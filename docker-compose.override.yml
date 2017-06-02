@@ -1,0 +1,21 @@
+---
+
+version: '2'
+
+services:
+  server:
+    volumes:
+    - .:/app
+    environment:
+      ALLOWED_HOSTS: 'localhost'
+      DATABASE_URL: postgres://postgres@db/postgres
+      DEBUG: "True"
+
+  celery:
+    volumes:
+    - .:/app
+    environment:
+      DEBUG: "True"
+      DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+      BROKER_URL: 'redis://redis'
+      C_FORCE_ROOT: "True"

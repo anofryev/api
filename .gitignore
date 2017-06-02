@@ -1,0 +1,29 @@
+# File types #
+##############
+*.pyc
+*.swo
+*.swp
+*.swn
+*.png
+*.jpg
+celerybeat-schedule*
+# Directories #
+###############
+logs/
+skin_root/htmlcov/
+skin_root/fabfile/
+backup/
+# Specific files #
+##################
+skin_root/skin/settings/environment.py
+skin_root/.coverage
+# OS generated files #
+######################
+._*
+.DS_Store
+ehthumbs.db
+Icon
+Thumbs.db
+*~
+.env
+.idea
