@@ -1,5 +1,5 @@
-from django.contrib import admin
+from mptt.admin import DraggableMPTTAdmin
 
 
-class AnatomicalSiteAdmin(admin.ModelAdmin):
+class AnatomicalSiteAdmin(DraggableMPTTAdmin):
     pass

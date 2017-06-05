@@ -68,6 +68,7 @@ THIRD_PARTY_APPS = [
     'storages',
     'versatileimagefield',
     'django_extensions',
+    'mptt',
     'raven.contrib.django.raven_compat',
 ]
 
