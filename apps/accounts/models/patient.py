@@ -105,7 +105,7 @@ class Patient(User):
 @receiver(pre_save, sender=Patient)
 def set_up(sender, instance, *args, **kwargs):
     if instance.mrn:
-        instance.username = instance.mrn
+        instance.username = str(instance.mrn)
     else:
         instance.username = slugify('{0}_{1}_{2}'.format(
             instance.first_name, instance.last_name, get_timestamp()))

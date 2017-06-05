@@ -11,6 +11,7 @@ from .viewsets import *
 router = routers.SimpleRouter()
 
 urlpatterns = [
+    # JWT authentication
     url(r'^auth/login/', obtain_jwt_token),
     url(r'^auth/token-refresh/', refresh_jwt_token),
     url(r'^auth/token-verify/', verify_jwt_token),
