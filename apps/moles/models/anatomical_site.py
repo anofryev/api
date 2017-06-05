@@ -22,7 +22,15 @@ class AnatomicalSite(MPTTModel):
         db_index=True
     )
 
+    class Meta:
+        verbose_name = 'Anatomical site'
+        verbose_name_plural = 'Anatomical sites'
+
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
+        # Generate and set slug (primary key)
         self.slug = slugify(self.name)
 
         return super(AnatomicalSite, self).save(*args, **kwargs)

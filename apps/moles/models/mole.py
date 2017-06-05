@@ -21,3 +21,10 @@ class Mole(models.Model):
     position_y = models.IntegerField(
         verbose_name='Position y'
     )
+
+    class Meta:
+        verbose_name = 'Mole'
+        verbose_name_plural = 'Moles'
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.patient, self.anatomical_site)

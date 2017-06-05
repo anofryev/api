@@ -1,6 +1,10 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.text import slugify
 from versatileimagefield.fields import VersatileImageField
 
+from skiniq.utils import get_timestamp
 from .user import User
 from .doctor import Doctor
 from .upload_paths import patient_photo_path
@@ -67,10 +71,9 @@ class Patient(User):
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=patient_photo_path,
-        # storage=S3BotoStorage(
-        #     bucket='skin-api-dev-public', querystring_auth=False),
         default='tmp/images/default_profile.jpeg',
         max_length=300,
+        null=True,
         blank=True)
     date_of_birth = models.DateField(
         verbose_name='Date of birth'
@@ -97,3 +100,12 @@ class Patient(User):
     class Meta:
         verbose_name = 'Patient'
         verbose_name_plural = 'Patients'
+
+
+@receiver(pre_save, sender=Patient)
+def set_up(sender, instance, *args, **kwargs):
+    if instance.mrn:
+        instance.username = instance.mrn
+    else:
+        instance.username = slugify('{0}_{1}_{2}'.format(
+            instance.first_name, instance.last_name, get_timestamp()))

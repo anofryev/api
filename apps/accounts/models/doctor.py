@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from storages.backends.s3boto import S3BotoStorage
 from versatileimagefield.fields import VersatileImageField
 
@@ -13,6 +15,11 @@ class Doctor(User):
         parent_link=True,
         related_name='doctor_role'
     )
+    email = models.EmailField(
+        unique=True,
+        max_length=255,
+        verbose_name='Email address',
+    )
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=doctor_photo_path,
@@ -20,6 +27,7 @@ class Doctor(User):
             bucket='skin-api-dev-public', querystring_auth=False),
         default='tmp/images/default_profile.jpeg',
         max_length=300,
+        null=True,
         blank=True
     )
     department = models.CharField(
@@ -34,3 +42,8 @@ class Doctor(User):
     class Meta:
         verbose_name = 'Doctor'
         verbose_name_plural = 'Doctors'
+
+
+@receiver(pre_save, sender=Doctor)
+def set_up(sender, instance, *args, **kwargs):
+    instance.username = instance.email

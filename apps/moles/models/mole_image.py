@@ -52,3 +52,10 @@ class MoleImage(models.Model):
         default=False,
         verbose_name='Biopsy'
     )
+
+    class Meta:
+        verbose_name = 'Mole image'
+        verbose_name_plural = 'Mole images'
+
+    def __str__(self):
+        return self.mole

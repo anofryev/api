@@ -25,3 +25,10 @@ class PatientAnatomicalSite(models.Model):
         blank=True,
         null=True
     )
+
+    class Meta:
+        verbose_name = 'Patient anatomical site'
+        verbose_name_plural = 'Patient anatomical sites'
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.patient, self.anatomical_site)
