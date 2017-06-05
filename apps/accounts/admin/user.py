@@ -41,7 +41,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'password')
         }),
         ('Personal info', {
-            'fields': ('first_name', 'last_name')
+            'fields': ('first_name', 'last_name', 'photo',)
         }),
         ('Permissions', {
             'fields': ('is_staff', 'is_superuser',)

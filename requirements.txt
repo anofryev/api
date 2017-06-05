@@ -5,6 +5,7 @@ celery==4.0.2
 dj-database-url==0.4.2
 django-filter==1.0.4
 django-storages==1.5.2
+django-mptt==0.8.6
 django-versatileimagefield==1.7.0
 djangorestframework-jwt==1.10.0
 djangorestframework==3.6.3

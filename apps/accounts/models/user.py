@@ -1,10 +1,6 @@
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin, BaseUserManager)
 from django.db import models
-from storages.backends.s3boto import S3BotoStorage
-from versatileimagefield.fields import VersatileImageField
-
-from .upload_paths import photo_filepath
 
 
 class UserManager(BaseUserManager):
@@ -45,27 +41,29 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         unique=True,
         max_length=255,
-        verbose_name='email address',)
+        verbose_name='Email address',
+    )
     first_name = models.CharField(
-        max_length=100)
+        max_length=100,
+        verbose_name='First name'
+    )
     last_name = models.CharField(
-        max_length=100)
-    photo = VersatileImageField(
-        verbose_name='Profile Picture',
-        upload_to=photo_filepath,
-        storage=S3BotoStorage(
-            bucket='skin-api-dev-public', querystring_auth=False),
-        default='tmp/images/default_profile.jpeg',
-        max_length=300,
-        blank=True)
+        max_length=100,
+        verbose_name='Last name'
+    )
     is_staff = models.BooleanField(
-        'Staff status',
         default=False,
+        verbose_name='Staff status'
     )
     is_active = models.BooleanField(
-        'Active',
         default=True,
+        verbose_name='Active'
     )
+    last_active = models.DateTimeField(
+        verbose_name='Last active',
+        null=True
+    )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 

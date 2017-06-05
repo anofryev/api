@@ -1,15 +1,23 @@
-import os
-
-from skiniq.utils import get_timestamp
+from skiniq.utils import generate_filename
 
 
-def photo_filepath(instance, filename):
-    tstamp = get_timestamp()
+def doctor_photo_path(instance, filename):
+    doctor = instance
+    new_filename = generate_filename(
+        filename, prefix='{0}_profile_pic'.format(doctor.pk))
 
-    upload_filename, f_ext = os.path.splitext(filename)
+    return '/'.join([
+        'users', str(doctor.pk),
+        'profile_picture', new_filename])
 
-    user_pk = instance.user.id
-    new_filename = '{user_pk}_photo_{tstamp}{ext}'.format(
-        user_pk=user_pk, tstamp=tstamp, ext=f_ext)
 
-    return '/'.join(['users', str(user_pk), 'photo', new_filename])
+def patient_photo_path(instance, filename):
+    patient = instance
+    doctor = patient.doctor
+    new_filename = generate_filename(
+        filename, prefix='{0}_profile_pic'.format(patient.pk))
+
+    return '/'.join([
+        'users', str(doctor.pk),
+        'patients', str(patient.pk),
+        'profile_picture', new_filename])
