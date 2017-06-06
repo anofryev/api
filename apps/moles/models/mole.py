@@ -34,3 +34,10 @@ class Mole(models.Model):
     def patient_anatomical_site(self):
         return PatientAnatomicalSite.objects.filter(
             patient=self.patient, anatomical_site=self.anatomical_site).first()
+
+    @property
+    def last_image(self):
+        try:
+            return self.images.latest('pk')
+        except models.ObjectDoesNotExist:
+            return None
