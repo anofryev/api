@@ -58,4 +58,4 @@ class MoleImage(models.Model):
         verbose_name_plural = 'Mole images'
 
     def __str__(self):
-        return self.mole
+        return str(self.mole)

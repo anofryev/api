@@ -36,6 +36,11 @@ class Mole(models.Model):
             patient=self.patient, anatomical_site=self.anatomical_site).first()
 
     @property
+    def anatomical_sites(self):
+        return list(
+            self.anatomical_site.get_ancestors()) + [self.anatomical_site]
+
+    @property
     def last_image(self):
         try:
             return self.images.latest('pk')
