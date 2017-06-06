@@ -23,8 +23,8 @@ class Doctor(User):
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=doctor_photo_path,
-        storage=S3BotoStorage(
-            bucket='skin-api-dev-public', querystring_auth=False),
+        # storage=S3BotoStorage(
+        #     bucket='skin-api-dev-public', querystring_auth=False),
         default='tmp/images/default_profile.jpeg',
         max_length=300,
         null=True,

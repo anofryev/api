@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
 from rest_framework_jwt.views import (
     obtain_jwt_token, refresh_jwt_token, verify_jwt_token)
@@ -9,8 +9,11 @@ from .viewsets import *
 
 
 router = routers.SimpleRouter()
+router.register('patient', PatientViewSet, )
 
 urlpatterns = [
+    url(r'^accounts/', include(router.urls)),
+
     # JWT authentication
     url(r'^auth/login/', obtain_jwt_token),
     url(r'^auth/token-refresh/', refresh_jwt_token),
@@ -24,5 +27,3 @@ urlpatterns = [
         auth_views.password_reset_complete,
         name='password_reset_complete'),
 ]
-
-urlpatterns += router.urls
