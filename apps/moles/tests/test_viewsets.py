@@ -1,6 +1,7 @@
 from apps.main.tests import APITestCase
 from apps.accounts.factories import PatientFactory
-from ..factories import PatientAnatomicalSiteFactory
+from ..factories import PatientAnatomicalSiteFactory, AnatomicalSiteFactory
+from ..models import PatientAnatomicalSite
 
 
 class ViewSetsTest(APITestCase):
@@ -8,10 +9,13 @@ class ViewSetsTest(APITestCase):
         super(ViewSetsTest, self).setUp()
         self.first_patient = PatientFactory.create(doctor=self.doctor)
         self.another_patient = PatientFactory()
+        self.anatomical_site = AnatomicalSiteFactory.create()
         self.first_patient_asite = PatientAnatomicalSiteFactory.create(
-            patient=self.first_patient)
+            patient=self.first_patient,
+            anatomical_site=self.anatomical_site)
         self.another_patient_asite = PatientAnatomicalSiteFactory.create(
-            patient=self.another_patient)
+            patient=self.another_patient,
+            anatomical_site=self.anatomical_site)
 
     def test_get_patient_anatomical_sites_success(self):
         self.authenticate_as_doctor()
@@ -38,3 +42,32 @@ class ViewSetsTest(APITestCase):
             '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
                 self.another_patient.pk))
         self.assertForbidden(resp)
+
+    def test_create_success(self):
+        self.authenticate_as_doctor()
+        patient_asite_data = {
+            'anatomical_site': self.anatomical_site.pk,
+        }
+        resp = self.client.post(
+            '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
+                self.first_patient.pk), patient_asite_data)
+        self.assertSuccessResponse(resp)
+
+        self.assertIsNotNone(resp.data['pk'])
+        patient_anatomical_site = PatientAnatomicalSite.objects.get(
+            pk=resp.data['pk'])
+        self.assertEqual(patient_anatomical_site.patient, self.first_patient)
+
+    def test_update_not_allowed(self):
+        self.authenticate_as_doctor()
+        resp = self.client.patch(
+            '/api/v1/accounts/patient/{0}/anatomical_site/{1}/'.format(
+                self.first_patient.pk, self.first_patient_asite.pk))
+        self.assertNotAllowed(resp)
+
+    def test_delete_not_allowed(self):
+        self.authenticate_as_doctor()
+        resp = self.client.delete(
+            '/api/v1/accounts/patient/{0}/anatomical_site/{1}/'.format(
+                self.first_patient.pk, self.first_patient_asite.pk))
+        self.assertNotAllowed(resp)

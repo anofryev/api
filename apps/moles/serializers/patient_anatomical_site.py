@@ -11,3 +11,8 @@ class PatientAnatomicalSiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientAnatomicalSite
         fields = ('pk', 'patient', 'anatomical_site', 'distant_photo', )
+        extra_kwargs = {
+            'patient': {
+                'read_only': True,
+            },
+        }
