@@ -9,4 +9,5 @@ class PatientSerializer(UserSerializer):
 
     class Meta:
         model = Patient
-        fields = ('pk', 'first_name', 'last_name', 'photo', )
+        fields = ('pk', 'first_name', 'last_name', 'mrn', 'date_of_birth',
+                  'sex', 'race', 'address', 'last_visit', 'photo', )

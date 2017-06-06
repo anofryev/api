@@ -2,6 +2,7 @@ from django.db import models
 
 from apps.accounts.models import Patient
 from .anatomical_site import AnatomicalSite
+from .patient_anatomical_site import PatientAnatomicalSite
 
 
 class Mole(models.Model):
@@ -28,3 +29,8 @@ class Mole(models.Model):
 
     def __str__(self):
         return '{0}: {1}'.format(self.patient, self.anatomical_site)
+
+    @property
+    def patient_anatomical_site(self):
+        return PatientAnatomicalSite.objects.filter(
+            patient=self.patient, anatomical_site=self.anatomical_site).first()

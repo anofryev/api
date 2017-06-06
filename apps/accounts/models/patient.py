@@ -55,6 +55,13 @@ class RaceEnum(object):
     )
 
 
+class PatientQuerySet(models.QuerySet):
+    def annotate_moles(self):
+        return self.annotate(
+            path_pending_moles
+        )
+
+
 class Patient(User):
     user_ptr = models.OneToOneField(
         User,
@@ -100,6 +107,12 @@ class Patient(User):
     class Meta:
         verbose_name = 'Patient'
         verbose_name_plural = 'Patients'
+        ordering = ('last_name', 'first_name', )
+
+    @property
+    def last_visit(self):
+        # TODO: add MAX between `date_modified `and mole image `date_modified`
+        return self.date_modified
 
 
 @receiver(pre_save, sender=Patient)

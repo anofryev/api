@@ -61,6 +61,7 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     'apps.accounts',
     'apps.moles',
+    'apps.main',
 ]
 
 THIRD_PARTY_APPS = [
@@ -68,6 +69,7 @@ THIRD_PARTY_APPS = [
     'storages',
     'versatileimagefield',
     'django_extensions',
+    'django_filters',
     'mptt',
     'raven.contrib.django.raven_compat',
 ]
