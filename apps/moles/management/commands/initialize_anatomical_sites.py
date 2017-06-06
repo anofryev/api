@@ -35,10 +35,11 @@ ANATOMICAL_SITES = (
         )),
     )),
     ('Neck', (
-        'Anterior neck and middle chest',
+        'Anterior neck',
         'Posterior neck',
     )),
     ('Chest', (
+        'Middle chest'
         'Right upper chest',
         'Left upper chest',
     )),
