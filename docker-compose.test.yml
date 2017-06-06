@@ -2,7 +2,7 @@ version: '2'
 
 services:
   server:
-    image: $DOCKER_IMAGE_BUILD
+    image: $BUILD_IMAGE
     ports:
     - 8000:8000
     links:
