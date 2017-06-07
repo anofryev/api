@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from versatileimagefield.fields import VersatileImageField
 
 from .mole import Mole
@@ -59,3 +61,11 @@ class MoleImage(models.Model):
 
     def __str__(self):
         return str(self.mole)
+
+
+@receiver(post_save, sender=MoleImage)
+def set_up(sender, instance, created, **kwargs):
+    from ..tasks import get_mole_image_prediction
+
+    if created:
+        get_mole_image_prediction.delay(pk=instance.pk)

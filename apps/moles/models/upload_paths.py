@@ -25,7 +25,7 @@ def mole_image_photo_path(instance, filename):
     patient = mole.patient
     doctor = patient.doctor
 
-    image_type = 'dermato' if mole.biopsy else 'clinical'
+    image_type = 'dermato' if mole_image.biopsy else 'clinical'
     new_filename = generate_filename(
         filename,
         prefix='{0}_{1}_photo'.format(mole.pk, image_type))

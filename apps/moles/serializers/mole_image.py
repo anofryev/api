@@ -12,3 +12,8 @@ class MoleImageSerializer(serializers.ModelSerializer):
         fields = ('pk', 'date_created', 'date_modified', 'path_diagnosis',
                   'clinical_diagnosis', 'prediction', 'prediction_accuracy',
                   'photo', 'biopsy', )
+
+
+class MoleImageCreateSerializer(MoleImageSerializer):
+    class Meta(MoleImageSerializer.Meta):
+        fields = ('photo', )

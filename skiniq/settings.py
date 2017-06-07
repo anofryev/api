@@ -273,6 +273,49 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 VERSATILEIMAGEFIELD_USE_PLACEHOLDIT = True
 
 
+# LOGGING SETTINGS
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'factory': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'DEBUG',
+        },
+    }
+}
+
 # TESTING SETTINGS
 RUN_TESTS = os.environ.get('RUN_TESTS', 'False') == 'True'
 IS_CI = os.environ.get('IS_CI', 'False') == 'True'
