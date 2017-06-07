@@ -15,6 +15,7 @@ pytz==2017.2
 raven==6.1.0
 redis==2.10.5
 whitenoise==3.3.0
+git+git://github.com/Brogency/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
 
 ipdb
 ipdbplugin
