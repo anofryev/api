@@ -5,7 +5,7 @@ from ..models import MoleImage
 
 
 class MoleImageSerializer(serializers.ModelSerializer):
-    photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
+    photo = VersatileImageFieldSerializer(sizes='main_set', required=True)
 
     class Meta:
         model = MoleImage

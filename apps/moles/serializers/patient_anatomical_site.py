@@ -6,7 +6,7 @@ from ..models import PatientAnatomicalSite
 
 class PatientAnatomicalSiteSerializer(serializers.ModelSerializer):
     distant_photo = VersatileImageFieldSerializer(
-        sizes='main_set', required=False)
+        sizes='main_set', required=True)
 
     class Meta:
         model = PatientAnatomicalSite
