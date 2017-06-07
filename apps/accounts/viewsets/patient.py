@@ -20,7 +20,10 @@ class PatientViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         qs = super(PatientViewSet, self).get_queryset()
 
-        return qs.filter(doctor=self.request.user.doctor_role)
+        qs = qs.annotate_last_upload().annotate_moles_images_count()
+        qs = qs.filter(doctor=self.request.user.doctor_role)
+
+        return qs
 
     def perform_create(self, serializer):
         return serializer.save(doctor=self.request.user.doctor_role)

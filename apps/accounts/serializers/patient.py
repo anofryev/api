@@ -1,15 +1,19 @@
+from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from apps.moles.serializers import MoleSerializer
 from ..models import Patient
 from .user import UserSerializer
 
 
 class PatientSerializer(UserSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
-    moles = MoleSerializer(many=True, read_only=True)
+
+    # Fields from aggregation
+    last_upload = serializers.DateTimeField(read_only=True)
+    moles_images_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Patient
         fields = ('pk', 'first_name', 'last_name', 'mrn', 'date_of_birth',
-                  'sex', 'race', 'address', 'last_visit', 'photo', 'moles',)
+                  'sex', 'race', 'address', 'photo', 'last_upload',
+                  'moles_images_count',)

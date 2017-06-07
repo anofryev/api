@@ -1,7 +1,7 @@
 from apps.main.tests import APITestCase
 
 from ..factories import PatientFactory
-from ..models import Patient
+from ..models import Patient, RaceEnum, SexEnum
 
 
 class ViewSetsTest(APITestCase):
@@ -24,14 +24,28 @@ class ViewSetsTest(APITestCase):
 
         self.assertEqual(len(resp.data), 2)
 
+    def test_get_own_patient_success(self):
+        self.authenticate_as_doctor()
+
+        resp = self.client.get('/api/v1/accounts/patient/{0}/'.format(
+            self.first_patient.pk))
+        self.assertSuccessResponse(resp)
+
+    def test_get_not_own_patient_failed(self):
+        self.authenticate_as_doctor()
+
+        resp = self.client.get('/api/v1/accounts/patient/{0}/'.format(
+            self.another_patient.pk))
+        self.assertNotFound(resp)
+
     def test_create_patient_success(self):
         self.authenticate_as_doctor()
 
         patient_data = {
             'first_name': 'first name',
             'last_name': 'first name',
-            'sex': 'm',
-            'race': 1,
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.ASIAN,
             'date_of_birth': '1990-01-01',
             'address': 'address',
             'photo': self.get_sample_image_file('photo.jpg'),
@@ -69,8 +83,8 @@ class ViewSetsTest(APITestCase):
         patient_data = {
             'first_name': 'first name',
             'last_name': 'first name',
-            'sex': 'm',
-            'race': 1,
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.BLACK_OR_AFRICAN_AMERICAN,
             'date_of_birth': '1990-01-01',
             'address': 'address',
             'mrn': 1234567,
