@@ -19,11 +19,11 @@ class MoleImage(models.Model):
     )
     path_diagnosis = models.CharField(
         max_length=100,
-        blank=True
+        blank=True,
+        verbose_name='Path diagnosis'
     )
     clinical_diagnosis = models.CharField(
         max_length=100,
-        default='Unknown',
         blank=True,
         verbose_name='Clinical diagnosis'
     )
