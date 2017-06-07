@@ -12,7 +12,7 @@ router = routers.SimpleRouter()
 router.register('patient', PatientViewSet, )
 
 urlpatterns = [
-    url(r'^accounts/', include(router.urls)),
+    url(r'^', include(router.urls)),
 
     # JWT authentication
     url(r'^auth/login/', obtain_jwt_token),

@@ -13,13 +13,13 @@ class ViewSetsTest(APITestCase):
         self.another_patient = PatientFactory.create()
 
     def test_get_patients_failed_for_unauthorized(self):
-        resp = self.client.get('/api/v1/accounts/patient/')
+        resp = self.client.get('/api/v1/patient/')
         self.assertForbidden(resp)
 
     def test_get_patients_success(self):
         self.authenticate_as_doctor()
 
-        resp = self.client.get('/api/v1/accounts/patient/')
+        resp = self.client.get('/api/v1/patient/')
         self.assertSuccessResponse(resp)
 
         self.assertEqual(len(resp.data), 2)
@@ -27,14 +27,14 @@ class ViewSetsTest(APITestCase):
     def test_get_own_patient_success(self):
         self.authenticate_as_doctor()
 
-        resp = self.client.get('/api/v1/accounts/patient/{0}/'.format(
+        resp = self.client.get('/api/v1/patient/{0}/'.format(
             self.first_patient.pk))
         self.assertSuccessResponse(resp)
 
     def test_get_not_own_patient_failed(self):
         self.authenticate_as_doctor()
 
-        resp = self.client.get('/api/v1/accounts/patient/{0}/'.format(
+        resp = self.client.get('/api/v1/patient/{0}/'.format(
             self.another_patient.pk))
         self.assertNotFound(resp)
 
@@ -52,7 +52,7 @@ class ViewSetsTest(APITestCase):
         }
 
         with self.fake_media():
-            resp = self.client.post('/api/v1/accounts/patient/', patient_data)
+            resp = self.client.post('/api/v1/patient/', patient_data)
 
         self.assertSuccessResponse(resp)
 
@@ -93,7 +93,7 @@ class ViewSetsTest(APITestCase):
 
         with self.fake_media():
             resp = self.client.patch(
-                '/api/v1/accounts/patient/{0}/'.format(patient.pk),
+                '/api/v1/patient/{0}/'.format(patient.pk),
                 patient_data)
 
         self.assertSuccessResponse(resp)
@@ -122,5 +122,5 @@ class ViewSetsTest(APITestCase):
 
         patient = PatientFactory(doctor=self.doctor)
         resp = self.client.delete(
-            '/api/v1/accounts/patient/{0}/'.format(patient.pk))
+            '/api/v1/patient/{0}/'.format(patient.pk))
         self.assertNotAllowed(resp)

@@ -21,7 +21,7 @@ class ViewSetsTest(APITestCase):
         self.authenticate_as_doctor()
 
         resp = self.client.get(
-            '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
+            '/api/v1/patient/{0}/anatomical_site/'.format(
                 self.first_patient.pk))
         self.assertSuccessResponse(resp)
 
@@ -33,13 +33,13 @@ class ViewSetsTest(APITestCase):
         self.authenticate_as_doctor()
 
         resp = self.client.get(
-            '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
+            '/api/v1/patient/{0}/anatomical_site/'.format(
                 self.another_patient.pk))
         self.assertForbidden(resp)
 
     def test_get_patient_anatomical_sites_forbidden_for_unauthorized(self):
         resp = self.client.get(
-            '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
+            '/api/v1/patient/{0}/anatomical_site/'.format(
                 self.another_patient.pk))
         self.assertForbidden(resp)
 
@@ -49,7 +49,7 @@ class ViewSetsTest(APITestCase):
             'anatomical_site': self.anatomical_site.pk,
         }
         resp = self.client.post(
-            '/api/v1/accounts/patient/{0}/anatomical_site/'.format(
+            '/api/v1/patient/{0}/anatomical_site/'.format(
                 self.first_patient.pk), patient_asite_data)
         self.assertSuccessResponse(resp)
 
@@ -61,13 +61,13 @@ class ViewSetsTest(APITestCase):
     def test_update_not_allowed(self):
         self.authenticate_as_doctor()
         resp = self.client.patch(
-            '/api/v1/accounts/patient/{0}/anatomical_site/{1}/'.format(
+            '/api/v1/patient/{0}/anatomical_site/{1}/'.format(
                 self.first_patient.pk, self.first_patient_asite.pk))
         self.assertNotAllowed(resp)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()
         resp = self.client.delete(
-            '/api/v1/accounts/patient/{0}/anatomical_site/{1}/'.format(
+            '/api/v1/patient/{0}/anatomical_site/{1}/'.format(
                 self.first_patient.pk, self.first_patient_asite.pk))
         self.assertNotAllowed(resp)

@@ -29,10 +29,10 @@ class ViewsTest(APITestCase):
         self.assertIsNone(data.get('doctor', None))
 
     def test_authenticate_success(self):
-        resp = self.client.get('/api/v1/accounts/patient/')
+        resp = self.client.get('/api/v1/patient/')
         self.assertIsNone(resp.wsgi_request.user.pk)
 
         self.authenticate_as_doctor()
 
-        resp = self.client.get('/api/v1/accounts/patient/')
+        resp = self.client.get('/api/v1/patient/')
         self.assertEqual(resp.wsgi_request.user.pk, self.doctor.pk)
