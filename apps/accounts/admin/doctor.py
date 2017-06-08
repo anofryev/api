@@ -9,3 +9,10 @@ class DoctorAdmin(UserAdmin):
         'fields': (
             'email', 'first_name', 'last_name', 'password1', 'password2',)
     }),)
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        (('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                    'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_active', )}),
+    )

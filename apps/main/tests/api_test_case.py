@@ -1,10 +1,11 @@
 from rest_framework.test import APITestCase as BaseAPITestCase
 from rest_framework import status
 
-from ..factories import DoctorFactory
+from apps.accounts.factories import DoctorFactory
+from .mixins import FileTestMixin
 
 
-class APITestCase(BaseAPITestCase):
+class APITestCase(FileTestMixin, BaseAPITestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
 

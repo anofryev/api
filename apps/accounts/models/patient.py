@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count, Max
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
@@ -55,6 +56,16 @@ class RaceEnum(object):
     )
 
 
+class PatientQuerySet(models.QuerySet):
+    def annotate_moles_images_count(self):
+        return self.annotate(
+            moles_images_count=Count('moles__images'))
+
+    def annotate_last_upload(self):
+        return self.annotate(
+            last_upload=Max('moles__images__date_created'))
+
+
 class Patient(User):
     user_ptr = models.OneToOneField(
         User,
@@ -97,9 +108,12 @@ class Patient(User):
         verbose_name='Address'
     )
 
+    objects = PatientQuerySet.as_manager()
+
     class Meta:
         verbose_name = 'Patient'
         verbose_name_plural = 'Patients'
+        ordering = ('last_name', 'first_name', )
 
 
 @receiver(pre_save, sender=Patient)
