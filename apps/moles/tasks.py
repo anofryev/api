@@ -13,6 +13,9 @@ def get_mole_image_prediction(pk):
     except MoleImage.DoesNotExist:
         return
 
+    if not mole_image.photo:
+        return
+
     payload = {
         'image_url': mole_image.photo.url,
     }

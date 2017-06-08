@@ -16,10 +16,10 @@ class MoleImageSerializer(serializers.ModelSerializer):
 
 class MoleImageCreateSerializer(MoleImageSerializer):
     class Meta(MoleImageSerializer.Meta):
-        fields = ('photo', )
+        fields = ('pk', 'photo', )
 
 
 class MoleImageUpdateSerializer(MoleImageSerializer):
     class Meta(MoleImageSerializer.Meta):
         fields = ('pk', 'path_diagnosis', 'clinical_diagnosis', 'biopsy',
-                  'biopsy_data',  )
+                  'biopsy_data', )

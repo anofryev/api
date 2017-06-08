@@ -42,5 +42,8 @@ class TasksTest(FileTestMixin, TestCase):
         self.assertEqual(mole_image.prediction, 'Unknown')
         self.assertAlmostEqual(float(mole_image.prediction_accuracy), 0.000)
 
-    def test_get_mole_image_prediction_for_not_existing_does_not_raises(self):
+    def test_get_mole_image_prediction_without_image_does_not_raise(self):
+        MoleImageFactory.create()
+
+    def test_get_mole_image_prediction_for_not_existing_does_not_raise(self):
         get_mole_image_prediction(0)

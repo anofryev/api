@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 
 from apps.accounts.permissions import IsDoctorOfPatient
-from ..models import MoleImage
+from ..models import Mole, MoleImage
 from ..serializers import (
     MoleImageSerializer, MoleImageCreateSerializer, MoleImageUpdateSerializer)
 
@@ -16,6 +16,9 @@ class MoleImageViewSet(viewsets.GenericViewSet,
     def get_mole_pk(self):
         return self.kwargs['mole_pk']
 
+    def get_mole(self):
+        return Mole.objects.get(pk=self.get_mole_pk())
+
     def get_queryset(self):
         qs = super(MoleImageViewSet, self).get_queryset()
 
@@ -27,3 +30,6 @@ class MoleImageViewSet(viewsets.GenericViewSet,
         elif self.action in ['update', 'partial_update']:
             return MoleImageUpdateSerializer
         return self.serializer_class
+
+    def perform_create(self, serializer):
+        return serializer.save(mole=self.get_mole())

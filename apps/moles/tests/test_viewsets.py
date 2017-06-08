@@ -1,36 +1,10 @@
-from django.test import mock
-
-from apps.main.tests import APITestCase, patch
-from apps.accounts.factories import PatientFactory
-from ..factories import (
-    PatientAnatomicalSiteFactory, AnatomicalSiteFactory, MoleFactory)
-from ..models import PatientAnatomicalSite, Mole
+from apps.main.tests import patch
+from ..factories import (AnatomicalSiteFactory, MoleImageFactory)
+from ..models import PatientAnatomicalSite, Mole, MoleImage
+from .moles_test_case import MolesTestCase
 
 
-class ViewSetsTest(APITestCase):
-    def setUp(self):
-        super(ViewSetsTest, self).setUp()
-
-        self.first_patient = PatientFactory.create(doctor=self.doctor)
-        self.another_patient = PatientFactory()
-
-        self.anatomical_site = AnatomicalSiteFactory.create()
-
-        self.first_patient_asite = PatientAnatomicalSiteFactory.create(
-            patient=self.first_patient,
-            anatomical_site=self.anatomical_site)
-        self.another_patient_asite = PatientAnatomicalSiteFactory.create(
-            patient=self.another_patient,
-            anatomical_site=self.anatomical_site)
-
-        self.first_patient_mole = MoleFactory.create(
-            patient=self.first_patient,
-            anatomical_site=self.anatomical_site)
-
-        self.another_patient_mole = MoleFactory.create(
-            patient=self.another_patient,
-            anatomical_site=self.anatomical_site)
-
+class PatientAnatomicalSiteViewSetTest(MolesTestCase):
     def test_get_patient_anatomical_sites_success(self):
         self.authenticate_as_doctor()
 
@@ -89,6 +63,8 @@ class ViewSetsTest(APITestCase):
                 self.first_patient.pk, self.first_patient_asite.pk))
         self.assertNotAllowed(resp)
 
+
+class MoleViewSetTest(MolesTestCase):
     def test_get_patient_moles_success(self):
         self.authenticate_as_doctor()
 
@@ -129,7 +105,7 @@ class ViewSetsTest(APITestCase):
         self.assertForbidden(resp)
 
     @patch('apps.moles.tasks.requests')
-    def test_create_patient_mole_success(self, mock_requests):
+    def test_create_success(self, mock_requests):
         self.authenticate_as_doctor()
 
         mole_data = {
@@ -159,7 +135,7 @@ class ViewSetsTest(APITestCase):
             'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
                 mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
 
-    def test_update_patient_mole_success(self):
+    def test_update_success(self):
         self.authenticate_as_doctor()
         another_anatomical_site = AnatomicalSiteFactory.create()
 
@@ -179,3 +155,112 @@ class ViewSetsTest(APITestCase):
         self.assertEqual(mole.anatomical_site, another_anatomical_site)
         self.assertEqual(mole.position_x, mole_data['position_x'])
         self.assertEqual(mole.position_y, mole_data['position_y'])
+
+    def test_delete_not_allowed(self):
+        self.authenticate_as_doctor()
+
+        resp = self.client.delete(
+            '/api/v1/patient/{0}/mole/{1}/'.format(
+                self.first_patient.pk, self.first_patient_mole.pk))
+        self.assertNotAllowed(resp)
+
+
+class MoleImageViewSetTest(MolesTestCase):
+    @patch('apps.moles.tasks.requests')
+    def test_get_patient_mole_images_success(self, mock_requests):
+        self.authenticate_as_doctor()
+
+        first_patient_mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+        resp = self.client.get(
+            '/api/v1/patient/{0}/mole/{1}/image/'.format(
+                self.first_patient.pk, self.first_patient_mole.pk))
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['pk'], first_patient_mole_image.pk)
+
+    def test_get_patient_mole_images_forbidden_for_not_own_patient(self):
+        self.authenticate_as_doctor()
+
+        resp = self.client.get(
+            '/api/v1/patient/{0}/mole/{1}/image/'.format(
+                self.another_patient.pk, self.another_patient_mole.pk))
+        self.assertForbidden(resp)
+
+    def test_get_patient_mole_images_forbidden_for_unauthorized(self):
+        resp = self.client.get(
+            '/api/v1/patient/{0}/mole/{1}/image/'.format(
+                self.another_patient.pk, self.another_patient_mole.pk))
+        self.assertForbidden(resp)
+
+    @patch('apps.moles.tasks.requests')
+    def test_create_success(self, mock_requests):
+        self.authenticate_as_doctor()
+
+        mole_image_data = {
+            'photo': self.get_sample_image_file(),
+        }
+
+        with self.fake_media():
+            resp = self.client.post(
+                '/api/v1/patient/{0}/mole/{1}/image/'.format(
+                    self.first_patient.pk, self.first_patient_mole.pk
+                ),
+                mole_image_data)
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertIsNotNone(data['pk'])
+
+        mole_image = MoleImage.objects.get(pk=data['pk'])
+        self.assertEqual(mole_image.mole, self.first_patient_mole)
+
+        mole = mole_image.mole
+        self.assertTrue(mole_image.photo.name.startswith(
+            'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
+                mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
+
+    @patch('apps.moles.tasks.requests')
+    def test_update_success(self, mock_requests):
+        self.authenticate_as_doctor()
+
+        mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+
+        mole_image_data = {
+            'biopsy': True,
+            'biopsy_data': '{"lens": 1}',
+            'clinical_diagnosis': 'clinical_diagnosis',
+            'path_diagnosis': 'path_diagnosis',
+        }
+
+        resp = self.client.patch(
+            '/api/v1/patient/{0}/mole/{1}/image/{2}/'.format(
+                self.first_patient.pk,
+                self.first_patient_mole.pk,
+                mole_image.pk
+            ),
+            mole_image_data)
+        self.assertSuccessResponse(resp)
+
+        mole_image.refresh_from_db()
+        self.assertEqual(mole_image.biopsy, mole_image_data['biopsy'])
+        self.assertEqual(mole_image.biopsy_data, mole_image_data['biopsy_data'])
+        self.assertEqual(mole_image.clinical_diagnosis,
+                         mole_image_data['clinical_diagnosis'])
+        self.assertEqual(mole_image.path_diagnosis,
+                         mole_image_data['path_diagnosis'])
+
+    def test_delete_not_allowed(self):
+        self.authenticate_as_doctor()
+
+        first_patient_mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+        resp = self.client.delete(
+            '/api/v1/patient/{0}/mole/{1}/image/{2}/'.format(
+                self.first_patient.pk,
+                self.first_patient_mole.pk,
+                first_patient_mole_image.pk))
+        self.assertNotAllowed(resp)
