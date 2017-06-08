@@ -31,10 +31,12 @@ class Doctor(User):
     )
     department = models.CharField(
         max_length=100,
+        blank=True,
         verbose_name='Department'
     )
     degree = models.CharField(
         max_length=20,
+        blank=True,
         verbose_name='Doctoral degree',
     )
     units_of_length = models.CharField(

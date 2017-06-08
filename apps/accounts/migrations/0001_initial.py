@@ -45,8 +45,8 @@ class Migration(migrations.Migration):
                 ('user_ptr', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, related_name='doctor_role', serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('email', models.EmailField(max_length=255, unique=True, verbose_name='Email address')),
                 ('photo', versatileimagefield.fields.VersatileImageField(blank=True, max_length=300, null=True, storage=django.core.files.storage.FileSystemStorage(), upload_to=apps.accounts.models.upload_paths.doctor_photo_path, verbose_name='Profile Picture')),
-                ('department', models.CharField(max_length=100, verbose_name='Department')),
-                ('degree', models.CharField(max_length=20, verbose_name='Doctoral degree')),
+                ('department', models.CharField(max_length=100, blank=True, verbose_name='Department')),
+                ('degree', models.CharField(max_length=20, blank=True, verbose_name='Doctoral degree')),
             ],
             options={
                 'verbose_name': 'Doctor',
