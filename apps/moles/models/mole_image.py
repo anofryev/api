@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from versatileimagefield.fields import VersatileImageField
 
+from apps.main.storages import private_storage
 from .mole import Mole
 from .upload_paths import mole_image_photo_path
 
@@ -47,6 +48,7 @@ class MoleImage(models.Model):
     photo = VersatileImageField(
         verbose_name='Photo',
         upload_to=mole_image_photo_path,
+        storage=private_storage,
         max_length=300,
         blank=True,
         null=True

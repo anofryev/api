@@ -11,7 +11,8 @@ class DoctorAdmin(UserAdmin):
     }),)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (('Personal info'), {'fields': ('first_name', 'last_name', 'email',
+                                        'photo')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                     'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_active', )}),

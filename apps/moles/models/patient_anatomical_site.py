@@ -1,6 +1,7 @@
 from django.db import models
 from versatileimagefield.fields import VersatileImageField
 
+from apps.main.storages import private_storage
 from apps.accounts.models import Patient
 from .anatomical_site import AnatomicalSite
 from .upload_paths import distant_photo_path
@@ -21,6 +22,7 @@ class PatientAnatomicalSite(models.Model):
     distant_photo = VersatileImageField(
         verbose_name='Distant photo',
         upload_to=distant_photo_path,
+        storage=private_storage,
         max_length=300,
         blank=True,
         null=True

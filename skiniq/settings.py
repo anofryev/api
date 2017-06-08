@@ -215,12 +215,10 @@ RAVEN_CONFIG = {
 
 AWS_S3_SECURE_URLS = True  # use https
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
-AWS_PUBLIC_BUCKET = os.environ.get('AWS_PUBLIC_BUCKET', '')
+AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
+    'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
 AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
 AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
-if AWS_STORAGE_BUCKET_NAME:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     # The amount of time, in seconds, that references to created images

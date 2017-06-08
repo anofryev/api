@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from versatileimagefield.fields import VersatileImageField
 
 from skiniq.utils import get_timestamp
+from apps.main.storages import private_storage
 from .user import User
 from .doctor import Doctor
 from .upload_paths import patient_photo_path
@@ -82,6 +83,7 @@ class Patient(User):
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=patient_photo_path,
+        storage=private_storage,
         max_length=300,
         null=True,
         blank=True)

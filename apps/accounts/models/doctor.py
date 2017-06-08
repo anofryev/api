@@ -1,9 +1,9 @@
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from storages.backends.s3boto import S3BotoStorage
 from versatileimagefield.fields import VersatileImageField
 
+from apps.main.storages import public_storage
 from .user import User
 from .upload_paths import doctor_photo_path
 
@@ -23,8 +23,7 @@ class Doctor(User):
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=doctor_photo_path,
-        # storage=S3BotoStorage(
-        #     bucket='skin-api-dev-public', querystring_auth=False),
+        storage=public_storage,
         max_length=300,
         null=True,
         blank=True
