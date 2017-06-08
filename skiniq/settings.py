@@ -23,7 +23,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__ + "/..")))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -61,6 +61,7 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     'apps.accounts',
     'apps.moles',
+    'apps.main',
 ]
 
 THIRD_PARTY_APPS = [
@@ -68,6 +69,8 @@ THIRD_PARTY_APPS = [
     'storages',
     'versatileimagefield',
     'django_extensions',
+    'django_filters',
+    'mptt',
     'raven.contrib.django.raven_compat',
 ]
 
@@ -91,7 +94,7 @@ ROOT_URLCONF = 'skiniq.urls'
 
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [BASE_DIR + '/templates/', ],
+    'DIRS': [os.path.join(BASE_DIR, 'templates')],
     'APP_DIRS': True,
     'OPTIONS': {
         'context_processors': [
@@ -143,24 +146,36 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # DRF AUTHENTICATION SETTINGS
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES':
-    ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',),
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',)
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
+        'djangorestframework_camel_case.parser.CamelCaseFormParser',
+        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+    ),
 }
 
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER': 'rest_framework_jwt.utils.jwt_encode_handler',
     'JWT_DECODE_HANDLER': 'rest_framework_jwt.utils.jwt_decode_handler',
-    'JWT_PAYLOAD_HANDLER': 'rest_framework_jwt.utils.jwt_payload_handler',
     'JWT_PAYLOAD_GET_USER_ID_HANDLER':
         'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+    'JWT_PAYLOAD_HANDLER': 'apps.accounts.utils.jwt_payload_handler',
     'JWT_RESPONSE_PAYLOAD_HANDLER':
-        'skiniq.utils.jwt_response_payload_handler',
+        'apps.accounts.utils.jwt_response_payload_handler',
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_ALGORITHM': 'HS256',
     'JWT_VERIFY': True,
@@ -198,8 +213,8 @@ RAVEN_CONFIG = {
     'dsn': os.environ.get('SENTRY_DSN', '')
 }
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_S3_SECURE_URLS = True      # use https
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_S3_SECURE_URLS = True  # use https
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_PUBLIC_BUCKET = os.environ.get('AWS_PUBLIC_BUCKET', '')
 AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
@@ -258,6 +273,49 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 VERSATILEIMAGEFIELD_USE_PLACEHOLDIT = True
 
 
+# LOGGING SETTINGS
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'factory': {
+            'handlers': ['null'],
+            'propagate': False,
+            'level': 'DEBUG',
+        },
+    }
+}
+
 # TESTING SETTINGS
 RUN_TESTS = os.environ.get('RUN_TESTS', 'False') == 'True'
 IS_CI = os.environ.get('IS_CI', 'False') == 'True'
@@ -274,3 +332,6 @@ if RUN_TESTS:
 
     CELERY_ALWAYS_EAGER = True
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

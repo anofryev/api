@@ -6,6 +6,7 @@ services:
   server:
     volumes:
     - .:/app
+    - ./media:/app/media
     environment:
       ALLOWED_HOSTS: 'localhost'
       DATABASE_URL: postgres://postgres@db/postgres

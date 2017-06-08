@@ -1,24 +1,20 @@
 from django.contrib.auth.models import (
     AbstractBaseUser, PermissionsMixin, BaseUserManager)
 from django.db import models
-from storages.backends.s3boto import S3BotoStorage
-from versatileimagefield.fields import VersatileImageField
-
-from .upload_paths import photo_filepath
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, first_name, last_name, password=None):
-        # Ensure that an email address is set
-        if not email:
-            raise ValueError('Users must have a valid e-mail address')
+    def create_user(self, username, first_name, last_name, password=None):
+        # Ensure that an username is set
+        if not username:
+            raise ValueError('Users must have an username')
         # Ensure that first and last names are set
         if not first_name:
             raise ValueError('Users must have a first name')
         if not last_name:
             raise ValueError('Users must have a last name')
         user = self.model(
-            email=self.normalize_email(email),
+            username=username,
             first_name=first_name,
             last_name=last_name,)
         user.set_password(password)
@@ -26,8 +22,8 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, first_name, last_name, password):
-        user = self.create_user(email, first_name, last_name, password)
+    def create_superuser(self, username, first_name, last_name, password):
+        user = self.create_user(username, first_name, last_name, password)
         user.is_staff = True
         user.is_superuser = True
         user.save()
@@ -42,37 +38,41 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
-    email = models.EmailField(
+    username = models.CharField(
+        max_length=150,
         unique=True,
-        max_length=255,
-        verbose_name='email address',)
+        editable=False,
+        verbose_name='Username'
+    )
     first_name = models.CharField(
-        max_length=100)
+        max_length=100,
+        verbose_name='First name'
+    )
     last_name = models.CharField(
-        max_length=100)
-    photo = VersatileImageField(
-        verbose_name='Profile Picture',
-        upload_to=photo_filepath,
-        storage=S3BotoStorage(
-            bucket='skin-api-dev-public', querystring_auth=False),
-        default='tmp/images/default_profile.jpeg',
-        max_length=300,
-        blank=True)
+        max_length=100,
+        verbose_name='Last name'
+    )
     is_staff = models.BooleanField(
-        'Staff status',
         default=False,
+        verbose_name='Staff status'
     )
     is_active = models.BooleanField(
-        'Active',
         default=True,
+        verbose_name='Active'
     )
-    USERNAME_FIELD = 'email'
+    last_active = models.DateTimeField(
+        verbose_name='Last active',
+        null=True,
+        blank=True
+    )
+
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     objects = UserManager()
 
     def get_full_name(self):
-        return self.first_name + " " + self.last_name
+        return '{0} {1}'.format(self.first_name, self.last_name)
 
     def get_short_name(self):
         return self.first_name
