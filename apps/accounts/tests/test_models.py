@@ -1,12 +1,45 @@
 import datetime
 from django.test import TestCase
 
-from apps.accounts.models.patient import RaceEnum, SexEnum
-from ..models import Doctor, Patient
+from ..models import User, Doctor, Patient, RaceEnum, SexEnum
 from ..factories import DoctorFactory
 
 
 class ModelsTestCase(TestCase):
+    def test_create_user_failed(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_user('', 'first name', 'last name')
+
+        with self.assertRaises(ValueError):
+            User.objects.create_user('username', '', 'last name')
+
+        with self.assertRaises(ValueError):
+            User.objects.create_user('username', 'first name', '')
+
+    def test_create_user(self):
+        user = User.objects.create_user(
+            username='username',
+            first_name='first name',
+            last_name='last name',
+            password='qwertyuiop')
+        self.assertEqual(user.username, 'username')
+        self.assertEqual(user.first_name, 'first name')
+        self.assertEqual(user.last_name, 'last name')
+        self.assertTrue(user.check_password('qwertyuiop'))
+        self.assertFalse(user.is_superuser)
+        self.assertFalse(user.is_staff)
+        self.assertEqual(user.get_full_name(), 'first name last name')
+        self.assertEqual(user.get_short_name(), 'first name')
+
+    def test_create_superuser(self):
+        user = User.objects.create_superuser(
+            username='username',
+            first_name='first name',
+            last_name='last name',
+            password='qwertyuiop')
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)
+
     def test_create_doctor(self):
         doctor = Doctor.objects.create(
             first_name='first', last_name='last', email='doctor@email.org')

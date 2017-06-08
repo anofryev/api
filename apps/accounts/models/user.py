@@ -7,7 +7,7 @@ class UserManager(BaseUserManager):
     def create_user(self, username, first_name, last_name, password=None):
         # Ensure that an username is set
         if not username:
-            raise ValueError('Users must have a valid e-mail address')
+            raise ValueError('Users must have an username')
         # Ensure that first and last names are set
         if not first_name:
             raise ValueError('Users must have a first name')

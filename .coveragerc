@@ -20,6 +20,7 @@ exclude_lines =
     def __str__
     def __unicode__
     if self\.debug
+    if RUN_TESTS:
 
     # Don't complain if tests don't hit defensive assertion code:
     raise AssertionError
