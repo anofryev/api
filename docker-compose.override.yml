@@ -10,6 +10,7 @@ services:
     environment:
       ALLOWED_HOSTS: 'localhost'
       DATABASE_URL: postgres://postgres@db/postgres
+      BROKER_URL: 'redis://redis'
       DEBUG: "True"
 
   celery:
