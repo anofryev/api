@@ -9,7 +9,7 @@ class PublicStorage(LazyObject):
         storage = DefaultStorage()
 
         public_bucket = settings.AWS_STORAGE_PUBLIC_BUCKET_NAME
-        if public_bucket:
+        if public_bucket:  # pragma: no cover
             storage = S3BotoStorage(
                 bucket=public_bucket, querystring_auth=False)
 

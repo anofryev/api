@@ -9,7 +9,7 @@ class PrivateStorage(LazyObject):
         storage = DefaultStorage()
 
         private_bucket = settings.AWS_STORAGE_BUCKET_NAME
-        if private_bucket:
+        if private_bucket:  # pragma: no cover
             storage = S3BotoStorage(bucket=private_bucket)
 
         self._wrapped = storage

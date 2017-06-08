@@ -1,11 +1,12 @@
 import datetime
 from django.test import TestCase
 
+from apps.main.tests.mixins import FileTestMixin
 from ..models import User, Doctor, Patient, RaceEnum, SexEnum
 from ..factories import DoctorFactory
 
 
-class ModelsTestCase(TestCase):
+class ModelsTestCase(FileTestMixin, TestCase):
     def test_create_user_failed(self):
         with self.assertRaises(ValueError):
             User.objects.create_user('', 'first name', 'last name')
@@ -41,8 +42,12 @@ class ModelsTestCase(TestCase):
         self.assertTrue(user.is_staff)
 
     def test_create_doctor(self):
-        doctor = Doctor.objects.create(
-            first_name='first', last_name='last', email='doctor@email.org')
+        with self.fake_media():
+            doctor = Doctor.objects.create(
+                photo=self.get_sample_image_file(),
+                first_name='first',
+                last_name='last',
+                email='doctor@email.org')
 
         self.assertEqual(doctor.username, 'doctor@email.org')
 
