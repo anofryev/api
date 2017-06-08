@@ -4,6 +4,7 @@ from rest_framework_jwt.views import (
 from rest_framework import routers
 
 from .viewsets import *
+from .views import *
 
 
 # This router mustn't have another viewsets because patient has nested routes
@@ -12,6 +13,7 @@ router_for_patients.register('patient', PatientViewSet)
 
 urlpatterns = [
     url(r'^', include(router_for_patients.urls)),
+    url(r'^auth/current_user/', current_user_view),
 
     # JWT authentication
     url(r'^auth/login/', obtain_jwt_token),

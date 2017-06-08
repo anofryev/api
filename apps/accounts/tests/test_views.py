@@ -1,5 +1,6 @@
 from apps.main.tests import APITestCase
 from ..factories import DoctorFactory, PatientFactory
+from ..models import UnitsOfLengthEnum
 
 
 class ViewsTest(APITestCase):
@@ -36,3 +37,44 @@ class ViewsTest(APITestCase):
 
         resp = self.client.get('/api/v1/patient/')
         self.assertEqual(resp.wsgi_request.user.pk, self.doctor.pk)
+
+    def test_get_current_user_for_unauthorized_failed(self):
+        resp = self.client.get('/api/v1/auth/current_user/')
+        self.assertForbidden(resp)
+
+    def test_get_current_user_success(self):
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/auth/current_user/')
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertEqual(data['pk'], self.doctor.pk)
+
+    def test_update_current_user_for_unauthorized_failed(self):
+        resp = self.client.patch('/api/v1/auth/current_user/')
+        self.assertForbidden(resp)
+
+    def test_update_current_user_success(self):
+        self.authenticate_as_doctor()
+        doctor_data = {
+            'first_name': 'new',
+            'last_name': 'new',
+            'email': 'new@email.com',
+            'units_of_length': UnitsOfLengthEnum.CENTIMETER,
+            'degree': 'new',
+            'department': 'new',
+        }
+        resp = self.client.patch('/api/v1/auth/current_user/', doctor_data)
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertEqual(data['pk'], self.doctor.pk)
+        self.doctor.refresh_from_db()
+        self.assertEqual(self.doctor.first_name, doctor_data['first_name'])
+        self.assertEqual(self.doctor.last_name, doctor_data['last_name'])
+        self.assertEqual(self.doctor.email, doctor_data['email'])
+        self.assertEqual(self.doctor.username, doctor_data['email'])
+        self.assertEqual(self.doctor.units_of_length,
+                         doctor_data['units_of_length'])
+        self.assertEqual(self.doctor.degree, doctor_data['degree'])
+        self.assertEqual(self.doctor.department, doctor_data['department'])
