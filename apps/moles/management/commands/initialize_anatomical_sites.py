@@ -1,4 +1,5 @@
 from django.core.management import BaseCommand
+from django.db import transaction
 
 from ...models import AnatomicalSite
 
@@ -101,6 +102,7 @@ def create_anatomical_sites(parent, item):
 
 
 class Command(BaseCommand):
-     def handle(self, **options):
-         for item in ANATOMICAL_SITES:
-             create_anatomical_sites(None, item)
+    @transaction.atomic
+    def handle(self, **options):
+        for item in ANATOMICAL_SITES:
+            create_anatomical_sites(None, item)
