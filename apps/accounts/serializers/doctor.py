@@ -10,4 +10,4 @@ class DoctorSerializer(UserSerializer):
     class Meta:
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
-                  'department', 'photo', )
+                  'department', 'photo', 'units_of_length', )

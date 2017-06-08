@@ -6,6 +6,7 @@ from versatileimagefield.fields import VersatileImageField
 from apps.main.storages import public_storage
 from .user import User
 from .upload_paths import doctor_photo_path
+from .enums import UnitsOfLengthEnum
 
 
 class Doctor(User):
@@ -35,6 +36,12 @@ class Doctor(User):
     degree = models.CharField(
         max_length=20,
         verbose_name='Doctoral degree',
+    )
+    units_of_length = models.CharField(
+        max_length=2,
+        choices=UnitsOfLengthEnum.CHOICES,
+        default=UnitsOfLengthEnum.INCH,
+        verbose_name='Units of length'
     )
 
     class Meta:
