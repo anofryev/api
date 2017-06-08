@@ -1,4 +1,4 @@
-from apps.main.tests import APITestCase
+from apps.main.tests import APITestCase, patch
 
 from ..factories import PatientFactory
 from ..models import Patient, RaceEnum, SexEnum
@@ -23,6 +23,49 @@ class ViewSetsTest(APITestCase):
         self.assertSuccessResponse(resp)
 
         self.assertEqual(len(resp.data), 2)
+
+    @patch('apps.moles.tasks.requests')
+    def test_get_patients_with_path_pending(self, mock_requests):
+        from apps.moles.factories import MoleFactory, MoleImageFactory
+
+        self.authenticate_as_doctor()
+
+        resp = self.client.get('/api/v1/patient/', {'path_pending': True})
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 0)
+
+        first_patient_mole = MoleFactory.create(patient=self.first_patient)
+        second_patient_mole = MoleFactory.create(patient=self.second_patient)
+        first_patient_mole_image = MoleImageFactory(mole=first_patient_mole)
+        second_patient_mole_image = MoleImageFactory(mole=second_patient_mole)
+
+        resp = self.client.get('/api/v1/patient/', {'path_pending': True})
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 0)
+
+        first_patient_mole_image.biopsy = True
+        first_patient_mole_image.save()
+
+        second_patient_mole_image.biopsy = True
+        second_patient_mole_image.save()
+
+        resp = self.client.get('/api/v1/patient/', {'path_pending': True})
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 2)
+
+        first_patient_mole_image.path_diagnosis = 'path'
+        first_patient_mole_image.save()
+
+        resp = self.client.get('/api/v1/patient/', {'path_pending': True})
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+
+        second_patient_mole_image.path_diagnosis = 'path'
+        second_patient_mole_image.save()
+
+        resp = self.client.get('/api/v1/patient/', {'path_pending': True})
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 0)
 
     def test_get_own_patient_success(self):
         self.authenticate_as_doctor()

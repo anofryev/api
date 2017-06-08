@@ -1,3 +1,4 @@
+from django.db.models import Count, Case, When, F
 from django_filters import FilterSet, ChoiceFilter, BooleanFilter
 
 from ..models import Patient
@@ -14,4 +15,16 @@ class PatientFilter(FilterSet):
         fields = ('race', 'sex',)
 
     def filter_path_pending(self, qs, name, value):
-        return qs.filter()
+        return qs.annotate(
+            mole_images_with_path_pending=Count(
+                Case(
+                    When(
+                        moles__images__biopsy=True,
+                        moles__images__path_diagnosis__exact='',
+                        then=F('moles__images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        ).filter(mole_images_with_path_pending__gt=0)

@@ -82,7 +82,6 @@ class Patient(User):
     photo = VersatileImageField(
         verbose_name='Profile Picture',
         upload_to=patient_photo_path,
-        default='tmp/images/default_profile.jpeg',
         max_length=300,
         null=True,
         blank=True)
