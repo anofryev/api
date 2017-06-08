@@ -1,13 +1,12 @@
 from django.db import transaction
 from rest_framework import viewsets, mixins, response, status
-from rest_framework.decorators import detail_route
 
 from apps.accounts.permissions import IsDoctorOfPatient
 from apps.accounts.viewsets.mixins import PatientInfoMixin
-from ..models import Mole, MoleImage
+from ..models import Mole
 from ..serializers import (
     MoleListSerializer, MoleDetailSerializer, MoleCreateSerializer,
-    MoleUpdateSerializer, MoleImageCreateSerializer)
+    MoleUpdateSerializer)
 
 
 class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
@@ -41,13 +40,3 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         return response.Response(
             MoleDetailSerializer(instance=instance).data,
             status=status.HTTP_201_CREATED)
-
-    @detail_route(methods=['POST'], serializer_class=MoleImageCreateSerializer)
-    def images(self, request, *args, **kwargs):
-        mole = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exceptions=True)
-        serializer.save(mole=mole)
-
-        return response.Response(
-            data=serializer.data, status=status.HTTP_201_CREATED)

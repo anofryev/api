@@ -156,7 +156,7 @@ class ViewSetsTest(APITestCase):
 
         mole_image = mole.images.first()
         self.assertTrue(mole_image.photo.name.startswith(
-            'users/{0}/patients/{1}/skin_images/{2}/{2}_clinical_photo'.format(
+            'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
                 mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
 
     def test_update_patient_mole_success(self):

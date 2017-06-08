@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -54,10 +55,16 @@ class MoleImage(models.Model):
         default=False,
         verbose_name='Biopsy'
     )
+    biopsy_data = JSONField(
+        blank=True,
+        null=True,
+        verbose_name='Biopsy data'
+    )
 
     class Meta:
         verbose_name = 'Mole image'
         verbose_name_plural = 'Mole images'
+        ordering = ('-date_created',)
 
     def __str__(self):
         return str(self.mole)
