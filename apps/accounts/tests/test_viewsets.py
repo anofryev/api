@@ -48,7 +48,7 @@ class ViewSetsTest(APITestCase):
             'race': RaceEnum.ASIAN,
             'date_of_birth': '1990-01-01',
             'address': 'address',
-            'photo': self.get_sample_image_file('photo.jpg'),
+            'photo': self.get_sample_image_file(),
         }
 
         with self.fake_media():
@@ -88,7 +88,7 @@ class ViewSetsTest(APITestCase):
             'date_of_birth': '1990-01-01',
             'address': 'address',
             'mrn': 1234567,
-            'photo': self.get_sample_image_file('photo.jpg'),
+            'photo': self.get_sample_image_file(),
         }
 
         with self.fake_media():

@@ -1,6 +1,9 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from versatileimagefield.fields import VersatileImageField
 
 from .mole import Mole
@@ -52,10 +55,24 @@ class MoleImage(models.Model):
         default=False,
         verbose_name='Biopsy'
     )
+    biopsy_data = JSONField(
+        blank=True,
+        null=True,
+        verbose_name='Biopsy data'
+    )
 
     class Meta:
         verbose_name = 'Mole image'
         verbose_name_plural = 'Mole images'
+        ordering = ('-date_created',)
 
     def __str__(self):
         return str(self.mole)
+
+
+@receiver(post_save, sender=MoleImage)
+def set_up(sender, instance, created, **kwargs):
+    from ..tasks import get_mole_image_prediction
+
+    if created:
+        get_mole_image_prediction.delay(pk=instance.pk)

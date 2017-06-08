@@ -8,11 +8,12 @@ from .views import *
 from .viewsets import *
 
 
-router = routers.SimpleRouter()
-router.register('patient', PatientViewSet, )
+# This router mustn't have another viewsets because patient has nested routes
+router_for_patients = routers.SimpleRouter()
+router_for_patients.register('patient', PatientViewSet)
 
 urlpatterns = [
-    url(r'^', include(router.urls)),
+    url(r'^', include(router_for_patients.urls)),
 
     # JWT authentication
     url(r'^auth/login/', obtain_jwt_token),
