@@ -16,4 +16,4 @@ class PatientSerializer(UserSerializer):
         model = Patient
         fields = ('pk', 'first_name', 'last_name', 'mrn', 'date_of_birth',
                   'sex', 'race', 'address', 'photo', 'last_upload',
-                  'moles_images_count',)
+                  'moles_images_count', )

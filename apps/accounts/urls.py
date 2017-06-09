@@ -13,6 +13,7 @@ router_for_patients.register('patient', PatientViewSet)
 
 urlpatterns = [
     url(r'^', include(router_for_patients.urls)),
+
     url(r'^auth/current_user/', current_user_view),
 
     # JWT authentication

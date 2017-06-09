@@ -7,7 +7,7 @@ from .models import MoleImage, PatientAnatomicalSite
 
 @receiver(post_save, sender=MoleImage)
 def warm_mole_image_photo(sender, instance, **kwargs):
-    """Crop and create photos"""
+    """Prepare photos"""
     VersatileImageFieldWarmer(
         instance_or_queryset=instance,
         rendition_key_set='main_set',
@@ -16,7 +16,7 @@ def warm_mole_image_photo(sender, instance, **kwargs):
 
 @receiver(post_save, sender=PatientAnatomicalSite)
 def warm_patient_anatomical_site_distant_photo(sender, instance, **kwargs):
-    """Crop and create photos"""
+    """Prepare photos"""
     VersatileImageFieldWarmer(
         instance_or_queryset=instance,
         rendition_key_set='main_set',

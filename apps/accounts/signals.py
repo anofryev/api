@@ -8,7 +8,7 @@ from .models import Patient, Doctor
 @receiver(post_save, sender=Patient)
 @receiver(post_save, sender=Doctor)
 def warm_patient_photo(sender, instance, **kwargs):
-    """Crop and create photos"""
+    """Prepare photos"""
     VersatileImageFieldWarmer(
         instance_or_queryset=instance,
         rendition_key_set='main_set',

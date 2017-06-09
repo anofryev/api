@@ -74,6 +74,9 @@ class MoleImage(models.Model):
 
 @receiver(post_save, sender=MoleImage)
 def set_up(sender, instance, created, **kwargs):
+    """
+    Completes MoleImage instance after creation by calling delayed task
+    """
     from ..tasks import get_mole_image_prediction
 
     if created:

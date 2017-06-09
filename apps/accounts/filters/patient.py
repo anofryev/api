@@ -12,9 +12,12 @@ class PatientFilter(FilterSet):
 
     class Meta:
         model = Patient
-        fields = ('race', 'sex',)
+        fields = ('race', 'sex', )
 
     def filter_path_pending(self, qs, name, value):
+        """
+        Filters list of patient which have `biopsy` and empty `path_diagnosis`
+        """
         return qs.annotate(
             mole_images_with_path_pending=Count(
                 Case(
