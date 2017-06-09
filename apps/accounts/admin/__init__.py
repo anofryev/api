@@ -2,8 +2,10 @@ from django.contrib import admin
 
 from .doctor import DoctorAdmin
 from .patient import PatientAdmin
-from ..models import User, Patient, Doctor
+from .patient_consent import PatientConsentAdmin
+from ..models import Patient, PatientConsent, Doctor
 
 
 admin.site.register(Patient, PatientAdmin)
+admin.site.register(PatientConsent, PatientConsentAdmin)
 admin.site.register(Doctor, DoctorAdmin)

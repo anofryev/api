@@ -74,7 +74,7 @@ class Patient(User):
 
 
 @receiver(pre_save, sender=Patient)
-def set_up(sender, instance, *args, **kwargs):
+def set_up_username(sender, instance, *args, **kwargs):
     if instance.mrn:
         instance.username = str(instance.mrn)
     else:

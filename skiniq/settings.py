@@ -71,6 +71,8 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'django_filters',
     'mptt',
+    'constance',
+    'constance.backends.database',
     'raven.contrib.django.raven_compat',
 ]
 
@@ -335,3 +337,12 @@ if RUN_TESTS:
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# CONSTANCE SETTINGS
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'CONSENT_VALID_DAYS': (
+        30,
+        'The number of days the consent is considered as valid'),
+}

@@ -55,5 +55,5 @@ class Doctor(User):
 
 
 @receiver(pre_save, sender=Doctor)
-def set_up(sender, instance, *args, **kwargs):
+def set_up_username(sender, instance, *args, **kwargs):
     instance.username = instance.email
