@@ -18,6 +18,8 @@ class TasksTest(FileTestMixin, TestCase):
         }
         mock_requests.post.return_value = post_mock
 
+        # Task `get_mole_image_prediction` runs automatically on post save
+        # signal
         with self.fake_media():
             mole_image = MoleImageFactory.create(
                 photo=self.get_sample_image_file())
@@ -34,6 +36,8 @@ class TasksTest(FileTestMixin, TestCase):
         }
         mock_requests.post.return_value = post_mock
 
+        # Task `get_mole_image_prediction` runs automatically on post save
+        # signal
         with self.fake_media():
             mole_image = MoleImageFactory.create(
                 photo=self.get_sample_image_file())
@@ -42,7 +46,9 @@ class TasksTest(FileTestMixin, TestCase):
         self.assertEqual(mole_image.prediction, 'Unknown')
         self.assertAlmostEqual(float(mole_image.prediction_accuracy), 0.000)
 
-    def test_get_mole_image_prediction_without_image_does_not_raise(self):
+    def test_get_mole_image_prediction_without_photo_does_not_raise(self):
+        # Task `get_mole_image_prediction` runs automatically on post save
+        # signal
         MoleImageFactory.create()
 
     def test_get_mole_image_prediction_for_not_existing_does_not_raise(self):
