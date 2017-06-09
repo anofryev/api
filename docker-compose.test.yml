@@ -1,13 +1,17 @@
 version: '2'
 
 services:
+  db:
+    image: postgres:9.4-alpine
+    ports:
+    - 5432
+
   server:
     image: $BUILD_IMAGE
     ports:
     - 8000:8000
     links:
     - db
-    - redis
     environment:
       DATABASE_URL: postgres://postgres@db/postgres
       RUN_TESTS: "True"
