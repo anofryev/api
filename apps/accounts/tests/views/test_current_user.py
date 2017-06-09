@@ -78,3 +78,24 @@ class CurrentUserViewTest(APITestCase):
                          doctor_data['units_of_length'])
         self.assertEqual(self.doctor.degree, doctor_data['degree'])
         self.assertEqual(self.doctor.department, doctor_data['department'])
+        self.assertTrue(self.doctor.check_password('password'))
+
+    def test_update_password_success(self):
+        self.authenticate_as_doctor()
+        doctor_data = {
+            'password': 'newpassword',
+        }
+        resp = self.client.patch(
+            '/api/v1/auth/current_user/', doctor_data)
+        self.assertSuccessResponse(resp)
+        self.doctor.refresh_from_db()
+        self.assertTrue(self.doctor.check_password(doctor_data['password']))
+
+    def test_update_password_to_empty_bad_request(self):
+        self.authenticate_as_doctor()
+        doctor_data = {
+            'password': '',
+        }
+        resp = self.client.patch(
+            '/api/v1/auth/current_user/', doctor_data)
+        self.assertBadRequest(resp)
