@@ -40,7 +40,7 @@ ANATOMICAL_SITES = (
         'Posterior neck',
     )),
     ('Chest', (
-        'Middle chest'
+        'Middle chest',
         'Right upper chest',
         'Left upper chest',
     )),
