@@ -1,9 +1,9 @@
 from apps.main.tests import APITestCase
-from ..factories import DoctorFactory, PatientFactory
-from ..models import UnitsOfLengthEnum
+from ...factories import DoctorFactory, PatientFactory
+from ...models import UnitsOfLengthEnum
 
 
-class ViewsTest(APITestCase):
+class CurrentUserViewTest(APITestCase):
     def test_login_as_doctor_success(self):
         doctor = DoctorFactory.create(password='qwertyuiop')
 

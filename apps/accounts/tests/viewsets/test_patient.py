@@ -1,12 +1,12 @@
 from apps.main.tests import APITestCase, patch
 
-from ..factories import PatientFactory
-from ..models import Patient, RaceEnum, SexEnum
+from ...factories import PatientFactory
+from ...models import Patient, RaceEnum, SexEnum
 
 
-class ViewSetsTest(APITestCase):
+class PatientViewSetTest(APITestCase):
     def setUp(self):
-        super(ViewSetsTest, self).setUp()
+        super(PatientViewSetTest, self).setUp()
 
         self.first_patient = PatientFactory.create(doctor=self.doctor)
         self.second_patient = PatientFactory.create(doctor=self.doctor)
