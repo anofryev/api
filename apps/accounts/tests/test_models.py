@@ -1,9 +1,11 @@
 import datetime
+
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.main.tests.mixins import FileTestMixin
 from ..models import User, Doctor, Patient, RaceEnum, SexEnum
-from ..factories import DoctorFactory
+from ..factories import DoctorFactory, PatientFactory, PatientConsentFactory
 
 
 class ModelsTestCase(FileTestMixin, TestCase):
@@ -76,3 +78,19 @@ class ModelsTestCase(FileTestMixin, TestCase):
         )
 
         self.assertTrue(patient.username.startswith('first_last_'))
+
+    def test_patient_does_not_have_valid_consent_without_consents(self):
+        patient = PatientFactory.create()
+        self.assertIsNone(patient.valid_consent)
+
+    def test_patient_has_valid_consent(self):
+        patient = PatientFactory.create()
+        consent = PatientConsentFactory.create(patient=patient)
+        self.assertEqual(patient.valid_consent, consent)
+
+    def test_patient_does_not_have_valid_consent_if_expired(self):
+        patient = PatientFactory.create()
+        consent = PatientConsentFactory.create(patient=patient)
+        consent.date_expired = timezone.now() - datetime.timedelta(hours=1)
+        consent.save()
+        self.assertIsNone(patient.valid_consent)

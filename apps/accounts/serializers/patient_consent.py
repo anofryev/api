@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
-from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from ..models import PatientConsent
+
 
 class PatientConsentSerializer(serializers.ModelSerializer):
     signature = Base64ImageField(required=True)

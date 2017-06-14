@@ -75,8 +75,9 @@ class Patient(User):
         verbose_name_plural = 'Patients'
         ordering = ('last_name', 'first_name', )
 
-    def has_valid_consent(self):
-        return self.consents.filter(date_expired__gt=timezone.now()).exists()
+    @property
+    def valid_consent(self):
+        return self.consents.filter(date_expired__gt=timezone.now()).first()
 
 
 @receiver(pre_save, sender=Patient)
