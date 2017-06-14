@@ -7,5 +7,5 @@ class PatientAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Personal info', {'fields': (
             'doctor', 'first_name', 'last_name', 'date_of_birth', 'photo',
-            'sex', 'race', 'address')}),
+            'sex', 'race', )}),
     )
