@@ -90,7 +90,6 @@ class PatientViewSetTest(APITestCase):
             'sex': SexEnum.MALE,
             'race': RaceEnum.ASIAN,
             'date_of_birth': '1990-01-01',
-            'address': 'address',
             'photo': self.get_sample_image_file(),
         }
 
@@ -108,7 +107,6 @@ class PatientViewSetTest(APITestCase):
         self.assertEqual(patient.last_name, patient_data['last_name'])
         self.assertEqual(patient.sex, patient_data['sex'])
         self.assertEqual(patient.race, patient_data['race'])
-        self.assertEqual(patient.address, patient_data['address'])
         self.assertEqual(
             str(patient.date_of_birth), patient_data['date_of_birth'])
         self.assertTrue(
@@ -129,7 +127,6 @@ class PatientViewSetTest(APITestCase):
             'sex': SexEnum.MALE,
             'race': RaceEnum.BLACK_OR_AFRICAN_AMERICAN,
             'date_of_birth': '1990-01-01',
-            'address': 'address',
             'mrn': 1234567,
             'photo': self.get_sample_image_file(),
         }
@@ -150,7 +147,6 @@ class PatientViewSetTest(APITestCase):
         self.assertEqual(patient.last_name, patient_data['last_name'])
         self.assertEqual(patient.sex, patient_data['sex'])
         self.assertEqual(patient.race, patient_data['race'])
-        self.assertEqual(patient.address, patient_data['address'])
         self.assertEqual(
             str(patient.date_of_birth), patient_data['date_of_birth'])
         self.assertTrue(

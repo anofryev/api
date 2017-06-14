@@ -41,28 +41,28 @@ class Patient(User):
         upload_to=patient_photo_path,
         storage=private_storage,
         max_length=300,
-        null=True,
-        blank=True)
+        blank=True, null=True
+    )
     date_of_birth = models.DateField(
-        verbose_name='Date of birth'
+        verbose_name='Date of birth',
+        blank=True, null=True
     )
     sex = models.CharField(
         max_length=1,
         choices=SexEnum.CHOICES,
-        verbose_name='Sex'
+        verbose_name='Sex',
+        blank=True, null=True
     )
     race = models.SmallIntegerField(
         choices=RaceEnum.CHOICES,
-        verbose_name='Race'
+        verbose_name='Race',
+        blank=True, null=True
     )
     mrn = models.IntegerField(
         unique=True,
         null=True,
         blank=True,
         verbose_name='Medical Record Number'
-    )
-    address = models.TextField(
-        verbose_name='Address'
     )
 
     objects = PatientQuerySet.as_manager()
