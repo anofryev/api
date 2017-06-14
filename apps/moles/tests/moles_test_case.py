@@ -1,5 +1,5 @@
 from apps.main.tests import APITestCase
-from apps.accounts.factories import PatientFactory
+from apps.accounts.factories import PatientFactory, PatientConsentFactory
 from ..factories import (
     PatientAnatomicalSiteFactory, AnatomicalSiteFactory, MoleFactory)
 
@@ -9,6 +9,8 @@ class MolesTestCase(APITestCase):
         super(MolesTestCase, self).setUp()
 
         self.first_patient = PatientFactory.create(doctor=self.doctor)
+        self.first_patient_consent = PatientConsentFactory(
+            patient=self.first_patient)
         self.another_patient = PatientFactory()
 
         self.anatomical_site = AnatomicalSiteFactory.create()

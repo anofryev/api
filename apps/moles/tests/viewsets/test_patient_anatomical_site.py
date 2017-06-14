@@ -59,6 +59,12 @@ class PatientAnatomicalSiteViewSetTest(MolesTestCase):
             )))
         self.assertEqual(patient_anatomical_site.patient, self.first_patient)
 
+    def test_create_forbidden_for_patient_without_valid_consent(self):
+        self.authenticate_as_doctor()
+        self.first_patient_consent.delete()
+        resp = self.client.post(self.get_url(self.first_patient.pk))
+        self.assertForbidden(resp)
+
     def test_update_not_allowed(self):
         self.authenticate_as_doctor()
         resp = self.client.patch(self.get_url(

@@ -69,6 +69,13 @@ class MoleImageViewSetTest(MolesTestCase):
             'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
                 mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
 
+    def test_create_forbidden_for_patient_without_valid_consent(self):
+        self.authenticate_as_doctor()
+        self.first_patient_consent.delete()
+        resp = self.client.post(
+            self.get_url(self.first_patient.pk, self.first_patient_mole.pk))
+        self.assertForbidden(resp)
+
     @patch('apps.moles.tasks.requests')
     def test_update_success(self, mock_requests):
         self.authenticate_as_doctor()
@@ -102,6 +109,20 @@ class MoleImageViewSetTest(MolesTestCase):
         self.assertEqual(mole_image.path_diagnosis,
                          mole_image_data['path_diagnosis'])
         self.assertNotEqual(mole_image.date_modified, yesterday_date)
+
+    @patch('apps.moles.tasks.requests')
+    def test_update_forbidden_for_patient_without_valid_consent(
+            self, mock_requests):
+        self.authenticate_as_doctor()
+
+        mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+
+        self.first_patient_consent.delete()
+        resp = self.client.patch(
+            self.get_url(self.first_patient.pk, self.first_patient_mole.pk,
+                         mole_image.pk))
+        self.assertForbidden(resp)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()

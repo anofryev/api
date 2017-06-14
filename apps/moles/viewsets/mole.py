@@ -1,7 +1,8 @@
 from django.db import transaction
 from rest_framework import viewsets, mixins, response, status
 
-from apps.accounts.permissions import IsDoctorOfPatient
+from apps.accounts.permissions import (
+    IsDoctorOfPatient, HasPatientValidConsentOrReadOnly)
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from ..models import Mole
 from ..serializers import (
@@ -15,7 +16,10 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                   mixins.UpdateModelMixin):
     queryset = Mole.objects.all()
     serializer_class = MoleListSerializer
-    permission_classes = (IsDoctorOfPatient, )
+    permission_classes = (
+        IsDoctorOfPatient,
+        HasPatientValidConsentOrReadOnly,
+    )
 
     def get_queryset(self):
         qs = super(MoleViewSet, self).get_queryset()
