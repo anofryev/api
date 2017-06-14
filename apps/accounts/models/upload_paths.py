@@ -24,10 +24,12 @@ def patient_photo_path(instance, filename):
 
 
 def patient_consent_signature_path(instance, filename):
-    patient = instance
+    consent = instance
+    print(consent.pk)
+    patient = instance.patient
     doctor = patient.doctor
     new_filename = generate_filename(
-        filename, prefix='{0}_signature'.format(patient.pk))
+        filename, prefix='{0}_signature'.format(consent.pk))
 
     return '/'.join([
         'users', str(doctor.pk),

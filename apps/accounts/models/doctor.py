@@ -4,12 +4,13 @@ from django.dispatch import receiver
 from versatileimagefield.fields import VersatileImageField
 
 from apps.main.storages import public_storage
+from apps.main.models.mixins import DelayedSaveFilesMixin
 from .user import User
 from .upload_paths import doctor_photo_path
 from .enums import UnitsOfLengthEnum
 
 
-class Doctor(User):
+class Doctor(DelayedSaveFilesMixin, User):
     user_ptr = models.OneToOneField(
         User,
         on_delete=models.CASCADE,

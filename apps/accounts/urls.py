@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from rest_framework_jwt.views import (
     obtain_jwt_token, refresh_jwt_token, verify_jwt_token)
-from rest_framework import routers
+from rest_framework_nested import routers
 
 from .viewsets import *
 from .views import *
@@ -11,8 +11,13 @@ from .views import *
 router_for_patients = routers.SimpleRouter()
 router_for_patients.register('patient', PatientViewSet)
 
+patient_router = routers.NestedSimpleRouter(
+    router_for_patients, r'patient', lookup='patient')
+patient_router.register('consent', PatientConsentViewSet)
+
 urlpatterns = [
     url(r'^', include(router_for_patients.urls)),
+    url(r'^', include(patient_router.urls)),
 
     url(r'^auth/current_user/', current_user_view),
 

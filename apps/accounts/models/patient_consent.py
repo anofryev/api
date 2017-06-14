@@ -6,11 +6,12 @@ from django.utils import timezone
 from constance import config
 
 from apps.main.storages import private_storage
+from apps.main.models.mixins import DelayedSaveFilesMixin
 from .patient import Patient
 from .upload_paths import patient_consent_signature_path
 
 
-class PatientConsent(models.Model):
+class PatientConsent(DelayedSaveFilesMixin, models.Model):
     date_created = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Created on'

@@ -3,17 +3,19 @@ from django.db.models import Count, Max
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
 from skiniq.utils import get_timestamp
 from apps.main.storages import private_storage
+from apps.main.models.mixins import DelayedSaveFilesMixin
 from .user import User
 from .doctor import Doctor
 from .upload_paths import patient_photo_path
 from .enums import SexEnum, RaceEnum
 
 
-class PatientQuerySet(models.QuerySet):
+class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_moles_images_count(self):
         return self.annotate(
             moles_images_count=Count('moles__images'))
@@ -41,7 +43,8 @@ class Patient(User):
         upload_to=patient_photo_path,
         storage=private_storage,
         max_length=300,
-        blank=True, null=True
+        null=True,
+        blank=True
     )
     date_of_birth = models.DateField(
         verbose_name='Date of birth',
@@ -71,6 +74,9 @@ class Patient(User):
         verbose_name = 'Patient'
         verbose_name_plural = 'Patients'
         ordering = ('last_name', 'first_name', )
+
+    def has_valid_consent(self):
+        return self.consents.filter(date_expired__gt=timezone.now()).exists()
 
 
 @receiver(pre_save, sender=Patient)
