@@ -1,8 +1,14 @@
 from django.db import models
+from django.db.models import Max
 
 from apps.accounts.models import Patient
 from .anatomical_site import AnatomicalSite
 from .patient_anatomical_site import PatientAnatomicalSite
+
+
+class MoleQuerySet(models.QuerySet):
+    def annotate_last_upload(self):
+        return self.annotate(last_upload=Max('images__date_created'))
 
 
 class Mole(models.Model):
@@ -22,6 +28,7 @@ class Mole(models.Model):
     position_y = models.IntegerField(
         verbose_name='Position y'
     )
+    objects = MoleQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Mole'
@@ -43,6 +50,6 @@ class Mole(models.Model):
     @property
     def last_image(self):
         try:
-            return self.images.latest('pk')
+            return self.images.latest('date_created')
         except models.ObjectDoesNotExist:
             return None

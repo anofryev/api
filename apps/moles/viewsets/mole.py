@@ -10,7 +10,8 @@ from ..serializers import (
 
 
 class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
-                  mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                  mixins.ListModelMixin, mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin):
     queryset = Mole.objects.all()
     serializer_class = MoleListSerializer
@@ -19,6 +20,9 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     def get_queryset(self):
         qs = super(MoleViewSet, self).get_queryset()
         qs = qs.prefetch_related('images')
+
+        qs = qs.annotate_last_upload().order_by(
+            '-last_upload')
 
         return qs.filter(patient=self.get_patient_pk())
 
@@ -36,7 +40,10 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save(patient=self.get_patient())
+        headers = self.get_success_headers(serializer.data)
 
         return response.Response(
             MoleDetailSerializer(instance=instance).data,
-            status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )

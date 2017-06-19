@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from django.utils import timezone
+
 from apps.main.tests import patch
 from ...factories import MoleImageFactory
 from ...models import MoleImage
@@ -69,8 +73,12 @@ class MoleImageViewSetTest(MolesTestCase):
     def test_update_success(self, mock_requests):
         self.authenticate_as_doctor()
 
-        mole_image = MoleImageFactory.create(
-            mole=self.first_patient_mole)
+        yesterday_date = timezone.now() - timedelta(days=1)
+        with patch('django.utils.timezone.now') as mock_now:
+            mock_now.return_value = yesterday_date
+            mole_image = MoleImageFactory.create(
+                mole=self.first_patient_mole)
+        self.assertEqual(mole_image.date_modified, yesterday_date)
 
         mole_image_data = {
             'biopsy': True,
@@ -93,6 +101,7 @@ class MoleImageViewSetTest(MolesTestCase):
                          mole_image_data['clinical_diagnosis'])
         self.assertEqual(mole_image.path_diagnosis,
                          mole_image_data['path_diagnosis'])
+        self.assertNotEqual(mole_image.date_modified, yesterday_date)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()
