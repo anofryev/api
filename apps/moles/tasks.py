@@ -8,13 +8,7 @@ from .models import MoleImage
 
 @shared_task
 def get_mole_image_prediction(pk):
-    try:
-        mole_image = MoleImage.objects.get(pk=pk)
-    except MoleImage.DoesNotExist:
-        return
-
-    if not mole_image.photo:
-        return
+    mole_image = MoleImage.objects.get(pk=pk)
 
     payload = {
         'image_url': mole_image.photo.url,
@@ -26,3 +20,5 @@ def get_mole_image_prediction(pk):
         mole_image.prediction = r.json()['prediction']
         mole_image.prediction_accuracy = Decimal(r.json()['probability'])
         mole_image.save()
+    else:
+        raise Exception(r)
