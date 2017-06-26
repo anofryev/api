@@ -10,7 +10,8 @@ class DoctorSerializer(UserSerializer):
     class Meta:
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
-                  'department', 'photo', 'units_of_length', 'password', )
+                  'department', 'photo', 'units_of_length', 'password',
+                  'can_see_prediction', )
         extra_kwargs = {
             'password': {
                 'write_only': True,

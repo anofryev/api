@@ -45,6 +45,9 @@ class Doctor(User):
         default=UnitsOfLengthEnum.INCH,
         verbose_name='Units of length'
     )
+    can_see_prediction = models.BooleanField(
+        default=False,
+    )
 
     class Meta:
         verbose_name = 'Doctor'
