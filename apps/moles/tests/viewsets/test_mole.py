@@ -104,12 +104,12 @@ class MoleViewSetTest(MolesTestCase):
         self.assertEqual(mole.position_x, mole_data['position_x'])
         self.assertEqual(mole.position_y, mole_data['position_y'])
 
-    def test_update_forbidden_for_patient_without_valid_consent(self):
+    def test_update_allow_for_patient_without_valid_consent(self):
         self.authenticate_as_doctor()
         self.first_patient_consent.delete()
         resp = self.client.patch(
             self.get_url(self.first_patient.pk, self.first_patient_mole.pk))
-        self.assertForbidden(resp)
+        self.assertSuccessResponse(resp)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()

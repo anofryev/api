@@ -111,7 +111,7 @@ class MoleImageViewSetTest(MolesTestCase):
         self.assertNotEqual(mole_image.date_modified, yesterday_date)
 
     @patch('apps.moles.tasks.requests')
-    def test_update_forbidden_for_patient_without_valid_consent(
+    def test_update_allow_for_patient_without_valid_consent(
             self, mock_requests):
         self.authenticate_as_doctor()
 
@@ -122,7 +122,7 @@ class MoleImageViewSetTest(MolesTestCase):
         resp = self.client.patch(
             self.get_url(self.first_patient.pk, self.first_patient_mole.pk,
                          mole_image.pk))
-        self.assertForbidden(resp)
+        self.assertSuccessResponse(resp)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()

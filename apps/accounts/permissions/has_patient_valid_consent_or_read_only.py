@@ -10,7 +10,7 @@ class HasPatientValidConsentOrReadOnly(IsDoctorOfPatient):
     """
 
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
+        if request.method != 'POST':
             return True
 
         if not super(HasPatientValidConsentOrReadOnly, self).has_permission(
