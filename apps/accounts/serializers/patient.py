@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from ..models import Patient
@@ -19,3 +20,17 @@ class PatientSerializer(UserSerializer):
         fields = ('pk', 'first_name', 'last_name', 'mrn', 'date_of_birth',
                   'sex', 'race', 'photo', 'last_upload',
                   'moles_images_count', 'valid_consent', )
+
+
+class CreatePatientSerializer(PatientSerializer):
+    signature = Base64ImageField(required=True)
+
+    def create(self, validated_data):
+        signature = validated_data.pop('signature')
+        patient = super(CreatePatientSerializer, self).create(validated_data)
+        patient.consents.create(signature=signature)
+        return patient
+
+    class Meta:
+        model = Patient
+        fields = PatientSerializer.Meta.fields + ('signature', )

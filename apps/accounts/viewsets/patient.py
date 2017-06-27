@@ -1,6 +1,8 @@
-from rest_framework import viewsets, mixins, pagination, filters
+from django.db import transaction
+from rest_framework import (viewsets, mixins, pagination,
+                            filters, response, status, )
 
-from ..serializers import PatientSerializer
+from ..serializers import PatientSerializer, CreatePatientSerializer
 from ..models import Patient
 from ..permissions import IsDoctor
 from ..filters import PatientFilter
@@ -17,6 +19,11 @@ class PatientViewSet(viewsets.GenericViewSet,
     pagination_class = pagination.LimitOffsetPagination
     search_fields = ('first_name', 'last_name', 'mrn', )
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreatePatientSerializer
+        return self.serializer_class
+
     def get_queryset(self):
         qs = super(PatientViewSet, self).get_queryset()
 
@@ -25,5 +32,16 @@ class PatientViewSet(viewsets.GenericViewSet,
 
         return qs
 
-    def perform_create(self, serializer):
-        return serializer.save(doctor=self.request.user.doctor_role)
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save(doctor=self.request.user.doctor_role)
+        data = PatientSerializer(instance=instance).data
+        headers = self.get_success_headers(data)
+
+        return response.Response(
+            data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )

@@ -91,6 +91,8 @@ class PatientViewSetTest(APITestCase):
             'race': RaceEnum.ASIAN,
             'date_of_birth': '1990-01-01',
             'photo': self.get_sample_image_file(),
+            'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
+                         'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
         }
 
         with self.fake_media():
@@ -101,6 +103,7 @@ class PatientViewSetTest(APITestCase):
         data = resp.data
         self.assertIsNotNone(data['pk'])
         patient = Patient.objects.get(pk=data['pk'])
+        self.assertEqual(patient.consents.count(), 1)
 
         self.assertEqual(patient.doctor, self.doctor)
         self.assertEqual(patient.first_name, patient_data['first_name'])
