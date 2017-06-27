@@ -25,7 +25,6 @@ def patient_photo_path(instance, filename):
 
 def patient_consent_signature_path(instance, filename):
     consent = instance
-    print(consent.pk)
     patient = instance.patient
     doctor = patient.doctor
     new_filename = generate_filename(
