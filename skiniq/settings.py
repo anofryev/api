@@ -327,6 +327,7 @@ if RUN_TESTS:
         NOSE_ARGS += [
             '--ipdb',
             '--ipdb-failures',
+            '--nocapture',
         ]
 
     CELERY_ALWAYS_EAGER = True
