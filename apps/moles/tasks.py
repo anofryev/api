@@ -6,6 +6,10 @@ from decimal import Decimal
 from .models import MoleImage
 
 
+class GetPrerdictionError(Exception):
+    pass
+
+
 @shared_task
 def get_mole_image_prediction(pk):
     mole_image = MoleImage.objects.get(pk=pk)
@@ -21,4 +25,4 @@ def get_mole_image_prediction(pk):
         mole_image.prediction_accuracy = Decimal(r.json()['probability'])
         mole_image.save()
     else:
-        raise Exception(r)
+        raise GetPrerdictionError(r)

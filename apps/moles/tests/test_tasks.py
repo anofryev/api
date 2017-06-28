@@ -1,13 +1,12 @@
-from django.test import TestCase, mock
-
+from django.test import TransactionTestCase, mock
 from apps.main.tests import patch
 from apps.main.tests.mixins import FileTestMixin
 from ..models import MoleImage
 from ..factories import MoleImageFactory
-from ..tasks import get_mole_image_prediction
+from ..tasks import GetPrerdictionError
 
 
-class TasksTest(FileTestMixin, TestCase):
+class TasksTest(FileTestMixin, TransactionTestCase):
     @patch('apps.moles.tasks.requests', new_callable=mock.MagicMock)
     def test_get_mole_image_prediction_success(self, mock_requests):
         post_mock = mock.MagicMock()
@@ -38,18 +37,6 @@ class TasksTest(FileTestMixin, TestCase):
 
         # Task `get_mole_image_prediction` runs automatically on post save
         # signal
-        with self.fake_media():
-            mole_image = MoleImageFactory.create(
+        with self.fake_media(), self.assertRaises(GetPrerdictionError):
+            MoleImageFactory.create(
                 photo=self.get_sample_image_file())
-
-        mole_image.refresh_from_db()
-        self.assertEqual(mole_image.prediction, 'Unknown')
-        self.assertAlmostEqual(float(mole_image.prediction_accuracy), 0.000)
-
-    def test_get_mole_image_prediction_without_photo_does_not_raise(self):
-        # Task `get_mole_image_prediction` runs automatically on post save
-        # signal
-        MoleImageFactory.create()
-
-    def test_get_mole_image_prediction_for_not_existing_does_not_raise(self):
-        get_mole_image_prediction(0)

@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
+import os, sys
 import datetime
 import dj_database_url
 
@@ -318,7 +318,7 @@ LOGGING = {
 }
 
 # TESTING SETTINGS
-RUN_TESTS = os.environ.get('RUN_TESTS', 'False') == 'True'
+RUN_TESTS = 'test' in sys.argv
 IS_CI = os.environ.get('IS_CI', 'False') == 'True'
 
 if RUN_TESTS:
