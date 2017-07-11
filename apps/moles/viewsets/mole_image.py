@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 
 from apps.accounts.permissions import (
-    HasPatientValidConsentOrDoctorOfPatientCanEdit, )
+    CompositeOr, IsDoctorOfPatient, HasPatientValidConsent, ForbidCreation)
 from ..models import Mole, MoleImage
 from ..serializers import (
     MoleImageSerializer, MoleImageCreateSerializer, MoleImageUpdateSerializer)
@@ -13,7 +13,8 @@ class MoleImageViewSet(viewsets.GenericViewSet,
     queryset = MoleImage.objects.all()
     serializer_class = MoleImageSerializer
     permission_classes = (
-        HasPatientValidConsentOrDoctorOfPatientCanEdit,
+        IsDoctorOfPatient,
+        CompositeOr(HasPatientValidConsent, ForbidCreation)
     )
 
     def get_mole_pk(self):
