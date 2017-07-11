@@ -18,8 +18,7 @@ class MoleImageViewSetTest(MolesTestCase):
 
         return url
 
-    @patch('apps.moles.tasks.requests')
-    def test_get_patient_mole_images_success(self, mock_requests):
+    def test_get_patient_mole_images_success(self):
         self.authenticate_as_doctor()
 
         first_patient_mole_image = MoleImageFactory.create(
