@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 
 from apps.accounts.permissions import (
-    IsDoctorOfPatient, HasPatientValidConsentOrReadOnly)
+    HasPatientValidConsentOrDoctorOfPatientCanEdit, )
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from ..models import PatientAnatomicalSite
 from ..serializers import PatientAnatomicalSiteSerializer
@@ -15,8 +15,7 @@ class PatientAnatomicalSiteViewSet(viewsets.GenericViewSet,
     serializer_class = PatientAnatomicalSiteSerializer
     queryset = PatientAnatomicalSite.objects.all()
     permission_classes = (
-        IsDoctorOfPatient,
-        HasPatientValidConsentOrReadOnly,
+        HasPatientValidConsentOrDoctorOfPatientCanEdit,
     )
 
     def get_queryset(self):
