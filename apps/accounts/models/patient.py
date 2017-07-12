@@ -77,7 +77,7 @@ class Patient(User):
 
     @property
     def valid_consent(self):
-        return self.consents.filter(date_expired__gt=timezone.now()).first()
+        return self.consents.valid().first()
 
 
 @receiver(pre_save, sender=Patient)
