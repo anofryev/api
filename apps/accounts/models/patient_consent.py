@@ -13,7 +13,7 @@ from .upload_paths import patient_consent_signature_path
 
 
 class PatientConsentQuerySet(models.QuerySet):
-    def filter_valid(self):
+    def valid(self):
         return self.filter(date_expired__gt=timezone.now())
 
 

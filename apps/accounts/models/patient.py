@@ -77,7 +77,7 @@ class Patient(User):
 
     @property
     def valid_consent(self):
-        return self.consents.filter_valid().first()
+        return self.consents.valid().first()
 
 
 @receiver(pre_save, sender=Patient)
