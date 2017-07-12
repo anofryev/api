@@ -40,9 +40,6 @@ class Composite(object):
     def __or__(self, another_permission_class):
         return CompositeOr(self.permission_class, another_permission_class)
 
-    def __ior__(self, another_permission_class):
-        return CompositeOr(self.permission_class, another_permission_class)
-
     def __call__(self, *args, **kwargs):
         return self.permission_class(*args, **kwargs)
 
