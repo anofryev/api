@@ -21,3 +21,31 @@ def CompositeOr(*permission_classes):
             return False
 
     return _Permission
+
+
+class Composite(object):
+    """
+    Composite wrapper for permission classes
+
+    Usage:
+    Composite(FirstClass) | Composite(SecondClass)
+
+    or with shorthand:
+    C(FirstClass) | C(SecondClass)
+    """
+
+    def __init__(self, permission_class):
+        self.permission_class = permission_class
+
+    def __or__(self, another_permission_class):
+        return CompositeOr(self.permission_class, another_permission_class)
+
+    def __ior__(self, another_permission_class):
+        return CompositeOr(self.permission_class, another_permission_class)
+
+    def __call__(self, *args, **kwargs):
+        return self.permission_class(*args, **kwargs)
+
+
+# Shorthand
+C = Composite
