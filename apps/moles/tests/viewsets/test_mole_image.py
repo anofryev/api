@@ -65,8 +65,8 @@ class MoleImageViewSetTest(MolesTestCase):
 
         mole = mole_image.mole
         self.assertTrue(mole_image.photo.name.startswith(
-            'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
-                mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
+            'patients/{0}/skin_images/{1}/{1}_photo'.format(
+                mole.patient.pk, mole.pk)))
 
     def test_create_forbidden_for_patient_without_valid_consent(self):
         self.authenticate_as_doctor()

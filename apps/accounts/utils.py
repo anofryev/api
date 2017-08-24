@@ -8,15 +8,11 @@ from .serializers import DoctorSerializer
 def jwt_response_payload_handler(token, user=None, request=None):
     data = {
         'token': token,
+        'doctor': DoctorSerializer(
+            user.doctor_role,
+            context={'request': request}
+        ).data,
     }
-
-    if hasattr(user, 'doctor_role'):
-        data.update({
-            'doctor': DoctorSerializer(
-                user.doctor_role,
-                context={'request': request}
-            ).data,
-        })
 
     return data
 

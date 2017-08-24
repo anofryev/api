@@ -28,7 +28,7 @@ class PatientViewSet(viewsets.GenericViewSet,
         qs = super(PatientViewSet, self).get_queryset()
 
         qs = qs.annotate_last_upload().annotate_moles_images_count()
-        qs = qs.filter(doctor=self.request.user.doctor_role)
+        qs = qs.filter(doctors=self.request.user.doctor_role)
 
         return qs
 
@@ -36,8 +36,10 @@ class PatientViewSet(viewsets.GenericViewSet,
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save(doctor=self.request.user.doctor_role)
-        data = PatientSerializer(instance=instance).data
+        instance = serializer.save()
+        data = PatientSerializer(
+            instance=instance,
+            context=self.get_serializer_context()).data
         headers = self.get_success_headers(data)
 
         return response.Response(

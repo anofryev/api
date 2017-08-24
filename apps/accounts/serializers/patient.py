@@ -2,14 +2,14 @@ from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Patient
-from .user import UserSerializer
+from ..models import Patient, DoctorToPatient
 from .patient_consent import PatientConsentSerializer
 
 
-class PatientSerializer(UserSerializer):
+class PatientSerializer(serializers.ModelSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     valid_consent = PatientConsentSerializer(allow_null=True, read_only=True)
+    encrypted_key = serializers.SerializerMethodField()
 
     # Fields from aggregation
     last_upload = serializers.DateTimeField(read_only=True)
@@ -17,18 +17,35 @@ class PatientSerializer(UserSerializer):
 
     class Meta:
         model = Patient
-        fields = ('pk', 'first_name', 'last_name', 'mrn', 'date_of_birth',
+        fields = ('pk', 'first_name', 'last_name', 'mrn',
+                  'date_of_birth', 'mrn_hash',
                   'sex', 'race', 'photo', 'last_upload',
-                  'moles_images_count', 'valid_consent', )
+                  'moles_images_count', 'valid_consent',
+                  'encrypted_key', )
+
+    def get_encrypted_key(self, patient):
+        doctor = self.context['request'].user.doctor_role
+        return DoctorToPatient.objects.filter(
+            doctor=doctor,
+            patient=patient).values_list(
+                'encrypted_key', flat=True).first()
 
 
 class CreatePatientSerializer(PatientSerializer):
     signature = Base64ImageField(required=True)
+    encrypted_key = serializers.CharField(required=True)
 
     def create(self, validated_data):
         signature = validated_data.pop('signature')
+        encrypted_key = validated_data.pop('encrypted_key')
+        doctor = self.context['request'].user.doctor_role
         patient = super(CreatePatientSerializer, self).create(validated_data)
         patient.consents.create(signature=signature)
+        DoctorToPatient.objects.create(
+            patient=patient,
+            doctor=doctor,
+            encrypted_key=encrypted_key)
+
         return patient
 
     class Meta:
