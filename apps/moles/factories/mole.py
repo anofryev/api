@@ -8,8 +8,7 @@ from .anatomical_site import AnatomicalSiteFactory
 class MoleFactory(DjangoModelFactory):
     patient = SubFactory(PatientFactory)
     anatomical_site = SubFactory(AnatomicalSiteFactory)
-    position_x = 0
-    position_y = 0
+    position_info = {'x': 0, 'y': 0}
 
     class Meta:
         model = Mole
