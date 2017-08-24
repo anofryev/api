@@ -82,6 +82,12 @@ class Patient(models.Model):
     def valid_consent(self):
         return self.consents.valid().first()
 
+    def __str__(self):
+        return "Patient: {0} ({1},{2})".format(
+            self.pk,
+            self.get_race_display(),
+            self.get_sex_display())
+
 
 class DoctorToPatient(models.Model):
     patient = models.ForeignKey(
