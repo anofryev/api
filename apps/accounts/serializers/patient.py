@@ -34,20 +34,42 @@ class PatientSerializer(serializers.ModelSerializer):
 class CreatePatientSerializer(PatientSerializer):
     signature = Base64ImageField(required=True)
     encrypted_key = serializers.CharField(required=True)
+    coordinator_encrypted_key = serializers.CharField(required=False)
+
+    def validate(self, data):
+        doctor = self.context['request'].user.doctor_role
+        if doctor.my_coordinator_id is not None \
+           and 'coordinator_encrypted_key' not in data:
+            raise serializers.ValidationError(
+                "Coordinator encrypted key "
+                "is required for doctor with coordinator"
+            )
+        return data
 
     def create(self, validated_data):
-        signature = validated_data.pop('signature')
-        encrypted_key = validated_data.pop('encrypted_key')
         doctor = self.context['request'].user.doctor_role
+
+        signature = validated_data.pop(
+            'signature')
+        encrypted_key = validated_data.pop(
+            'encrypted_key')
+        coordinator_encrypted_key = validated_data.pop(
+            'coordinator_encrypted_key', None)
+
         patient = super(CreatePatientSerializer, self).create(validated_data)
         patient.consents.create(signature=signature)
         DoctorToPatient.objects.create(
             patient=patient,
             doctor=doctor,
             encrypted_key=encrypted_key)
-
+        if doctor.my_coordinator_id:
+            DoctorToPatient.objects.create(
+                patient=patient,
+                doctor_id=doctor.my_coordinator_id,
+                encrypted_key=coordinator_encrypted_key)
         return patient
 
     class Meta:
         model = Patient
-        fields = PatientSerializer.Meta.fields + ('signature', )
+        fields = PatientSerializer.Meta.fields + (
+            'signature', 'coordinator_encrypted_key', )

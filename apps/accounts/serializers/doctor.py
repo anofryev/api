@@ -11,7 +11,7 @@ class DoctorSerializer(UserSerializer):
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
                   'department', 'photo', 'units_of_length', 'password',
-                  'can_see_prediction', )
+                  'can_see_prediction',  'public_key', 'private_key',)
         extra_kwargs = {
             'password': {
                 'write_only': True,

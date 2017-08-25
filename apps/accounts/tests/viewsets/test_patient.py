@@ -1,6 +1,6 @@
 from apps.main.tests import APITestCase, patch
 
-from ...factories import PatientFactory
+from ...factories import PatientFactory, DoctorFactory
 from ...models import Patient, RaceEnum, SexEnum, DoctorToPatient
 
 
@@ -120,6 +120,36 @@ class PatientViewSetTest(APITestCase):
         #             patient.pk)))
         self.assertIsNone(patient.mrn)
         self.assertIsNone(patient.mrn_hash)
+
+    def test_create_patient_require_coordinator_encrypted_key(self):
+        coordinator = DoctorFactory.create(coordinator=True).coordinator_role
+        self.doctor.my_coordinator = coordinator
+        self.doctor.save()
+
+        self.authenticate_as_doctor()
+
+        patient_data = {
+            'first_name': 'first name',
+            'last_name': 'first name',
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.ASIAN,
+            'date_of_birth': '1990-01-01',
+            'photo': self.get_sample_image_file(),
+            'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
+                         'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
+            'encrypted_key': 'qwertyuiop',
+        }
+
+        with self.fake_media():
+            resp = self.client.post('/api/v1/patient/', patient_data)
+        self.assertBadRequest(resp)
+
+        patient_data['coordinator_encrypted_key'] = 'poiuytrewq'
+        patient_data['photo'] = self.get_sample_image_file()
+
+        with self.fake_media():
+            resp = self.client.post('/api/v1/patient/', patient_data)
+        self.assertSuccessResponse(resp)
 
     def test_update_patient_success(self):
         self.authenticate_as_doctor()
