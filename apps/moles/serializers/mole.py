@@ -23,7 +23,7 @@ class MoleListSerializer(MoleSerializer):
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'last_image', 'images_count',
-                  'position_info', )
+                  'position_info', 'patient_anatomical_site', )
 
 
 class MoleDetailSerializer(MoleSerializer):
