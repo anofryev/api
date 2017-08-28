@@ -165,6 +165,7 @@ class PatientViewSetTest(APITestCase):
             'mrn': '1234567',
             'mrn_hash': '1q2w3e4r',
             'photo': self.get_sample_image_file(),
+            'encrypted_key': 'some new key',
         }
 
         with self.fake_media():
@@ -192,6 +193,37 @@ class PatientViewSetTest(APITestCase):
         #             patient.pk)))
         self.assertEqual(patient.mrn, '1234567')
         self.assertEqual(patient.mrn_hash, '1q2w3e4r')
+
+        self.assertEqual(
+            'some new key',
+            DoctorToPatient.objects.filter(
+                patient=patient,
+                doctor=self.doctor).values_list(
+                    'encrypted_key',
+                    flat=True).first())
+
+    def test_encrypted_key_is_requred_for_patient_update(self):
+        self.authenticate_as_doctor()
+
+        patient = PatientFactory.create(doctor=self.doctor)
+
+        patient_data = {
+            'first_name': 'first name',
+            'last_name': 'first name',
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.BLACK_OR_AFRICAN_AMERICAN,
+            'date_of_birth': '1990-01-01',
+            'mrn': '1234567',
+            'mrn_hash': '1q2w3e4r',
+            'photo': self.get_sample_image_file(),
+        }
+
+        with self.fake_media():
+            resp = self.client.patch(
+                '/api/v1/patient/{0}/'.format(patient.pk),
+                patient_data)
+
+        self.assertBadRequest(resp)
 
     def test_delete_not_allowed(self):
         self.authenticate_as_doctor()

@@ -6,10 +6,18 @@ from ..models import Patient, DoctorToPatient
 from .patient_consent import PatientConsentSerializer
 
 
+class EncryptedKeyField(serializers.CharField):
+    def to_internal_value(self, data):
+        return {'encrypted_key': data}
+
+    def to_representation(self, patient):
+        return self.parent.get_encrypted_key(patient)
+
+
 class PatientSerializer(serializers.ModelSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     valid_consent = PatientConsentSerializer(allow_null=True, read_only=True)
-    encrypted_key = serializers.SerializerMethodField()
+    encrypted_key = EncryptedKeyField(source='*')
 
     # Fields from aggregation
     last_upload = serializers.DateTimeField(read_only=True)
@@ -23,12 +31,27 @@ class PatientSerializer(serializers.ModelSerializer):
                   'moles_images_count', 'valid_consent',
                   'encrypted_key', )
 
+    def validate(self, data):
+        if data.get('encrypted_key'):
+            return data
+        raise serializers.ValidationError("encrypted_key is required.")
+
     def get_encrypted_key(self, patient):
         doctor = self.context['request'].user.doctor_role
         return DoctorToPatient.objects.filter(
             doctor=doctor,
             patient=patient).values_list(
                 'encrypted_key', flat=True).first()
+
+    def update(self, instance, validated_data):
+        doctor = self.context['request'].user.doctor_role
+        patient = super(PatientSerializer, self).update(
+            instance, validated_data)
+        DoctorToPatient.objects.filter(
+            doctor=doctor,
+            patient=patient).update(
+                encrypted_key=validated_data['encrypted_key'])
+        return patient
 
 
 class CreatePatientSerializer(PatientSerializer):

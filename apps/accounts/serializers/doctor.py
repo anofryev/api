@@ -21,6 +21,9 @@ class DoctorSerializer(UserSerializer):
                 'write_only': True,
                 'required': False,
             },
+            'private_key': {
+                'allow_blank': True,
+            },
         }
 
     def get_coordinator_public_key(self, doctor):
