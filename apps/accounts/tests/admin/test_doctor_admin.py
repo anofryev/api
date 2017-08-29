@@ -16,11 +16,11 @@ class DoctorAdminTest(TestCase):
         self.client.login(
             username=self.superuser.username, password=self.password)
 
-        responce = self.client.get(
+        response = self.client.get(
             urlresolvers.reverse(
                 'admin:accounts_doctor_change', args=[self.superuser.pk]))
 
         # We just need to check that Doctor get_from override don't raise
-        self.assertEqual(responce.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            len(responce.context['adminform'].form.fields.values()) > 0)
+            len(response.context['adminform'].form.fields.values()) > 0)
