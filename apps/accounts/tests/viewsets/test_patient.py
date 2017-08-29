@@ -1,3 +1,4 @@
+import json
 from apps.main.tests import APITestCase, patch
 
 from ...factories import PatientFactory, DoctorFactory
@@ -93,7 +94,7 @@ class PatientViewSetTest(APITestCase):
             'photo': self.get_sample_image_file(),
             'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
                          'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
-            'encrypted_key': 'qwertyuiop',
+            'encryption_keys': json.dumps({self.doctor.pk: 'qwertyuiop'}),
         }
 
         with self.fake_media():
@@ -137,14 +138,18 @@ class PatientViewSetTest(APITestCase):
             'photo': self.get_sample_image_file(),
             'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
                          'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
-            'encrypted_key': 'qwertyuiop',
+            'encryption_keys': json.dumps({self.doctor.pk: 'qwertyuiop'}),
         }
 
         with self.fake_media():
             resp = self.client.post('/api/v1/patient/', patient_data)
         self.assertBadRequest(resp)
 
-        patient_data['coordinator_encrypted_key'] = 'poiuytrewq'
+        patient_data['encryption_keys'] = json.dumps(
+            {
+                self.doctor.pk: 'qwertyuiop',
+                self.doctor.my_coordinator_id: 'qwertyuiop',
+            })
         patient_data['photo'] = self.get_sample_image_file()
 
         with self.fake_media():
@@ -165,7 +170,7 @@ class PatientViewSetTest(APITestCase):
             'mrn': '1234567',
             'mrn_hash': '1q2w3e4r',
             'photo': self.get_sample_image_file(),
-            'encrypted_key': 'some new key',
+            'encryption_keys': json.dumps({self.doctor.pk: 'some new key'}),
         }
 
         with self.fake_media():
