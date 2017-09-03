@@ -15,7 +15,8 @@ class DoctorSerializer(UserSerializer):
         fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
                   'department', 'photo', 'units_of_length', 'password',
                   'can_see_prediction',
-                  'public_key', 'private_key', 'coordinator_public_key', )
+                  'public_key', 'private_key', 'coordinator_public_key',
+                  'my_coordinator_id', )
         extra_kwargs = {
             'password': {
                 'write_only': True,
