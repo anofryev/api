@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Max
+from django.contrib.postgres.fields import JSONField
 
 from apps.accounts.models import Patient
 from .anatomical_site import AnatomicalSite
@@ -22,11 +23,14 @@ class Mole(models.Model):
         AnatomicalSite,
         verbose_name='Anatomical site'
     )
-    position_x = models.IntegerField(
-        verbose_name='Position x'
+    patient_anatomical_site = models.ForeignKey(
+        PatientAnatomicalSite,
+        verbose_name='Patient anatomical site',
+        blank=True,
+        null=True
     )
-    position_y = models.IntegerField(
-        verbose_name='Position y'
+    position_info = JSONField(
+        verbose_name='Mole position information'
     )
     objects = MoleQuerySet.as_manager()
 
@@ -36,11 +40,6 @@ class Mole(models.Model):
 
     def __str__(self):
         return '{0}: {1}'.format(self.patient, self.anatomical_site)
-
-    @property
-    def patient_anatomical_site(self):
-        return PatientAnatomicalSite.objects.filter(
-            patient=self.patient, anatomical_site=self.anatomical_site).first()
 
     @property
     def anatomical_sites(self):
