@@ -35,6 +35,8 @@ class Migration(migrations.Migration):
     dependencies = [('moles', '0002_setup-anatomical-site'), ]
 
     operations = [
+        migrations.RunSQL('SET CONSTRAINTS ALL IMMEDIATE',
+                          reverse_sql=migrations.RunSQL.noop),
         migrations.AddField(
             model_name='mole',
             name='patient_anatomical_site',
@@ -57,4 +59,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='mole',
             name='position_y', ),
+        migrations.RunSQL('SET CONSTRAINTS ALL IMMEDIATE',
+                          reverse_sql=migrations.RunSQL.noop),
     ]
