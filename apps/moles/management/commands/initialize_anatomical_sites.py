@@ -6,8 +6,22 @@ from ...models import AnatomicalSite
 
 ANATOMICAL_SITES = (
     ('Head', (
-        'Face',
-        'Occipital scalp',
+        'Hair',
+        'Forehead',
+        'Temple',
+        'Ear',
+        'Ear lobe',
+        'Ear helix',
+        'Eyebrow',
+        'Eyelash',
+        'Eye',
+        'Nose',
+        'Nostril',
+        'Jaw',
+        'Chin',
+        'Lip',
+        'Mouth',
+        'Cheek',
     )),
     ('Arms', (
         ('Right arm', (
@@ -20,7 +34,7 @@ ANATOMICAL_SITES = (
             'Right posterior upper arm',
             'Right elbow',
             'Right posterior forearm',
-            'Right dorsal hand'
+            'Right dorsal hand',
         )),
         ('Left arm', (
             'Left anterior shoulder',
@@ -32,7 +46,7 @@ ANATOMICAL_SITES = (
             'Left posterior upper arm',
             'Left elbow',
             'Left posterior forearm',
-            'Left dorsal hand'
+            'Left dorsal hand',
         )),
     )),
     ('Neck', (
