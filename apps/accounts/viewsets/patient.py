@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Count, Case, When, F, Q
 from rest_framework import (viewsets, mixins, pagination,
                             filters, response, status, )
 
@@ -28,6 +29,29 @@ class PatientViewSet(viewsets.GenericViewSet,
         qs = super(PatientViewSet, self).get_queryset()
 
         qs = qs.annotate_last_upload().annotate_moles_images_count()
+        qs = qs.annotate(
+            mole_images_with_diagnose_required=Count(
+                Case(
+                    When(
+                        Q(moles__images__path_diagnosis__exact='')
+                        or Q(moles__images__clinical_diagnosis__exact=''),
+                        then=F('moles__images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+        qs = qs.annotate(
+            mole_images_approve_required=Count(
+                Case(
+                    When(moles__images__approved__exact=False,
+                         then=F('moles__images__pk')),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
         qs = qs.filter(doctors=self.request.user.doctor_role)
 
         return qs

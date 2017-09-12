@@ -62,6 +62,9 @@ class MoleImage(models.Model):
         null=True,
         verbose_name='Biopsy data'
     )
+    approved = models.BooleanField(
+        verbose_name='Photo is approved by coordinator',
+        default=False)
 
     class Meta:
         verbose_name = 'Mole image'
