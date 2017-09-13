@@ -39,17 +39,29 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         doctor = self.context['request'].user.doctor_role
-        if doctor.pk not in data.get('encryption_keys', {}):
+        encryption_keys = data.get('encryption_keys', {})
+        if doctor.pk not in encryption_keys:
             raise serializers.ValidationError(
                 "Your  encrypted key is required"
             )
 
         if doctor.my_coordinator_id is not None \
-           and doctor.my_coordinator_id not in data.get('encryption_keys', {}):
+           and doctor.my_coordinator_id not in encryption_keys:
             raise serializers.ValidationError(
                 "Coordinator encrypted key "
                 "is required for doctor with coordinator"
             )
+
+        for rel in DoctorToPatient.objects.filter(
+                patient=self.instance).select_related(
+                    'doctor'):
+            doctor = rel.doctor
+            if doctor.id not in encryption_keys:
+                raise serializers.ValidationError(
+                    "Doctor encrypted key "
+                    "is required for {0}".format(doctor)
+                )
+
         return data
 
     def get_encrypted_key(self, patient):
@@ -61,7 +73,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def get_doctors(self, patient):
         return DoctorToPatient.objects.filter(patient=patient).values_list(
-            'patient',
+            'doctor_id',
             flat=True)
 
     def create(self, validated_data):
