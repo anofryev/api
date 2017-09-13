@@ -65,6 +65,10 @@ class MoleImage(models.Model):
     approved = models.BooleanField(
         verbose_name='Photo is approved by coordinator',
         default=False)
+    age = models.IntegerField(
+        verbose_name="Age when photo was taken",
+        blank=True, null=True
+    )
 
     class Meta:
         verbose_name = 'Mole image'

@@ -12,7 +12,12 @@ class MoleImageSerializer(serializers.ModelSerializer):
         model = MoleImage
         fields = ('pk', 'date_created', 'date_modified', 'path_diagnosis',
                   'clinical_diagnosis', 'prediction', 'prediction_accuracy',
-                  'photo', 'biopsy', 'biopsy_data', 'approved', )
+                  'photo', 'biopsy', 'biopsy_data', 'approved', 'age', )
+        extra_kwargs = {
+            'age': {
+                'read_only': True,
+            },
+        }
 
     def validate_approved(self, data):
         if data != self.instance.approved \
@@ -25,7 +30,14 @@ class MoleImageSerializer(serializers.ModelSerializer):
 
 class MoleImageCreateSerializer(MoleImageSerializer):
     class Meta(MoleImageSerializer.Meta):
-        fields = ('pk', 'photo', )
+        fields = ('pk', 'photo', 'age', )
+        extra_kwargs = {
+            'age': {
+                'read_only': False,
+            },
+        }
+
+
 
 
 class MoleImageUpdateSerializer(MoleImageSerializer):
