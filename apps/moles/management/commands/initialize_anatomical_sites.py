@@ -148,7 +148,7 @@ class Command(BaseCommand):
             initialized_anatomical_sites.extend(
                 initialize_anatomical_sites(None, item))
 
-        # Remove old anatomical sites
+        # Remove old anatomical sites but save existing patient anatomical sites
         old_anatomical_sites = AnatomicalSite.objects.exclude(
             slug__in=[
                 anatomical_site.slug
