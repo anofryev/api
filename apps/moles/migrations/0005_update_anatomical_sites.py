@@ -17,7 +17,7 @@ def reverse_func(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('moles', '0003_prepare-model-for-3d-widget'),
+        ('moles', '0004_split_head_anatomical_sites'),
     ]
 
     operations = [
