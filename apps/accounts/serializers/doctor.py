@@ -10,6 +10,7 @@ class DoctorSerializer(UserSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     coordinator_public_key = serializers.SerializerMethodField()
     my_doctors_public_keys = serializers.SerializerMethodField()
+    is_coordinator = serializers.SerializerMethodField()
 
     class Meta:
         model = Doctor
@@ -17,7 +18,8 @@ class DoctorSerializer(UserSerializer):
                   'department', 'photo', 'units_of_length', 'password',
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
-                  'my_coordinator_id', 'my_doctors_public_keys', )
+                  'my_coordinator_id', 'my_doctors_public_keys',
+                  'is_coordinator',)
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -35,6 +37,8 @@ class DoctorSerializer(UserSerializer):
                     coordinator.doctors.values('id', 'public_key')}
         return None
 
+    def get_is_coordinator(self, doctor):
+        return Coordinator.objects.filter(doctor_ptr=doctor).exists()
 
     def get_coordinator_public_key(self, doctor):
         if doctor.my_coordinator_id:
