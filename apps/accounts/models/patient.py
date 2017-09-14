@@ -46,7 +46,7 @@ class Patient(models.Model):
         unique=True,
         null=True,
         blank=True,
-        verbose_name='Hash of Medical Record Number'
+        verbose_name='Medical Record Number'
     )
     photo = VersatileImageField(
         verbose_name='Profile Picture',
