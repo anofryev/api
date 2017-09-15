@@ -1,13 +1,48 @@
 from django.core.management import BaseCommand
 from django.db import transaction
+from django.utils.text import slugify
 
 from ...models import AnatomicalSite
 
 
 ANATOMICAL_SITES = (
     ('Head', (
-        'Face',
         'Occipital scalp',
+        ('Face', (
+            'Right cheek',
+            'Left cheek',
+            'Chin',
+            ('Right ear', (
+                'Right ear helix',
+                'Right earlobe',
+            )),
+            ('Left ear', (
+                'Left ear helix',
+                'Left earlobe',
+            )),
+            ('Right eye', (
+                'Right eyelashes',
+            )),
+            ('Left eye', (
+                'Left eyelashes',
+            )),
+            'Right eyebrow',
+            'Left eyebrow',
+            'Forehead',
+            'Hair',
+            'Right jaw',
+            'Left jaw',
+            ('Mouth', (
+                'Lower lip',
+                'Upper lip',
+            )),
+            ('Nose', (
+                'Right nostril',
+                'Left nostril',
+            )),
+            'Right temple',
+            'Left temple',
+        )),
     )),
     ('Arms', (
         ('Right arm', (
@@ -20,7 +55,7 @@ ANATOMICAL_SITES = (
             'Right posterior upper arm',
             'Right elbow',
             'Right posterior forearm',
-            'Right dorsal hand'
+            'Right dorsal hand',
         )),
         ('Left arm', (
             'Left anterior shoulder',
@@ -32,33 +67,28 @@ ANATOMICAL_SITES = (
             'Left posterior upper arm',
             'Left elbow',
             'Left posterior forearm',
-            'Left dorsal hand'
+            'Left dorsal hand',
         )),
     )),
-    ('Neck', (
+    ('Trunk', (
         'Anterior neck',
         'Posterior neck',
-    )),
-    ('Chest', (
         'Middle chest',
         'Right upper chest',
         'Left upper chest',
-    )),
-    ('Abdomen', (
         'Right upper abdomen',
         'Right lower abdomen',
         'Left upper abdomen',
         'Left lower abdomen',
-    )),
-    ('Back', (
         'Right upper back',
         'Right lower back',
         'Left upper back',
         'Left lower back',
+        'Right buttock',
+        'Left buttock',
     )),
     ('Legs', (
         ('Right leg', (
-            'Right buttock',
             'Right posterior thigh',
             'Right popliteal fossa',
             'Right proximal calf',
@@ -71,7 +101,6 @@ ANATOMICAL_SITES = (
             'Right dorsal foot',
         )),
         ('Left leg', (
-            'Left buttock',
             'Left posterior thigh',
             'Left popliteal fossa',
             'Left proximal calf',
@@ -87,22 +116,48 @@ ANATOMICAL_SITES = (
 )
 
 
-def create_anatomical_sites(parent, item):
+def initialize_anatomical_sites(parent, item):
     if isinstance(item, tuple):
         name, children = item
     else:
         name = item
         children = []
 
-    anatomical_site, _ = AnatomicalSite.objects.get_or_create(
-        parent=parent, name=name)
+    slug = slugify(name)
+
+    try:
+        anatomical_site = AnatomicalSite.objects.get(slug=slug)
+        anatomical_site.move_to(parent, 'last-child')
+    except:
+        anatomical_site = AnatomicalSite.objects.create(
+            slug=slug, name=name, parent=parent)
+
+    result = [anatomical_site]
 
     for child in children:
-        create_anatomical_sites(anatomical_site, child)
+        result.extend(initialize_anatomical_sites(anatomical_site, child))
+
+    return result
 
 
 class Command(BaseCommand):
     @transaction.atomic
     def handle(self, **options):
+        initialized_anatomical_sites = []
         for item in ANATOMICAL_SITES:
-            create_anatomical_sites(None, item)
+            initialized_anatomical_sites.extend(
+                initialize_anatomical_sites(None, item))
+
+        # Remove old anatomical sites but save existing patient anatomical sites
+        old_anatomical_sites = AnatomicalSite.objects.exclude(
+            slug__in=[
+                anatomical_site.slug
+                for anatomical_site in initialized_anatomical_sites
+            ]
+        ).order_by('-level')
+
+        for anatomical_site in old_anatomical_sites:
+            anatomical_site.patientanatomicalsite_set.update(
+                anatomical_site=anatomical_site.parent)
+
+        old_anatomical_sites.delete()

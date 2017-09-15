@@ -25,18 +25,28 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
             last_upload=Max('moles__images__date_created'))
 
 
-class Patient(User):
-    user_ptr = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        parent_link=True,
-        related_name='patient_role'
+class Patient(models.Model):
+    first_name = models.TextField(
+        verbose_name='Encrypted first name'
     )
-    doctor = models.ForeignKey(
-        Doctor,
-        on_delete=models.CASCADE,
-        related_name='patients',
-        verbose_name='Doctor'
+    last_name = models.TextField(
+        verbose_name='Encrypted last name'
+    )
+    date_of_birth = models.TextField(
+        verbose_name='Encrypted date of birth',
+        blank=True, null=True
+    )
+    mrn = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Encrypted Medical Record Number'
+    )
+    mrn_hash = models.CharField(
+        max_length=32,
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name='Medical Record Number'
     )
     photo = VersatileImageField(
         verbose_name='Profile Picture',
@@ -45,10 +55,6 @@ class Patient(User):
         max_length=300,
         null=True,
         blank=True
-    )
-    date_of_birth = models.DateField(
-        verbose_name='Date of birth',
-        blank=True, null=True
     )
     sex = models.CharField(
         max_length=1,
@@ -61,29 +67,41 @@ class Patient(User):
         verbose_name='Race',
         blank=True, null=True
     )
-    mrn = models.IntegerField(
-        unique=True,
-        null=True,
-        blank=True,
-        verbose_name='Medical Record Number'
+    doctors = models.ManyToManyField(
+        Doctor,
+        related_name="patients",
+        through='DoctorToPatient'
     )
-
     objects = PatientQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Patient'
         verbose_name_plural = 'Patients'
-        ordering = ('last_name', 'first_name', )
 
     @property
     def valid_consent(self):
-        return self.consents.filter(date_expired__gt=timezone.now()).first()
+        return self.consents.valid().first()
+
+    def __str__(self):
+        return "Patient: {0} ({1},{2})".format(
+            self.pk,
+            self.get_race_display(),
+            self.get_sex_display())
 
 
-@receiver(pre_save, sender=Patient)
-def set_up_username(sender, instance, *args, **kwargs):
-    if instance.mrn:
-        instance.username = str(instance.mrn)
-    else:
-        instance.username = slugify('{0}_{1}_{2}'.format(
-            instance.first_name, instance.last_name, get_timestamp()))
+class DoctorToPatient(models.Model):
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        verbose_name='Patient'
+    )
+
+    doctor = models.ForeignKey(
+        Doctor,
+        on_delete=models.CASCADE,
+        verbose_name='Doctor'
+    )
+
+    encrypted_key = models.TextField(
+        verbose_name='Encrypted key for patient data',
+    )

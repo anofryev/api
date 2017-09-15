@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -9,6 +10,11 @@ from apps.main.storages import private_storage
 from apps.main.models.mixins import DelayedSaveFilesMixin
 from .patient import Patient
 from .upload_paths import patient_consent_signature_path
+
+
+class PatientConsentQuerySet(models.QuerySet):
+    def valid(self):
+        return self.filter(date_expired__gt=timezone.now())
 
 
 class PatientConsent(DelayedSaveFilesMixin, models.Model):
@@ -33,6 +39,8 @@ class PatientConsent(DelayedSaveFilesMixin, models.Model):
         blank=True,
         verbose_name='Signature'
     )
+
+    objects = PatientConsentQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Patient consent'

@@ -36,7 +36,7 @@ class PatientConsentViewSetTest(APITestCase):
 
         consent_data = {
             'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
-                          'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
+                         'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
         }
 
         with self.fake_media():
@@ -49,7 +49,9 @@ class PatientConsentViewSetTest(APITestCase):
         self.assertIsNotNone(consent.date_expired)
         self.assertEqual(consent.patient, self.first_patient)
         self.assertTrue(consent.signature.name.startswith(
-            'users/62/patients/63/consent/{0}_signature'.format(consent.pk)))
+            'patients/{0}/consent/{1}_signature'.format(
+                self.first_patient.pk,
+                consent.pk)))
 
     def test_detail_not_found(self):
         self.authenticate_as_doctor()

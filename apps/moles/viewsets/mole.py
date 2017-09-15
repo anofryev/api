@@ -1,8 +1,9 @@
 from django.db import transaction
+from django.db.models import Count, Case, When, F, Q
 from rest_framework import viewsets, mixins, response, status
 
 from apps.accounts.permissions import (
-    IsDoctorOfPatient, HasPatientValidConsentOrReadOnly)
+    C, IsDoctorOfPatient, HasPatientValidConsent, AllowAllExceptCreation)
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from ..models import Mole
 from ..serializers import (
@@ -18,7 +19,7 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     serializer_class = MoleListSerializer
     permission_classes = (
         IsDoctorOfPatient,
-        HasPatientValidConsentOrReadOnly,
+        C(HasPatientValidConsent) | C(AllowAllExceptCreation)
     )
 
     def get_queryset(self):
@@ -27,6 +28,29 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
 
         qs = qs.annotate_last_upload().order_by(
             '-last_upload')
+        qs = qs.annotate(
+            images_with_diagnose_required=Count(
+                Case(
+                    When(
+                        Q(images__path_diagnosis__exact='')
+                        or Q(images__clinical_diagnosis__exact=''),
+                        then=F('images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+        qs = qs.annotate(
+            images_approve_required=Count(
+                Case(
+                    When(images__approved__exact=False,
+                         then=F('images__pk')),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
 
         return qs.filter(patient=self.get_patient_pk())
 

@@ -50,9 +50,8 @@ class PatientAnatomicalSiteViewSetTest(MolesTestCase):
         patient_anatomical_site = PatientAnatomicalSite.objects.get(
             pk=resp.data['pk'])
         self.assertTrue(patient_anatomical_site.distant_photo.name.startswith(
-            'users/{0}/patients/{1}/anatomical_sites/{2}/regional_photo/'
-            '{2}_{3}_regional_photo'.format(
-                patient_anatomical_site.patient.doctor.pk,
+            'patients/{0}/anatomical_sites/{1}/regional_photo/'
+            '{1}_{2}_regional_photo'.format(
                 patient_anatomical_site.patient.pk,
                 patient_anatomical_site.pk,
                 patient_anatomical_site.anatomical_site.pk
