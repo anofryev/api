@@ -1,3 +1,4 @@
+import json
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 from apps.accounts.models import Coordinator
@@ -18,6 +19,11 @@ class MoleImageSerializer(serializers.ModelSerializer):
                 'read_only': True,
             },
         }
+
+    def validate_biopsy_data(self, biopsy_data):
+        if isinstance(biopsy_data, str):
+            return json.loads(biopsy_data)
+        return biopsy_data
 
     def validate_approved(self, data):
         if data != self.instance.approved \
