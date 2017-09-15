@@ -49,6 +49,18 @@ class Doctor(DelayedSaveFilesMixin, User):
     can_see_prediction = models.BooleanField(
         default=False,
     )
+    public_key = models.TextField(
+        default=''
+    )
+    private_key = models.TextField(
+        default=''
+    )
+    my_coordinator = models.ForeignKey(
+        'accounts.Coordinator',
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        related_name='doctors'
+    )
 
     class Meta:
         verbose_name = 'Doctor'

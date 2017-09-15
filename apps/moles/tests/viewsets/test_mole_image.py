@@ -65,8 +65,8 @@ class MoleImageViewSetTest(MolesTestCase):
 
         mole = mole_image.mole
         self.assertTrue(mole_image.photo.name.startswith(
-            'users/{0}/patients/{1}/skin_images/{2}/{2}_photo'.format(
-                mole.patient.doctor.pk, mole.patient.pk, mole.pk)))
+            'patients/{0}/skin_images/{1}/{1}_photo'.format(
+                mole.patient.pk, mole.pk)))
 
     def test_create_forbidden_for_patient_without_valid_consent(self):
         self.authenticate_as_doctor()
@@ -102,12 +102,48 @@ class MoleImageViewSetTest(MolesTestCase):
 
         mole_image.refresh_from_db()
         self.assertEqual(mole_image.biopsy, mole_image_data['biopsy'])
-        self.assertEqual(mole_image.biopsy_data, mole_image_data['biopsy_data'])
+        # self.assertEqual(mole_image.biopsy_data, mole_image_data['biopsy_data'])
+        # biopsy can bee eiter string or object so we have separated tests for this cases
         self.assertEqual(mole_image.clinical_diagnosis,
                          mole_image_data['clinical_diagnosis'])
         self.assertEqual(mole_image.path_diagnosis,
                          mole_image_data['path_diagnosis'])
         self.assertNotEqual(mole_image.date_modified, yesterday_date)
+
+    @patch('apps.moles.tasks.requests')
+    def test_update_biopsy_data_as_string_success(self, mock_requests):
+        self.authenticate_as_doctor()
+        mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+        mole_image_data = {
+            'biopsy_data': '{"lens": 1}',
+        }
+        resp = self.client.patch(
+            self.get_url(
+                self.first_patient.pk, self.first_patient_mole.pk,
+                mole_image.pk),
+            mole_image_data)
+        self.assertSuccessResponse(resp)
+        mole_image.refresh_from_db()
+        self.assertDictEqual({'lens': 1}, mole_image.biopsy_data)
+
+    @patch('apps.moles.tasks.requests')
+    def test_update_biopsy_data_as_dict_success(self, mock_requests):
+        self.authenticate_as_doctor()
+        mole_image = MoleImageFactory.create(
+            mole=self.first_patient_mole)
+        mole_image_data = {
+            'biopsy_data': {'lens': 1},
+        }
+        resp = self.client.patch(
+            self.get_url(
+                self.first_patient.pk, self.first_patient_mole.pk,
+                mole_image.pk),
+            mole_image_data,
+            format='json')
+        self.assertSuccessResponse(resp)
+        mole_image.refresh_from_db()
+        self.assertDictEqual({'lens': 1}, mole_image.biopsy_data)
 
     @patch('apps.moles.tasks.requests')
     def test_update_allow_for_patient_without_valid_consent(

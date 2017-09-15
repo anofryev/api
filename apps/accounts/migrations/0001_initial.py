@@ -72,7 +72,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Patients',
                 'ordering': ('last_name', 'first_name'),
             },
-            bases=('accounts.user',),
         ),
         migrations.AddField(
             model_name='user',
