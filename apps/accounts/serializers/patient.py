@@ -22,6 +22,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
     # Fields from aggregation
     last_upload = serializers.DateTimeField(read_only=True)
+    moles_count = serializers.SerializerMethodField()
     moles_images_count = serializers.IntegerField(read_only=True)
     mole_images_with_diagnose_required = serializers.IntegerField(
         read_only=True)
@@ -33,6 +34,7 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = ('pk', 'first_name', 'last_name', 'mrn',
                   'date_of_birth', 'mrn_hash', 'valid_consent',
                   'sex', 'race', 'photo', 'last_upload',
+                  'moles_count',
                   'moles_images_count', 'mole_images_with_diagnose_required',
                   'mole_images_approve_required',
                   'encrypted_key', 'encryption_keys', 'doctors', )
@@ -63,6 +65,9 @@ class PatientSerializer(serializers.ModelSerializer):
                 )
 
         return data
+
+    def get_moles_count(self, patient):
+        return patient.moles.count()
 
     def get_encrypted_key(self, patient):
         doctor = self.context['request'].user.doctor_role
