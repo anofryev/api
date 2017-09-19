@@ -2,8 +2,18 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator
+from ..models import Doctor, Coordinator, Site
 from .user import UserSerializer
+
+
+class RegisterDoctorSerializer(UserSerializer):
+    site = serializers.PrimaryKeyRelatedField(
+        queryset=Site.objects.all())
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email', 'password',
+                  'site',)
 
 
 class DoctorSerializer(UserSerializer):
