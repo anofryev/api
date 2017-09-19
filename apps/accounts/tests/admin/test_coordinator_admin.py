@@ -51,5 +51,8 @@ class CoordinatorAdminTest(TestCase):
             urlresolvers.reverse(
                 'admin:accounts_coordinator_change', args=[coordinator.pk]))
 
+        fields = response.context['adminform'].form.fields
         self.assertEqual(
-            len(response.context['adminform'].form.fields.values()), 0)
+            len(fields.values()), 1)
+
+        self.assertIsNotNone(fields['site'])
