@@ -53,6 +53,4 @@ class CoordinatorAdminTest(TestCase):
 
         fields = response.context['adminform'].form.fields
         self.assertEqual(
-            len(fields.values()), 1)
-
-        self.assertIsNotNone(fields['site'])
+            len(fields.values()), 0)
