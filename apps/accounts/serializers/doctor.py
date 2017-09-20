@@ -14,7 +14,7 @@ class RegisterDoctorSerializer(UserSerializer):
         write_only=True)
 
     def create(self, validated_data):
-        site = validated_data.pop('site')
+        site = validated_data.pop('site', None)
         password = validated_data.pop('password')
         doctor = super(RegisterDoctorSerializer,
                        self).create(validated_data)
@@ -45,8 +45,8 @@ class DoctorSerializer(UserSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
-                  'department', 'photo', 'units_of_length',
+        fields = ('pk', 'first_name', 'last_name', 'email', 'password',
+                  'degree', 'department', 'photo', 'units_of_length',
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',

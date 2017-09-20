@@ -30,7 +30,6 @@ urlpatterns = [
     # Registration
     url(r'^auth/register/$', views.RegistrationView.as_view()),
     url(r'^auth/activate/$', views.ActivationView.as_view()),
-    url(r'^auth/password/$', views.SetPasswordView.as_view()),
     url(
         r'^auth/password/reset/$',
         views.PasswordResetView.as_view(),

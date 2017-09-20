@@ -50,9 +50,9 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@skiniq.co")
 POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
 POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
 
-if POSTMARK_API_KEY:
-    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'
-    DEFAULT_FROM_EMAIL = POSTMARK_SENDER
+if POSTMARK_API_KEY:  # pragma: no cover
+    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'  # pragma: no cover
+    DEFAULT_FROM_EMAIL = POSTMARK_SENDER  # pragma: no cover
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
