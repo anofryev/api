@@ -89,6 +89,10 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
+AUTHENTICATION_BACKENDS = [
+    'apps.accounts.authentication_backend.AuthenticationBackend',
+]
+
 # MIDDLEWARE CONFIGURATION
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -285,10 +289,14 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 VERSATILEIMAGEFIELD_USE_PLACEHOLDIT = True
 
 DJOSER = {
-    'DOMAIN': 'api.skiniq.co',
+    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'api.skiniq.co'),
     'SITE_NAME': 'SkinIQ',
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
+        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
+        'web_ui/#/password/reset/confirm/{uid}/{token}'),
+    'ACTIVATION_URL': os.environ.get(
+        'DJOSER_ACTIVATION_URL',
+        'web_ui/#/activate/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_registration': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',

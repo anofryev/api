@@ -2,7 +2,8 @@ from django.contrib.auth.admin import UserAdmin
 
 
 class DoctorAdmin(UserAdmin):
-    list_display = ('first_name', 'last_name',)
+    list_display = ('email', 'first_name', 'last_name',
+                    'is_active', 'approved_by_coordinator', )
     search_fields = ('first_name', 'last_name')
     add_fieldsets = ((None, {
         'classes': ('wide',),
@@ -16,9 +17,14 @@ class DoctorAdmin(UserAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name',
                                       'photo', 'department', 'degree',)}),
         ('Settings', {'fields': ('units_of_length', 'my_coordinator',)}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
-                                    'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_active', )}),
+        ('Active status', {
+            'fields': ('is_active', 'approved_by_coordinator', )
+        }),
+        ('Admin settings', {
+            'fields': ('is_staff', 'is_superuser',
+                       'groups', 'user_permissions'),
+            'classes': ('collapse', ),
+        }),
     )
 
     def get_form(self, request, obj=None, **kwargs):

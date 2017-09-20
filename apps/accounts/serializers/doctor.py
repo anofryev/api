@@ -16,16 +16,20 @@ class RegisterDoctorSerializer(UserSerializer):
     def create(self, validated_data):
         site = validated_data.pop('site')
         password = validated_data.pop('password')
-        doctor = super(RegisterDoctorSerializer, self).create(validated_data)
-        doctor.coordinator = site.site_coordinator
+        doctor = super(RegisterDoctorSerializer,
+                       self).create(validated_data)
+        if site:
+            doctor.coordinator = site.site_coordinator
+        else:
+            doctor.approved_by_coordinator = True
         doctor.set_password(password)
         doctor.save()
         return doctor
 
     class Meta:
         model = Doctor
-        fields = ('pk', 'first_name', 'last_name', 'email', 'password',
-                  'site',)
+        fields = ('pk', 'first_name', 'last_name',
+                  'email', 'password', 'site', )
         extra_kwargs = {
             'password': {
                 'write_only': True,

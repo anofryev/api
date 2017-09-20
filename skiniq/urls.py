@@ -3,13 +3,13 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
+admin.site.site_header = 'SkinIQ administrative interface'
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/v1/', include('rest_framework.urls')),
     url(r'^api/v1/', include('apps.accounts.urls')),
     url(r'^api/v1/', include('apps.moles.urls')),
-    url(r'^api/v1/auth/', include('djoser.urls')),
 ]
 
 
