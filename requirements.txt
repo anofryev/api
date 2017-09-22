@@ -27,6 +27,7 @@ git+git://github.com/Brogency/djangorestframework-camel-case@a6a448360941130678b
 
 ipdb
 ipdbplugin
+django-db-email-backend==0.3
 django-extensions==1.7.9
 ipython==6.1.0
 

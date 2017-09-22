@@ -35,6 +35,7 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG_EMAIL = os.environ.get('DEBUG_EMAIL', 'False') == 'True'
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
@@ -50,7 +51,9 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@skiniq.co")
 POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
 POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
 
-if POSTMARK_API_KEY:  # pragma: no cover
+if DEBUG_EMAIL:  # pragma: no cover
+    EMAIL_BACKEND = 'db_email_backend.backend.DBEmailBackend'  # pragma: no cover
+elif POSTMARK_API_KEY:  # pragma: no cover
     EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'  # pragma: no cover
     DEFAULT_FROM_EMAIL = POSTMARK_SENDER  # pragma: no cover
 else:
@@ -86,6 +89,8 @@ THIRD_PARTY_APPS = [
     'corsheaders',
 ]
 
+if DEBUG_EMAIL:
+    THIRD_PARTY_APPS.append('db_email_backend')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
