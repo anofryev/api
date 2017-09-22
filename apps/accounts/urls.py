@@ -1,11 +1,10 @@
 from django.conf.urls import url, include
-from rest_framework_jwt.views import (
-    obtain_jwt_token, refresh_jwt_token, verify_jwt_token)
+from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
 from rest_framework_nested import routers
 from djoser import views
 
 from .viewsets import PatientViewSet, PatientConsentViewSet
-from .views import current_user_view
+from .views import current_user_view, sites_view, obtain_jwt_token
 
 
 # This router mustn't have another viewsets because patient has nested routes
@@ -21,6 +20,7 @@ urlpatterns = [
     url(r'^', include(patient_router.urls)),
 
     url(r'^auth/current_user/$', current_user_view),
+    url(r'^auth/sites/$', sites_view),
 
     # JWT authentication
     url(r'^auth/login/$', obtain_jwt_token),
@@ -35,7 +35,7 @@ urlpatterns = [
         views.PasswordResetView.as_view(),
     ),
     url(
-        r'^auth.password/reset/confirm/$',
+        r'^auth/password/reset/confirm/$',
         views.PasswordResetConfirmView.as_view(),
     ),
 ]
