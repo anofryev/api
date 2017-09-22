@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='Staff status'
     )
     is_active = models.BooleanField(
-        default=False,
+        default=True,
         verbose_name='Active'
     )
     last_active = models.DateTimeField(

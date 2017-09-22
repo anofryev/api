@@ -22,6 +22,7 @@ class RegisterDoctorSerializer(UserSerializer):
             doctor.coordinator = site.site_coordinator
         else:
             doctor.approved_by_coordinator = True
+        doctor.is_active = False
         doctor.set_password(password)
         doctor.save()
         return doctor
