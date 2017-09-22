@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
+admin.site.site_header = 'SkinIQ administrative interface'
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

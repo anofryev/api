@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='Staff status'
     )
     is_active = models.BooleanField(
-        default=True,
+        default=False,
         verbose_name='Active'
     )
     last_active = models.DateTimeField(
@@ -76,3 +76,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.first_name
+
+    @property
+    def doctor_role__email(self):
+        return self.doctor_role.email
+
+    @staticmethod
+    def get_email_field_name():
+        return 'doctor_role__email'

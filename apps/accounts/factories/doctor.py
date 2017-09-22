@@ -6,6 +6,7 @@ from .user import UserFactory
 
 class DoctorFactory(UserFactory):
     email = Faker('email')
+    approved_by_coordinator = True
 
     class Meta:
         model = Doctor

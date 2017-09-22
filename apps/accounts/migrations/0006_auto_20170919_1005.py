@@ -12,7 +12,7 @@ import versatileimagefield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0006_add_site'),
+        ('accounts', '0005_add_coordinator_role'),
     ]
 
     operations = [

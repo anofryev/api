@@ -2,8 +2,39 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator
+from ..models import Doctor, Coordinator, Site
 from .user import UserSerializer
+
+
+class RegisterDoctorSerializer(UserSerializer):
+    site = serializers.PrimaryKeyRelatedField(
+        queryset=Site.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True)
+
+    def create(self, validated_data):
+        site = validated_data.pop('site', None)
+        password = validated_data.pop('password')
+        doctor = super(RegisterDoctorSerializer,
+                       self).create(validated_data)
+        if site:
+            doctor.coordinator = site.site_coordinator
+        else:
+            doctor.approved_by_coordinator = True
+        doctor.set_password(password)
+        doctor.save()
+        return doctor
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name',
+                  'email', 'password', 'site', )
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+            },
+        }
 
 
 class DoctorSerializer(UserSerializer):
@@ -14,8 +45,8 @@ class DoctorSerializer(UserSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('pk', 'first_name', 'last_name', 'email', 'degree',
-                  'department', 'photo', 'units_of_length', 'password',
+        fields = ('pk', 'first_name', 'last_name', 'email', 'password',
+                  'degree', 'department', 'photo', 'units_of_length',
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',

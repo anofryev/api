@@ -40,14 +40,21 @@ CORS_ORIGIN_ALLOW_ALL = DEBUG
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # EMAIL settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False') == 'True'
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_EMAIL_FROM', EMAIL_HOST_USER)
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == "True"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@skiniq.co")
 
+POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
+POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
+
+if POSTMARK_API_KEY:  # pragma: no cover
+    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'  # pragma: no cover
+    DEFAULT_FROM_EMAIL = POSTMARK_SENDER  # pragma: no cover
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # APP CONFIGURATION
 DJANGO_APPS = [
@@ -67,6 +74,7 @@ PROJECT_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'djoser',
     'storages',
     'versatileimagefield',
     'django_extensions',
@@ -80,6 +88,10 @@ THIRD_PARTY_APPS = [
 
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
+
+AUTHENTICATION_BACKENDS = [
+    'apps.accounts.authentication_backend.AuthenticationBackend',
+]
 
 # MIDDLEWARE CONFIGURATION
 MIDDLEWARE_CLASSES = [
@@ -275,6 +287,21 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 }
 
 VERSATILEIMAGEFIELD_USE_PLACEHOLDIT = True
+
+DJOSER = {
+    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'api.skiniq.co'),
+    'SITE_NAME': 'SkinIQ',
+    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
+        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
+        'web_ui/#/password/reset/confirm/{uid}/{token}'),
+    'ACTIVATION_URL': os.environ.get(
+        'DJOSER_ACTIVATION_URL',
+        'web_ui/#/activate/{uid}/{token}'),
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_registration': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',
+    },
+}
 
 
 # LOGGING SETTINGS
