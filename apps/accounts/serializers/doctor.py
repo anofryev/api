@@ -85,3 +85,11 @@ class DoctorSerializer(UserSerializer):
             instance.set_password(password)
 
         return super(DoctorSerializer, self).update(instance, validated_data)
+
+
+class DoctorRegistrationRequestSerializer(UserSerializer):
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name',
+                  'email', 'is_active',
+                  'approved_by_coordinator', )
