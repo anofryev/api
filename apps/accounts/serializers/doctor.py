@@ -19,7 +19,7 @@ class RegisterDoctorSerializer(UserSerializer):
         doctor = super(RegisterDoctorSerializer,
                        self).create(validated_data)
         if site:
-            doctor.coordinator = site.site_coordinator
+            doctor.my_coordinator = site.site_coordinator
         else:
             doctor.approved_by_coordinator = True
         doctor.is_active = False
