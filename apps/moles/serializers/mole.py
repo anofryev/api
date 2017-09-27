@@ -60,20 +60,24 @@ def validate(self, data):
 class MoleCreateSerializer(MoleSerializer):
     photo = VersatileImageFieldSerializer(
         sizes='main_set', required=True, write_only=True)
+    age = serializers.IntegerField(
+        required=False,
+        allow_null=True)
 
     class Meta(MoleSerializer.Meta):
         fields = ('anatomical_site', 'patient_anatomical_site',
-                  'position_info', 'photo', )
+                  'position_info', 'photo', 'age', )
 
     validate_position_info = validate_position_info
     validate = validate
 
     def create(self, validated_data):
         photo = validated_data.pop('photo')
+        age = validated_data.pop('age', None)
 
         mole = super(MoleCreateSerializer, self).create(validated_data)
 
-        MoleImage.objects.create(mole=mole, photo=photo)
+        MoleImage.objects.create(mole=mole, photo=photo, age=age)
 
         return mole
 
