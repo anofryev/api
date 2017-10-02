@@ -11,6 +11,23 @@ class Coordinator(models.Model):
         related_name='coordinator_role'
     )
 
+    def __str__(self):
+        return self.doctor_ptr.__str__()
+
     class Meta:
         verbose_name = 'Coordinator'
         verbose_name_plural = 'Coordinators'
+
+
+class Site(models.Model):
+    title = models.CharField(
+        max_length=120)
+
+    site_coordinator = models.OneToOneField(
+        Coordinator,
+        on_delete=models.CASCADE,
+        related_name='site'
+    )
+
+    def __str__(self):
+        return self.title

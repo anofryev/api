@@ -44,7 +44,7 @@ class PatientSerializer(serializers.ModelSerializer):
         encryption_keys = data.get('encryption_keys', {})
         if doctor.pk not in encryption_keys:
             raise serializers.ValidationError(
-                "Your  encrypted key is required"
+                "Your encrypted key is required"
             )
 
         if doctor.my_coordinator_id is not None \

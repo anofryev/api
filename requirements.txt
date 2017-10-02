@@ -14,9 +14,12 @@ djangorestframework-jwt==1.10.0
 djangorestframework==3.6.3
 drf-nested-routers==0.90.0
 django-cors-headers==2.1.0
+django-templated-mail==0.2.0
+djoser==0.7.0
 gunicorn==19.7.1
 psycopg2==2.7.1
 pytz==2017.2
+python-postmark==0.4.12
 raven==6.1.0
 redis==2.10.5
 requests==2.17.3
@@ -25,6 +28,7 @@ git+git://github.com/Brogency/djangorestframework-camel-case@a6a448360941130678b
 
 ipdb
 ipdbplugin
+django-db-email-backend==0.3
 django-extensions==1.7.9
 ipython==6.1.0
 
