@@ -29,7 +29,7 @@ class RegisterDoctorSerializer(UserSerializer):
 
     class Meta:
         model = Doctor
-        fields = ('pk', 'first_name', 'last_name',
+        fields = ('pk', 'date_created', 'first_name', 'last_name',
                   'email', 'password', 'site', )
         extra_kwargs = {
             'password': {

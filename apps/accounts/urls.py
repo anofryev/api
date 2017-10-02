@@ -5,7 +5,8 @@ from djoser import views
 
 from .viewsets import (PatientViewSet, PatientConsentViewSet,
                        DoctorRegistrationRequestViewSet, )
-from .views import current_user_view, sites_view, obtain_jwt_token
+from .views import (current_user_view, sites_view, obtain_jwt_token,
+                    registration_view, reset_confirmation_view)
 
 
 # This router mustn't have another viewsets because patient has nested routes
@@ -34,7 +35,7 @@ urlpatterns = [
     url(r'^auth/token-verify/$', verify_jwt_token),
 
     # Registration
-    url(r'^auth/register/$', views.RegistrationView.as_view()),
+    url(r'^auth/register/$', registration_view),
     url(r'^auth/activate/$', views.ActivationView.as_view()),
     url(
         r'^auth/password/reset/$',
@@ -42,6 +43,6 @@ urlpatterns = [
     ),
     url(
         r'^auth/password/reset/confirm/$',
-        views.PasswordResetConfirmView.as_view(),
+        reset_confirmation_view,
     ),
 ]
