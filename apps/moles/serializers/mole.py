@@ -20,7 +20,11 @@ class MoleListSerializer(MoleSerializer):
     last_image = MoleImageSerializer(read_only=True)
     images_count = serializers.IntegerField(
         source='images.count', read_only=True)
-    images_with_diagnose_required = serializers.IntegerField(
+    images_with_pathological_diagnosis_required = serializers.IntegerField(
+        read_only=True)
+    images_with_clinical_diagnosis_required = serializers.IntegerField(
+        read_only=True)
+    images_biopsy_count = serializers.IntegerField(
         read_only=True)
     images_approve_required = serializers.IntegerField(
         read_only=True)
@@ -28,7 +32,10 @@ class MoleListSerializer(MoleSerializer):
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'last_image', 'images_count',
                   'position_info', 'patient_anatomical_site',
-                  'images_with_diagnose_required', 'images_approve_required', )
+                  'images_with_clinical_diagnosis_required',
+                  'images_with_pathological_diagnosis_required',
+                  'images_biopsy_count',
+                  'images_approve_required', )
 
 
 class MoleDetailSerializer(MoleSerializer):
