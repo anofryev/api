@@ -18,16 +18,5 @@ class PatientFilter(FilterSet):
         """
         Filters list of patient which have `biopsy` and empty `path_diagnosis`
         """
-        return qs.annotate(
-            mole_images_with_path_pending=Count(
-                Case(
-                    When(
-                        moles__images__biopsy=True,
-                        moles__images__path_diagnosis__exact='',
-                        then=F('moles__images__pk')
-                    ),
-                    default=None
-                ),
-                distinct=True
-            )
-        ).filter(mole_images_with_path_pending__gt=0)
+        return qs.filter(
+            moles_images_with_pathological_diagnosis_required__gt=0)

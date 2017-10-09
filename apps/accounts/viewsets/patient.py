@@ -26,35 +26,15 @@ class PatientViewSet(viewsets.GenericViewSet,
         return self.serializer_class
 
     def get_queryset(self):
-        qs = super(PatientViewSet, self).get_queryset()
-
-        qs = qs.annotate_last_upload().annotate_moles_images_count()
-        qs = qs.annotate(
-            mole_images_with_diagnose_required=Count(
-                Case(
-                    When(
-                        Q(moles__images__path_diagnosis__exact='')
-                        or Q(moles__images__clinical_diagnosis__exact=''),
-                        then=F('moles__images__pk')
-                    ),
-                    default=None
-                ),
-                distinct=True
-            )
-        )
-        qs = qs.annotate(
-            mole_images_approve_required=Count(
-                Case(
-                    When(moles__images__approved__exact=False,
-                         then=F('moles__images__pk')),
-                    default=None
-                ),
-                distinct=True
-            )
-        )
-        qs = qs.filter(doctors=self.request.user.doctor_role)
-
-        return qs
+        return super(PatientViewSet, self)\
+            .get_queryset()\
+            .annotate_last_upload()\
+            .annotate_moles_images_count()\
+            .annotate_clinical_diagnosis_required()\
+            .annotate_pathological_diagnosis_required()\
+            .annotate_biopsy_count()\
+            .annotate_approve_required()\
+            .filter(doctors=self.request.user.doctor_role)
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):

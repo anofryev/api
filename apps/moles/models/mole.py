@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, Count, Case, When, Q, F
 from django.contrib.postgres.fields import JSONField
 
 from apps.accounts.models import Patient
@@ -10,6 +10,61 @@ from .patient_anatomical_site import PatientAnatomicalSite
 class MoleQuerySet(models.QuerySet):
     def annotate_last_upload(self):
         return self.annotate(last_upload=Max('images__date_created'))
+
+    def annotate_clinical_diagnosis_required(self):
+        return self.annotate(
+            images_with_clinical_diagnosis_required=Count(
+                Case(
+                    When(
+                        Q(images__clinical_diagnosis__exact=''),
+                        then=F('images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_pathological_diagnosis_required(self):
+        return self.annotate(
+            images_with_pathological_diagnosis_required=Count(
+                Case(
+                    When(
+                        images__biopsy=True,
+                        images__path_diagnosis__exact='',
+                        then=F('images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_biopsy_count(self):
+        return self.annotate(
+            images_biopsy_count=Count(
+                Case(
+                    When(
+                        images__biopsy=True,
+                        then=F('images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_approve_required(self):
+        return self.annotate(
+            images_approve_required=Count(
+                Case(
+                    When(images__approved__exact=False,
+                         then=F('images__pk')),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
 
 
 class Mole(models.Model):

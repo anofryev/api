@@ -21,23 +21,29 @@ class PatientSerializer(serializers.ModelSerializer):
     encryption_keys = IntDict(child=serializers.CharField(), write_only=True)
 
     # Fields from aggregation
-    last_upload = serializers.DateTimeField(read_only=True)
     moles_count = serializers.SerializerMethodField()
     moles_images_count = serializers.IntegerField(read_only=True)
-    mole_images_with_diagnose_required = serializers.IntegerField(
+    last_upload = serializers.DateTimeField(read_only=True)
+    moles_images_with_clinical_diagnosis_required = serializers.IntegerField(
         read_only=True)
-    mole_images_approve_required = serializers.IntegerField(
+    moles_images_with_pathological_diagnosis_required =\
+        serializers.IntegerField(read_only=True)
+    moles_images_biopsy_count = serializers.IntegerField(read_only=True)
+    moles_images_approve_required = serializers.IntegerField(
         read_only=True)
 
     class Meta:
         model = Patient
         fields = ('pk', 'first_name', 'last_name', 'mrn',
                   'date_of_birth', 'mrn_hash', 'valid_consent',
-                  'sex', 'race', 'photo', 'last_upload',
+                  'sex', 'race', 'photo',
+                  'encrypted_key', 'encryption_keys', 'doctors',
                   'moles_count',
-                  'moles_images_count', 'mole_images_with_diagnose_required',
-                  'mole_images_approve_required',
-                  'encrypted_key', 'encryption_keys', 'doctors', )
+                  'moles_images_count', 'last_upload',
+                  'moles_images_with_clinical_diagnosis_required',
+                  'moles_images_with_pathological_diagnosis_required',
+                  'moles_images_biopsy_count',
+                  'moles_images_approve_required', )
 
     def validate(self, data):
         doctor = self.context['request'].user.doctor_role

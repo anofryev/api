@@ -23,36 +23,16 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     )
 
     def get_queryset(self):
-        qs = super(MoleViewSet, self).get_queryset()
-        qs = qs.prefetch_related('images')
-
-        qs = qs.annotate_last_upload().order_by(
-            '-last_upload')
-        qs = qs.annotate(
-            images_with_diagnose_required=Count(
-                Case(
-                    When(
-                        Q(images__path_diagnosis__exact='')
-                        or Q(images__clinical_diagnosis__exact=''),
-                        then=F('images__pk')
-                    ),
-                    default=None
-                ),
-                distinct=True
-            )
-        )
-        qs = qs.annotate(
-            images_approve_required=Count(
-                Case(
-                    When(images__approved__exact=False,
-                         then=F('images__pk')),
-                    default=None
-                ),
-                distinct=True
-            )
-        )
-
-        return qs.filter(patient=self.get_patient_pk())
+        return super(MoleViewSet, self)\
+            .get_queryset()\
+            .prefetch_related('images')\
+            .annotate_last_upload()\
+            .annotate_clinical_diagnosis_required()\
+            .annotate_pathological_diagnosis_required()\
+            .annotate_biopsy_count()\
+            .annotate_approve_required()\
+            .filter(patient=self.get_patient_pk())\
+            .order_by('-last_upload')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

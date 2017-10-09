@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Case, When, Q, F
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
@@ -23,6 +23,61 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_last_upload(self):
         return self.annotate(
             last_upload=Max('moles__images__date_created'))
+
+    def annotate_clinical_diagnosis_required(self):
+        return self.annotate(
+            moles_images_with_clinical_diagnosis_required=Count(
+                Case(
+                    When(
+                        Q(moles__images__clinical_diagnosis__exact=''),
+                        then=F('moles__images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_pathological_diagnosis_required(self):
+        return self.annotate(
+            moles_images_with_pathological_diagnosis_required=Count(
+                Case(
+                    When(
+                        moles__images__biopsy=True,
+                        moles__images__path_diagnosis__exact='',
+                        then=F('moles__images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_biopsy_count(self):
+        return self.annotate(
+            moles_images_biopsy_count=Count(
+                Case(
+                    When(
+                        moles__images__biopsy=True,
+                        then=F('moles__images__pk')
+                    ),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
+
+    def annotate_approve_required(self):
+        return self.annotate(
+            moles_images_approve_required=Count(
+                Case(
+                    When(moles__images__approved__exact=False,
+                         then=F('moles__images__pk')),
+                    default=None
+                ),
+                distinct=True
+            )
+        )
 
 
 class Patient(models.Model):
