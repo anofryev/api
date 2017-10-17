@@ -4,7 +4,7 @@ from rest_framework_nested import routers
 from djoser import views
 
 from .viewsets import (PatientViewSet, PatientConsentViewSet,
-                       DoctorRegistrationRequestViewSet, )
+                       SiteJoinRequestViewSet, )
 from .views import (current_user_view, sites_view, obtain_jwt_token,
                     registration_view, reset_confirmation_view)
 
@@ -18,8 +18,8 @@ patient_router = routers.NestedSimpleRouter(
 patient_router.register('consent', PatientConsentViewSet)
 
 router_for_doctors = routers.SimpleRouter()
-router_for_doctors.register('doctors_registration_requests',
-                            DoctorRegistrationRequestViewSet)
+router_for_doctors.register('site_join_requests',
+                            SiteJoinRequestViewSet)
 
 urlpatterns = [
     url(r'^', include(router_for_patients.urls)),

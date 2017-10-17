@@ -6,10 +6,8 @@ from django.utils.text import slugify
 from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
-from skiniq.utils import get_timestamp
 from apps.main.storages import private_storage
 from apps.main.models.mixins import DelayedSaveFilesMixin
-from .user import User
 from .doctor import Doctor
 from .upload_paths import patient_photo_path
 from .enums import SexEnum, RaceEnum

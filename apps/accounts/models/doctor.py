@@ -61,9 +61,6 @@ class Doctor(DelayedSaveFilesMixin, User):
         blank=True, null=True,
         related_name='doctors'
     )
-    approved_by_coordinator = models.BooleanField(
-        default=False
-    )
 
     class Meta:
         verbose_name = 'Doctor'

@@ -87,16 +87,14 @@ THIRD_PARTY_APPS = [
     'constance.backends.database',
     'raven.contrib.django.raven_compat',
     'corsheaders',
+    'fsm_admin',
+    'django_fsm_log',
 ]
 
 if DEBUG_EMAIL:
     THIRD_PARTY_APPS.append('db_email_backend')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
-
-AUTHENTICATION_BACKENDS = [
-    'apps.accounts.authentication_backend.AuthenticationBackend',
-]
 
 # MIDDLEWARE CONFIGURATION
 MIDDLEWARE_CLASSES = [
@@ -381,3 +379,5 @@ CONSTANCE_CONFIG = {
         30,
         'The number of days the consent is considered as valid'),
 }
+
+FSM_ADMIN_FORCE_PERMIT = True

@@ -1,3 +1,3 @@
 from .patient import PatientViewSet
 from .patient_consent import PatientConsentViewSet
-from .doctors import DoctorRegistrationRequestViewSet
+from .site_join_request import SiteJoinRequestViewSet

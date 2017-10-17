@@ -14,14 +14,3 @@
 
 {% blocktrans %}The {{ site_name }} team{% endblocktrans %}
 {% endblock text_body %}
-
-{% block html_body %}
-{% blocktrans %}You're receiving this email because you need to confirm or reject registration of {{ doctor }}.{% endblocktrans %}
-
-{% trans "Please go to the following page to procceed:" %}
-{{ protocol }}://{{ url }}
-
-{% trans "Thanks for using our site!" %}
-
-{% blocktrans %}The {{ site_name }} team{% endblocktrans %}
-{% endblock html_body %}

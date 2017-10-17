@@ -31,3 +31,8 @@ class Site(models.Model):
 
     def __str__(self):
         return self.title
+
+
+def is_coordinator(user):
+    return Coordinator.objects.filter(
+        doctor_ptr_id=user).first()

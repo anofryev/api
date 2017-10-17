@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator, Site
+from ..models import Doctor, Coordinator, SiteJoinRequest, Site
 from .user import UserSerializer
 
 
@@ -18,13 +18,12 @@ class RegisterDoctorSerializer(UserSerializer):
         password = validated_data.pop('password')
         doctor = super(RegisterDoctorSerializer,
                        self).create(validated_data)
-        if site:
-            doctor.my_coordinator = site.site_coordinator
-        else:
-            doctor.approved_by_coordinator = True
         doctor.is_active = False
         doctor.set_password(password)
         doctor.save()
+        if site:
+            SiteJoinRequest.objects.create(
+                doctor=doctor, site=site)
         return doctor
 
     class Meta:
@@ -87,9 +86,20 @@ class DoctorSerializer(UserSerializer):
         return super(DoctorSerializer, self).update(instance, validated_data)
 
 
-class DoctorRegistrationRequestSerializer(UserSerializer):
+class CreateSiteJoinRequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Doctor
-        fields = ('pk', 'first_name', 'last_name',
-                  'email', 'is_active',
-                  'approved_by_coordinator', )
+        model = SiteJoinRequest
+        fields = ('pk', 'site', )
+
+    def create(self, validated_data):
+        validated_data['doctor_id'] = self.context['request'].user.id
+        return super(CreateSiteJoinRequestSerializer,
+                     self).create(validated_data)
+
+
+class SiteJoinRequestSerializer(serializers.ModelSerializer):
+    doctor = DoctorSerializer()
+
+    class Meta:
+        model = SiteJoinRequest
+        fields = ('pk', 'doctor', 'state', )
