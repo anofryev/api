@@ -302,7 +302,7 @@ DJOSER = {
         'web_ui/#/activate/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
-        'user_registration': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',
+        'user_create': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',
     },
 }
 

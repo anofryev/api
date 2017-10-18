@@ -2,9 +2,8 @@ from factory import Faker
 from apps.main.tests import APITestCase
 
 from ...factories import SiteFactory, UserFactory
-from ...models import (
-    User, Coordinator, Doctor, SiteJoinRequest,
-    SiteJoinRequest, JoinStateEnum, )
+from ...models import (User, Coordinator,
+                       SiteJoinRequest, JoinStateEnum, )
 
 
 class RegistrationTest(APITestCase):
