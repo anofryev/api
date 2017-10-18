@@ -2,7 +2,9 @@ from factory import Faker
 from apps.main.tests import APITestCase
 
 from ...factories import SiteFactory, UserFactory
-from ...models import User, Coordinator, Doctor
+from ...models import (
+    User, Coordinator, Doctor, SiteJoinRequest,
+    SiteJoinRequest, JoinStateEnum, )
 
 
 class RegistrationTest(APITestCase):
@@ -68,12 +70,11 @@ class RegistrationTest(APITestCase):
 
         # Activating user
         User.objects.filter(id=resp.data['pk']).update(is_active=True)
-
-        self.assertCanNotLogin(credentials)
-
-        # Approving user
-        Doctor.objects.filter(id=resp.data['pk']).update(
-            approved_by_coordinator=True)
+        self.assertTrue(
+            SiteJoinRequest.objects.filter(
+                state=JoinStateEnum.NEW,
+                doctor_id=resp.data['pk'],
+                site=self.site).exists())
 
         self.assertCanLogin(credentials)
 

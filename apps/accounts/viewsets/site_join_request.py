@@ -20,6 +20,7 @@ class SiteJoinRequestViewSet(
         C(IsCoordinator) | C(IsDoctor),
     )
     queryset = SiteJoinRequest.objects.none()
+    filter_fields = ('state', )
 
     def get_serializer_class(self):
         if self.action == 'create':

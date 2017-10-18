@@ -4,4 +4,4 @@ from .coordinator import Coordinator, Site
 from .patient import Patient, DoctorToPatient
 from .patient_consent import PatientConsent
 from .enums import SexEnum, RaceEnum, UnitsOfLengthEnum
-from .site_join_request import SiteJoinRequest
+from .site_join_request import SiteJoinRequest, JoinStateEnum
