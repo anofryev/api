@@ -5,7 +5,8 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer, ValidationError
 
-from django_fsm import can_proceed, has_transition_perm, FSMFieldMixin
+from django_fsm import (
+    can_proceed, has_transition_perm, FSMFieldMixin, TransitionNotAllowed, )
 
 
 def add_transition_actions(Klass):
@@ -33,7 +34,10 @@ def add_transition_actions(Klass):
                 transition = getattr(obj, name)
                 if can_proceed(transition) and\
                    has_transition_perm(transition, request.user):
-                    transition(**args.validated_data)
+                    try:
+                        transition(**args.validated_data)
+                    except TransitionNotAllowed as err:
+                        raise ValidationError(str(err))
                     obj.save()
                     return Response()
                 else:

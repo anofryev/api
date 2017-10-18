@@ -1,5 +1,10 @@
 from funcy import walk_keys
+
+from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from django_fsm import FSMIntegerField, transition, TransitionNotAllowed
 from rest_framework import serializers
 
@@ -8,6 +13,17 @@ from templated_mail.mail import BaseEmailMessage
 from .coordinator import is_coordinator
 from .patient import DoctorToPatient
 from .doctor import Doctor
+
+
+class CoordinatorRegistrationNotification(BaseEmailMessage):
+    template_name = 'email/coordnator_notification.html'
+
+    def get_context_data(self):
+        context = super(CoordinatorRegistrationNotification,
+                        self).get_context_data()
+        context['url'] = "{}#/doctor-registration-requests".format(
+            settings.DJOSER['DOMAIN'])
+        return context
 
 
 class CoordinatorApprovedEmail(BaseEmailMessage):
@@ -54,7 +70,7 @@ class SiteJoinRequest(models.Model):
     approved -> site coordinator approved joining
     confirmed -> doctor confirmed joining and shared all patients
     """
-    state = FSMIntegerField(default=JoinStateEnum.NEW, protected=True)
+    state = FSMIntegerField(default=JoinStateEnum.NEW)
     doctor = models.ForeignKey('accounts.Doctor')
     site = models.ForeignKey('accounts.Site')
 
@@ -119,3 +135,15 @@ class SiteJoinRequest(models.Model):
             'site_title': self.site.title,
             'doctor': self.doctor
         }).send([Doctor.objects.get(id=self.site.site_coordinator_id).email])
+
+
+@receiver(post_save, sender=SiteJoinRequest)
+def notify_coordinator(sender, instance, created, **kwargs):
+    if created and instance.state == JoinStateEnum.NEW:
+        doctor = instance.doctor
+        to = [Doctor.objects.get(id=instance.site.site_coordinator_id).email]
+
+        CoordinatorRegistrationNotification(
+            context={'doctor': "{0} {1}".format(
+                     doctor.first_name,
+                     doctor.last_name)}).send(to)

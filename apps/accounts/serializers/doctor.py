@@ -84,22 +84,3 @@ class DoctorSerializer(UserSerializer):
             instance.set_password(password)
 
         return super(DoctorSerializer, self).update(instance, validated_data)
-
-
-class CreateSiteJoinRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SiteJoinRequest
-        fields = ('pk', 'site', )
-
-    def create(self, validated_data):
-        validated_data['doctor_id'] = self.context['request'].user.id
-        return super(CreateSiteJoinRequestSerializer,
-                     self).create(validated_data)
-
-
-class SiteJoinRequestSerializer(serializers.ModelSerializer):
-    doctor = DoctorSerializer()
-
-    class Meta:
-        model = SiteJoinRequest
-        fields = ('pk', 'doctor', 'state', )

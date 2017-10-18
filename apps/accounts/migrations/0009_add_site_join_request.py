@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='SiteJoinRequest',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('state', django_fsm.FSMIntegerField(default=0, protected=True)),
+                ('state', django_fsm.FSMIntegerField(default=0)),
             ],
         ),
         migrations.RemoveField(

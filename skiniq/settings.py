@@ -91,8 +91,8 @@ THIRD_PARTY_APPS = [
     'django_fsm_log',
 ]
 
-if DEBUG_EMAIL:
-    THIRD_PARTY_APPS.append('db_email_backend')
+if DEBUG_EMAIL:  # pragma: no cover
+    THIRD_PARTY_APPS.append('db_email_backend')  # pragma: no cover
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 

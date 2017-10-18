@@ -32,16 +32,17 @@ class APITestCase(FileTestMixin, BaseAPITestCase):
     def assertNotFound(self, resp):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    def get_token(self):
+    def get_token(self, doctor=None):
+        doctor = doctor or self.doctor
         resp = self.client.post('/api/v1/auth/login/', {
-            'username': self.doctor.username,
+            'username': doctor.username,
             'password': 'password',
         })
         self.assertSuccessResponse(resp)
         return resp.data['token']
 
-    def authenticate_as_doctor(self):
-        token = self.get_token()
+    def authenticate_as_doctor(self, doctor=None):
+        token = self.get_token(doctor)
         self.client.credentials(
             HTTP_AUTHORIZATION='JWT {0}'.format(token)
         )
