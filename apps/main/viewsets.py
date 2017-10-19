@@ -39,7 +39,7 @@ def add_transition_actions(Klass):
                     except TransitionNotAllowed as err:
                         raise ValidationError(str(err))
                     obj.save()
-                    return Response()
+                    return Response(status=204)
                 else:
                     raise ValidationError(
                         "You cant perform '{}' transition".format(name))

@@ -29,4 +29,4 @@ class SiteJoinRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SiteJoinRequest
-        fields = ('pk', 'doctor', 'state', )
+        fields = ('pk', 'doctor', 'state', 'date_created', 'date_modified', )

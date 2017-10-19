@@ -70,6 +70,8 @@ class SiteJoinRequest(models.Model):
     approved -> site coordinator approved joining
     confirmed -> doctor confirmed joining and shared all patients
     """
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     state = FSMIntegerField(default=JoinStateEnum.NEW)
     doctor = models.ForeignKey('accounts.Doctor')
     site = models.ForeignKey('accounts.Site')

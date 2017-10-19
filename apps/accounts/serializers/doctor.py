@@ -50,7 +50,7 @@ class DoctorSerializer(UserSerializer):
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',
-                  'is_coordinator',)
+                  'is_coordinator', 'date_created',)
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -58,6 +58,9 @@ class DoctorSerializer(UserSerializer):
             },
             'private_key': {
                 'allow_blank': True,
+            },
+            'date_created': {
+                'read_only': True,
             },
         }
 
