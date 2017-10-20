@@ -30,9 +30,11 @@ class SiteJoinRequestViewSet(
     def get_queryset(self):
         doctor = self.request.user.doctor_role
         coordinator = is_coordinator(doctor)
+        qs = SiteJoinRequest.objects.prefetch_related(
+            'doctor', 'site')
         if coordinator:
-            return SiteJoinRequest.objects.filter(
+            return qs.filter(
                 site=coordinator.site)
-        return SiteJoinRequest.objects.filter(
+        return qs.filter(
             doctor=doctor
         )

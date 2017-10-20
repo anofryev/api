@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import SiteJoinRequest
+from ..models import SiteJoinRequest, Doctor
 from .doctor import DoctorSerializer
 
 
@@ -26,7 +26,14 @@ class CreateSiteJoinRequestSerializer(serializers.ModelSerializer):
 
 class SiteJoinRequestSerializer(serializers.ModelSerializer):
     doctor = DoctorSerializer()
+    site_title = serializers.CharField(source='site.title')
+    coordinator_public_key = serializers.SerializerMethodField()
+
+    def get_coordinator_public_key(self, obj):
+        return Doctor.objects.get(
+            id=obj.site.site_coordinator_id).public_key
 
     class Meta:
         model = SiteJoinRequest
-        fields = ('pk', 'doctor', 'state', 'date_created', 'date_modified', )
+        fields = ('pk', 'doctor', 'state', 'coordinator_public_key',
+                  'date_created', 'date_modified', 'site_title', )
