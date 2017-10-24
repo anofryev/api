@@ -70,7 +70,6 @@ class SiteJoinRequestTest(APITestCase):
         self.assertEqual(self.doctor.my_coordinator_id,
                          jr.site.site_coordinator_id)
 
-
     def test_that_coordinator_can_reject(self):
         jr = SiteJoinRequest.objects.create(
             doctor=self.doctor,
