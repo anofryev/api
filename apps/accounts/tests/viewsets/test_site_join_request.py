@@ -106,6 +106,20 @@ class SiteJoinRequestTest(APITestCase):
             '/api/v1/site_join_requests/{0}/reject/'.format(jr.id))
         self.assertBadRequest(resp)
 
+    def test_that_doctor_can_get_coordinator_public_key(self):
+        SiteJoinRequest.objects.create(
+            doctor=self.doctor,
+            site=self.site,
+            state=JoinStateEnum.APPROVED)
+
+        self.authenticate_as_doctor()
+
+        resp = self.client.get(
+            '/api/v1/site_join_requests/')
+
+        self.assertSuccessResponse(resp)
+        self.assertTrue('coordinator_public_key' in resp.data[0])
+
     def test_doctor_without_patinets_can_confirm_joining(self):
         jr = SiteJoinRequest.objects.create(
             doctor=self.doctor,
@@ -124,7 +138,6 @@ class SiteJoinRequestTest(APITestCase):
         self.doctor.refresh_from_db()
         self.assertEqual(self.doctor.my_coordinator_id,
                          jr.site.site_coordinator_id)
-
 
     def test_doctor_with_patinets_can_confirm_joining(self):
         for _index in range(random.randint(1, 10)):

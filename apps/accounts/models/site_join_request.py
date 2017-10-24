@@ -17,46 +17,45 @@ from .patient import DoctorToPatient
 from .doctor import Doctor
 
 
-class GetProtocolFromSettings:
+class GetProtocolFromSettingsMixin:
     def get_context_data(self):
-        context = super(GetProtocolFromSettings,
+        context = super(GetProtocolFromSettingsMixin,
                         self).get_context_data()
         context['protocol'] = settings.PROTOCOL
         return context
 
 
-class CoordinatorRegistrationNotification(BaseEmailMessage,
-                                          GetProtocolFromSettings):
+class CoordinatorRegistrationNotification(GetProtocolFromSettingsMixin,
+                                          BaseEmailMessage):
     template_name = 'email/coordnator_notification.html'
 
     def get_context_data(self):
         context = super(CoordinatorRegistrationNotification,
                         self).get_context_data()
-        context['url'] = "{}#/doctor-registration-requests".format(
-            settings.DOMAIN)
+        context['url'] = "{}://{}#/doctor-registration-requests".format(
+            context['protocol'], settings.DOMAIN)
         return context
 
 
-class CoordinatorApprovedEmail(BaseEmailMessage,
-                               GetProtocolFromSettings):
+class CoordinatorApprovedEmail(BaseEmailMessage):
     template_name = 'email/you_was_approved.html'
 
 
-class CoordinatorRejectedEmail(BaseEmailMessage,
-                               GetProtocolFromSettings):
+class CoordinatorRejectedEmail(BaseEmailMessage):
     template_name = 'email/you_was_rejected.html'
 
 
-class DoctorSharedPatientsEmail(BaseEmailMessage,
-                                GetProtocolFromSettings):
+class DoctorSharedPatientsEmail(GetProtocolFromSettingsMixin,
+                                BaseEmailMessage):
     template_name = 'email/doctor_shared_patients.html'
 
     def get_context_data(self):
         context = super(DoctorSharedPatientsEmail,
                         self).get_context_data()
-        context['url'] = "{}#/".format(
-            settings.DOMAIN)
+        context['url'] = "{}://{}#/".format(
+            context['protocol'], settings.DOMAIN)
         return context
+
 
 class ConfirmArgsSerializer(serializers.Serializer):
     encrypted_keys = serializers.DictField(child=serializers.CharField())

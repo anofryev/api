@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from apps.main.tests import patch
+from apps.accounts.factories import CoordinatorFactory
 from ...factories import MoleImageFactory
 from ...models import MoleImage
 from ..moles_test_case import MolesTestCase
@@ -169,3 +170,45 @@ class MoleImageViewSetTest(MolesTestCase):
             self.first_patient_mole.pk,
             first_patient_mole_image.pk))
         self.assertNotAllowed(resp)
+
+
+    @patch('apps.moles.tasks.requests')
+    def test_that_doctor_cant_change_approved_field(self, mock_requests):
+        mole_image = MoleImageFactory.create(
+            approved=False,
+            mole=self.first_patient_mole)
+
+        mole_image_data = {
+            'approved': True,
+        }
+
+        self.authenticate_as_doctor()
+        resp = self.client.patch(
+            self.get_url(
+                self.first_patient.pk, self.first_patient_mole.pk,
+                mole_image.pk),
+            mole_image_data)
+        self.assertBadRequest(resp)
+
+    @patch('apps.moles.tasks.requests')
+    def test_that_coordinator_can_change_approved_field(self, mock_requests):
+        mole_image = MoleImageFactory.create(
+            approved=False,
+            mole=self.first_patient_mole)
+
+        mole_image_data = {
+            'approved': True,
+        }
+
+        CoordinatorFactory.create(doctor_ptr=self.doctor)
+
+        self.authenticate_as_doctor()
+        resp = self.client.patch(
+            self.get_url(
+                self.first_patient.pk, self.first_patient_mole.pk,
+                mole_image.pk),
+            mole_image_data)
+        self.assertSuccessResponse(resp)
+
+        mole_image.refresh_from_db()
+        self.assertTrue(mole_image.approved)

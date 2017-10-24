@@ -81,3 +81,4 @@ class CompositePermissionTestCase(TestCase):
             mock.Mock(), mock.Mock()))
         self.assertTrue(permission_class().has_object_permission(
             mock.Mock(), mock.Mock(), mock.Mock()))
+

@@ -192,10 +192,10 @@ class PatientViewSetTest(APITestCase):
         self.assertEqual(patient.race, patient_data['race'])
         self.assertEqual(
             str(patient.date_of_birth), patient_data['date_of_birth'])
-        # self.assertTrue(
-        #     patient.photo.name.startswith(
-        #         'users/{0}/profile_picture/{0}_profile_pic_'.format(
-        #             patient.pk)))
+        self.assertTrue(
+            patient.photo.name.startswith(
+                'patients/{0}/profile_picture/{0}_profile_pic_'.format(
+                    patient.pk)))
         self.assertEqual(patient.mrn, '1234567')
         self.assertEqual(patient.mrn_hash, '1q2w3e4r')
 
@@ -221,6 +221,34 @@ class PatientViewSetTest(APITestCase):
             'mrn': '1234567',
             'mrn_hash': '1q2w3e4r',
             'photo': self.get_sample_image_file(),
+        }
+
+        with self.fake_media():
+            resp = self.client.patch(
+                '/api/v1/patient/{0}/'.format(patient.pk),
+                patient_data)
+
+        self.assertBadRequest(resp)
+
+    def test_encrypted_keys_are_requred_for_all_doctors_to_update_patient(self):
+        self.authenticate_as_doctor()
+
+        patient = PatientFactory.create(doctor=self.doctor)
+        DoctorToPatient.objects.create(
+            patient=patient,
+            doctor=DoctorFactory.create(),
+            encrypted_key='secret key')
+
+        patient_data = {
+            'first_name': 'first name',
+            'last_name': 'first name',
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.BLACK_OR_AFRICAN_AMERICAN,
+            'date_of_birth': '1990-01-01',
+            'mrn': '1234567',
+            'mrn_hash': '1q2w3e4r',
+            'photo': self.get_sample_image_file(),
+            'encryption_keys': json.dumps({self.doctor.pk: 'some new key'}),
         }
 
         with self.fake_media():
