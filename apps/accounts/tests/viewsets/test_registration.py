@@ -1,8 +1,10 @@
 from factory import Faker
-from apps.main.tests import APITestCase
+from django.test import mock
+from apps.main.tests import APITestCase, patch
 
-from ...factories import SiteFactory, UserFactory
-from ...models import User, Coordinator, Doctor
+from ...factories import SiteFactory, UserFactory, DoctorFactory
+from ...models import (User, Coordinator,
+                       SiteJoinRequest, JoinStateEnum, )
 
 
 class RegistrationTest(APITestCase):
@@ -48,7 +50,8 @@ class RegistrationTest(APITestCase):
 
         self.assertCanLogin(credentials)
 
-    def test_that_doctor_can_register_as_part_of_the_group(self):
+    @patch('apps.accounts.models.site_join_request.CoordinatorRegistrationNotification.send')
+    def test_that_doctor_can_register_as_part_of_the_group(self, sendEmailMock):
         data = {
             'first_name': Faker('first_name').generate({}),
             'last_name': Faker('last_name').generate({}),
@@ -58,6 +61,7 @@ class RegistrationTest(APITestCase):
         }
         resp = self.client.post('/api/v1/auth/register/', data)
         self.assertSuccessResponse(resp)
+        sendEmailMock.assert_called_once()
 
         credentials = {
             'username': data['email'],
@@ -68,12 +72,11 @@ class RegistrationTest(APITestCase):
 
         # Activating user
         User.objects.filter(id=resp.data['pk']).update(is_active=True)
-
-        self.assertCanNotLogin(credentials)
-
-        # Approving user
-        Doctor.objects.filter(id=resp.data['pk']).update(
-            approved_by_coordinator=True)
+        self.assertTrue(
+            SiteJoinRequest.objects.filter(
+                state=JoinStateEnum.NEW,
+                doctor_id=resp.data['pk'],
+                site=self.site).exists())
 
         self.assertCanLogin(credentials)
 
@@ -82,3 +85,29 @@ class RegistrationTest(APITestCase):
         user = UserFactory.create(is_staff=True, password=password)
         self.assertTrue(
             self.client.login(username=user.username, password=password))
+
+    def test_that_private_key_clean_after_password_reset(self):
+        doctor = DoctorFactory.create(private_key='private key')
+        new_password = Faker('password').generate({})
+
+        def validate(self, data):
+            self.user = doctor.user_ptr
+            return data
+
+        with patch('djoser.serializers.UidAndTokenSerializer.validate',
+                   new=validate, autospec=False),\
+            patch('djoser.serializers.UidAndTokenSerializer.validate_uid',
+                  new=lambda self, value: value, autospec=False):
+            resp = self.client.post(
+                '/api/v1/auth/password/reset/confirm/',
+                {
+                    'uid': 'uid',
+                    'token': 'token',
+                    'new_password': new_password,
+                })
+            self.assertSuccessResponse(resp)
+
+        doctor.refresh_from_db()
+        self.assertEqual(doctor.private_key, '')
+        self.assertCanLogin({'username': doctor.username,
+                             'password': new_password})

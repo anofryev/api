@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator, Site
+from ..models import Doctor, Coordinator, SiteJoinRequest, Site
 from .user import UserSerializer
 
 
@@ -18,13 +18,12 @@ class RegisterDoctorSerializer(UserSerializer):
         password = validated_data.pop('password')
         doctor = super(RegisterDoctorSerializer,
                        self).create(validated_data)
-        if site:
-            doctor.my_coordinator = site.site_coordinator
-        else:
-            doctor.approved_by_coordinator = True
         doctor.is_active = False
         doctor.set_password(password)
         doctor.save()
+        if site:
+            SiteJoinRequest.objects.create(
+                doctor=doctor, site=site)
         return doctor
 
     class Meta:
@@ -51,7 +50,7 @@ class DoctorSerializer(UserSerializer):
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',
-                  'is_coordinator',)
+                  'is_coordinator', 'date_created',)
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -59,6 +58,9 @@ class DoctorSerializer(UserSerializer):
             },
             'private_key': {
                 'allow_blank': True,
+            },
+            'date_created': {
+                'read_only': True,
             },
         }
 
@@ -85,11 +87,3 @@ class DoctorSerializer(UserSerializer):
             instance.set_password(password)
 
         return super(DoctorSerializer, self).update(instance, validated_data)
-
-
-class DoctorRegistrationRequestSerializer(UserSerializer):
-    class Meta:
-        model = Doctor
-        fields = ('pk', 'first_name', 'last_name',
-                  'email', 'is_active',
-                  'approved_by_coordinator', )

@@ -156,8 +156,8 @@ class Command(BaseCommand):
             ]
         ).order_by('-level')
 
-        for anatomical_site in old_anatomical_sites:
-            anatomical_site.patientanatomicalsite_set.update(
-                anatomical_site=anatomical_site.parent)
+        for anatomical_site in old_anatomical_sites:           # pragma: no cover
+            anatomical_site.patientanatomicalsite_set.update(  # pragma: no cover
+                anatomical_site=anatomical_site.parent)        # pragma: no cover
 
         old_anatomical_sites.delete()

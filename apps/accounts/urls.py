@@ -1,12 +1,13 @@
 from django.conf.urls import url, include
-from rest_framework_jwt.views import refresh_jwt_token, verify_jwt_token
+from rest_framework_jwt.views import (
+    obtain_jwt_token, refresh_jwt_token, verify_jwt_token, )
 from rest_framework_nested import routers
 from djoser import views
 
 from .viewsets import (PatientViewSet, PatientConsentViewSet,
-                       DoctorRegistrationRequestViewSet, )
-from .views import (current_user_view, sites_view, obtain_jwt_token,
-                    registration_view, reset_confirmation_view)
+                       SiteJoinRequestViewSet, )
+from .views import (
+    current_user_view, sites_view, reset_confirmation_view)
 
 
 # This router mustn't have another viewsets because patient has nested routes
@@ -18,8 +19,8 @@ patient_router = routers.NestedSimpleRouter(
 patient_router.register('consent', PatientConsentViewSet)
 
 router_for_doctors = routers.SimpleRouter()
-router_for_doctors.register('doctors_registration_requests',
-                            DoctorRegistrationRequestViewSet)
+router_for_doctors.register('site_join_requests',
+                            SiteJoinRequestViewSet)
 
 urlpatterns = [
     url(r'^', include(router_for_patients.urls)),
@@ -35,7 +36,7 @@ urlpatterns = [
     url(r'^auth/token-verify/$', verify_jwt_token),
 
     # Registration
-    url(r'^auth/register/$', registration_view),
+    url(r'^auth/register/$', views.UserCreateView.as_view()),
     url(r'^auth/activate/$', views.ActivationView.as_view()),
     url(
         r'^auth/password/reset/$',

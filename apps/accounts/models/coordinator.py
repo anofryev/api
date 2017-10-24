@@ -19,15 +19,6 @@ class Coordinator(models.Model):
         verbose_name_plural = 'Coordinators'
 
 
-class Site(models.Model):
-    title = models.CharField(
-        max_length=120)
-
-    site_coordinator = models.OneToOneField(
-        Coordinator,
-        on_delete=models.CASCADE,
-        related_name='site'
-    )
-
-    def __str__(self):
-        return self.title
+def is_coordinator(user):
+    return Coordinator.objects.filter(
+        doctor_ptr_id=user).first()

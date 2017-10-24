@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 class DoctorAdmin(UserAdmin):
     list_display = ('email', 'first_name', 'last_name',
-                    'is_active', 'approved_by_coordinator', )
+                    'is_active', )
     search_fields = ('first_name', 'last_name')
     add_fieldsets = ((None, {
         'classes': ('wide',),
@@ -18,7 +18,7 @@ class DoctorAdmin(UserAdmin):
                                       'photo', 'department', 'degree',)}),
         ('Settings', {'fields': ('units_of_length', 'my_coordinator',)}),
         ('Active status', {
-            'fields': ('is_active', 'approved_by_coordinator', )
+            'fields': ('is_active', )
         }),
         ('Admin settings', {
             'fields': ('is_staff', 'is_superuser',

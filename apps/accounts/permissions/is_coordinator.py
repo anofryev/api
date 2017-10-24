@@ -1,5 +1,5 @@
 from .is_doctor import IsDoctor
-from ..models import Coordinator
+from ..models.coordinator import is_coordinator
 
 
 class IsCoordinator(IsDoctor):
@@ -7,5 +7,4 @@ class IsCoordinator(IsDoctor):
         if not super(IsCoordinator, self).has_permission(request, view):
             return False
 
-        return Coordinator.objects.filter(
-            doctor_ptr_id=request.user.id).exists()
+        return is_coordinator(request.user) is not None
