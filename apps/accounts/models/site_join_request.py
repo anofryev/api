@@ -52,14 +52,11 @@ class DoctorSharedPatientsEmail(BaseEmailMessage,
     template_name = 'email/doctor_shared_patients.html'
 
     def get_context_data(self):
-        context = super(CoordinatorRegistrationNotification,
+        context = super(DoctorSharedPatientsEmail,
                         self).get_context_data()
         context['url'] = "{}#/".format(
             settings.DOMAIN)
         return context
-
-
-
 
 class ConfirmArgsSerializer(serializers.Serializer):
     encrypted_keys = serializers.DictField(child=serializers.CharField())
