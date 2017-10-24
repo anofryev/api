@@ -5,7 +5,9 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from django_fsm import FSMIntegerField, transition, TransitionNotAllowed
+from django_fsm import (
+    FSMIntegerField, transition,
+    TransitionNotAllowed, RETURN_VALUE, )
 from rest_framework import serializers
 
 from templated_mail.mail import BaseEmailMessage
@@ -97,12 +99,20 @@ class SiteJoinRequest(models.Model):
     @transition(
         field=state,
         source=JoinStateEnum.NEW,
-        target=JoinStateEnum.APPROVED,
+        target=RETURN_VALUE(JoinStateEnum.APPROVED, JoinStateEnum.CONFIRMED),
         permission=is_site_coordinator)
     def approve(self):
+        has_patients = self.doctor.patients.exists()
         CoordinatorApprovedEmail(
             context={'site_title': self.site.title,
+                     'has_patients': has_patients,
                      'doctor': self.doctor}).send([self.doctor.email])
+        if not has_patients:
+            self.doctor.my_coordinator_id = self.site.site_coordinator_id
+            self.doctor.save()
+            return JoinStateEnum.CONFIRMED
+
+        return JoinStateEnum.APPROVED
 
     @transition(
         field=state,

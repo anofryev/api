@@ -28,7 +28,7 @@ class SiteJoinRequestTest(APITestCase):
                 doctor=self.doctor,
                 site=self.site).exists())
 
-    def test_that_doctor_can_send_request_twise(self):
+    def test_that_doctor_cant_send_request_twise(self):
         data = {
             'site': self.site.id,
         }
@@ -39,6 +39,7 @@ class SiteJoinRequestTest(APITestCase):
         self.assertBadRequest(resp)
 
     def test_that_coordinator_can_approve(self):
+        PatientFactory.create(doctor=self.doctor)
         jr = SiteJoinRequest.objects.create(
             doctor=self.doctor,
             site=self.site)
@@ -51,6 +52,24 @@ class SiteJoinRequestTest(APITestCase):
         self.assertSuccessResponse(resp)
         jr.refresh_from_db()
         self.assertEqual(jr.state, JoinStateEnum.APPROVED)
+
+    def test_that_doctor_without_patients_get_confirmed_state(self):
+        jr = SiteJoinRequest.objects.create(
+            doctor=self.doctor,
+            site=self.site)
+
+        self.authenticate_as_doctor(
+            self.coordinator.doctor_ptr)
+
+        resp = self.client.post(
+            '/api/v1/site_join_requests/{0}/approve/'.format(jr.id))
+        self.assertSuccessResponse(resp)
+        jr.refresh_from_db()
+        self.assertEqual(jr.state, JoinStateEnum.CONFIRMED)
+        self.doctor.refresh_from_db()
+        self.assertEqual(self.doctor.my_coordinator_id,
+                         jr.site.site_coordinator_id)
+
 
     def test_that_coordinator_can_reject(self):
         jr = SiteJoinRequest.objects.create(
@@ -103,6 +122,10 @@ class SiteJoinRequestTest(APITestCase):
         self.assertSuccessResponse(resp)
         jr.refresh_from_db()
         self.assertEqual(jr.state, JoinStateEnum.CONFIRMED)
+        self.doctor.refresh_from_db()
+        self.assertEqual(self.doctor.my_coordinator_id,
+                         jr.site.site_coordinator_id)
+
 
     def test_doctor_with_patinets_can_confirm_joining(self):
         for _index in range(random.randint(1, 10)):
@@ -123,6 +146,9 @@ class SiteJoinRequestTest(APITestCase):
         self.assertSuccessResponse(resp)
         jr.refresh_from_db()
         self.assertEqual(jr.state, JoinStateEnum.CONFIRMED)
+        self.doctor.refresh_from_db()
+        self.assertEqual(self.doctor.my_coordinator_id,
+                         jr.site.site_coordinator_id)
 
     def test_doctor_with_patinets_cant_confirm_joining_if_dont_provide_enought_keys(self):
         for _index in range(random.randint(1, 10)):
