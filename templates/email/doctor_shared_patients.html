@@ -5,7 +5,8 @@
 {% endblock subject %}
 
 {% block text_body %}
-{% blocktrans %}You're receiving this email because doctor {{ doctor }} you have approved for {{ site_title }} has just shared all her patients with you. Now you can review diagnoses and approve and reject data at web ui.{% endblocktrans %}
+{% blocktrans %}You're receiving this email because doctor {{ doctor }} has just shared all her patients with {{ site_title }} site. Now you can review diagnoses and approve and reject data at web ui.{% endblocktrans %}
+{{ protocol }}://{{ url }}
 
 {% trans "Thanks for using our site!" %}
 
