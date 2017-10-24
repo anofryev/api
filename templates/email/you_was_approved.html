@@ -7,13 +7,14 @@
 {% block text_body %}
 {% blocktrans %}You're receiving this email because you registration as part of {{ site_title }} was approved by the coordinator.{% endblocktrans %}
 
-{% if doctor.is_active %}
-{% blocktrans %}Now you can use the system from the mobile application{% endblocktrans %}
-{% else %}
+{% if not doctor.is_active %}
 {% blocktrans %}Please confirm your email, after that you can start using the system. The instruction was sent to your email earlier.{% endblocktrans %}
 {% endif %}
 
-
+{% if has_patients %}
+{% blocktrans %}Since you have already created patients you need to share them with you coordinator.
+Please open 'My Profile' tab of th mobile application and press 'Share patients with {{ site_title }}' button.{% endblocktrans %}
+{% endif %}
 
 {% trans "Thanks for using our site!" %}
 

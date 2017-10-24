@@ -292,8 +292,6 @@ VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
 VERSATILEIMAGEFIELD_USE_PLACEHOLDIT = True
 
 DJOSER = {
-    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'api.skiniq.co'),
-    'SITE_NAME': 'SkinIQ',
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',
         'web_ui/#/password/reset/confirm/{uid}/{token}'),
@@ -306,6 +304,9 @@ DJOSER = {
     },
 }
 
+DOMAIN = os.environ.get('DOMAIN', 'api.skiniq.co')
+SITE_NAME = os.environ.get('SITE_NAME', 'Skin IQ')
+PROTOCOL = os.environ.get('PROTOCOL', 'http')
 
 # LOGGING SETTINGS
 LOGGING = {
