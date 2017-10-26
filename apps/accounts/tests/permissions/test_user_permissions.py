@@ -1,4 +1,4 @@
-from django.test import TestCase, mock
+from django.test import TestCase
 from apps.accounts.permissions import (IsCoordinator, IsDoctor,
                                        IsDoctorOfPatient)
 from ...factories import (DoctorFactory, CoordinatorFactory, UserFactory,

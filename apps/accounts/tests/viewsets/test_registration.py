@@ -80,6 +80,17 @@ class RegistrationTest(APITestCase):
 
         self.assertCanLogin(credentials)
 
+    def test_that_doctor_can_register_with_weak_password(self):
+        data = {
+            'first_name': Faker('first_name').generate({}),
+            'last_name': Faker('last_name').generate({}),
+            'email': Faker('email').generate({}),
+            'password': '12345',
+            'site': self.site.id,
+        }
+        resp = self.client.post('/api/v1/auth/register/', data)
+        self.assertBadRequest(resp)
+
     def test_that_reqular_admin_user_can_login(self):
         password = Faker('password').generate({})
         user = UserFactory.create(is_staff=True, password=password)

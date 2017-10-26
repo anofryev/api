@@ -1,5 +1,5 @@
 from apps.main.tests import APITestCase
-from ...factories import DoctorFactory, PatientFactory
+from ...factories import DoctorFactory
 
 
 class LoginViewTest(APITestCase):
