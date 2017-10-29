@@ -1,4 +1,4 @@
-from skiniq.utils import generate_filename
+from skin.utils import generate_filename
 
 
 def distant_photo_path(instance, filename):
