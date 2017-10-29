@@ -1,5 +1,5 @@
 """
-WSGI config for skiniq project.
+WSGI config for skin project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -12,6 +12,6 @@ import os
 from django.core.wsgi import get_wsgi_application
 from whitenoise.django import DjangoWhiteNoise
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "skiniq.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "skin.settings")
 application = get_wsgi_application()
 application = DjangoWhiteNoise(application)
