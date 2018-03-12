@@ -1,9 +1,5 @@
 from django.db import models
 from django.db.models import Count, Max, Case, When, Q, F
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from django.utils.text import slugify
-from django.utils import timezone
 from versatileimagefield.fields import VersatileImageField
 
 from apps.main.storages import private_storage
