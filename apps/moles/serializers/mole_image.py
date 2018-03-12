@@ -44,8 +44,6 @@ class MoleImageCreateSerializer(MoleImageSerializer):
         }
 
 
-
-
 class MoleImageUpdateSerializer(MoleImageSerializer):
     class Meta(MoleImageSerializer.Meta):
         fields = ('pk', 'path_diagnosis', 'clinical_diagnosis', 'biopsy',

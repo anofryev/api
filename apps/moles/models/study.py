@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.main.storages import private_storage
 from apps.moles.models.upload_paths import study_consent_docs_path
 
 
@@ -18,7 +19,7 @@ class Study(models.Model):
         related_name='studies',
         through='StudyToPatient'
     )
-    consent_forms = models.ManyToManyField(
+    consent_docs = models.ManyToManyField(
         'ConsentDoc',
         blank=True,
         related_name='studies',
@@ -30,12 +31,10 @@ class Study(models.Model):
 
 
 class ConsentDoc(models.Model):
-    title = models.CharField(
-        max_length=240
-    )
-    pdf = models.FileField(
-        verbose_name='PDF file',
+    file = models.FileField(
+        verbose_name='Document file',
         upload_to=study_consent_docs_path,
+        storage=private_storage,
     )
 
     class Meta:
@@ -55,5 +54,6 @@ class StudyToPatient(models.Model):
         verbose_name='Patient'
     )
     patient_consent = models.ForeignKey(
-        'accounts.PatientConsent'
+        'accounts.PatientConsent',
+        blank=True, null=True
     )
