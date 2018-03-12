@@ -19,7 +19,7 @@ class Study(models.Model):
         through='StudyToPatient'
     )
     consent_forms = models.ManyToManyField(
-        ConsentDoc,
+        'ConsentDoc',
         blank=True,
         related_name='studies',
     )
