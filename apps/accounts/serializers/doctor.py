@@ -37,11 +37,23 @@ class RegisterDoctorSerializer(UserSerializer):
         }
 
 
-class DoctorSerializer(UserSerializer):
+class DoctorLiteSerializer(UserSerializer):
+    is_coordinator = serializers.SerializerMethodField()
+
+    def get_is_coordinator(self, doctor):
+        return Coordinator.objects.filter(doctor_ptr=doctor).exists()
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'date_created',)
+
+
+class DoctorSerializer(DoctorLiteSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     coordinator_public_key = serializers.SerializerMethodField()
     my_doctors_public_keys = serializers.SerializerMethodField()
-    is_coordinator = serializers.SerializerMethodField()
 
     class Meta:
         model = Doctor
@@ -70,9 +82,6 @@ class DoctorSerializer(UserSerializer):
             return {d['id']: d['public_key'] for d in
                     coordinator.doctors.values('id', 'public_key')}
         return None
-
-    def get_is_coordinator(self, doctor):
-        return Coordinator.objects.filter(doctor_ptr=doctor).exists()
 
     def get_coordinator_public_key(self, doctor):
         if doctor.my_coordinator_id:
