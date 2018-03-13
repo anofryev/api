@@ -1,10 +1,14 @@
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
-from apps.accounts.permissions import IsCoordinator, IsDoctor, IsDoctorOfPatient
+from apps.accounts.models import Doctor
+from apps.accounts.permissions import IsCoordinator, IsDoctor
+from apps.accounts.permissions.is_coordinator_of_doctor import \
+    IsCoordinatorOfDoctor
 from apps.accounts.viewsets.mixins import PatientInfoMixin
-from apps.moles.permissions import IsMemberOfStudy
-from ..models import ConsentDoc, Study
+from ..models import ConsentDoc, Study, StudyInvitation
 from ..serializers import (
     ConsentDocSerializer, StudyCreateUpdateSerializer, StudyListSerializer)
 
@@ -33,12 +37,29 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     def get_permissions(self):
         if self.action in ['create', 'update', 'destroy']:
             return [IsCoordinator()]
-        elif self.action == 'patient_sign':
-            return [IsDoctorOfPatient(), IsMemberOfStudy()]
+        elif self.action == 'add_doctor':
+            return [IsCoordinatorOfDoctor()]
         else:
             return super(StudyViewSet, self).get_permissions()
 
-    @detail_route(methods=['PUT'])
-    def patient_sign(self):
-        patient = self.get_patient()
-        # TODO
+    @detail_route(methods=['POST'])
+    def add_doctor(self):
+        study = self.get_object()
+        doctor = get_object_or_404(Doctor, pk=self.kwargs['doctor_pk'])
+        email_list = self.request.data['emails']
+        fail_emails = []
+
+        for email in email_list:
+            check_doctor = Doctor.objects.filter(email=email).first()
+            if check_doctor and not check_doctor.physician_role:
+                fail_emails.append(email)
+            else:
+                StudyInvitation.objects.create(
+                    email=email,
+                    study=study,
+                    doctor=doctor)
+
+        return Response({
+            'all_success': len(fail_emails) == 0,
+            'fail_emails': fail_emails
+        })
