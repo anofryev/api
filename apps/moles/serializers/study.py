@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.accounts.serializers import PatientSerializer, DoctorLiteSerializer
+from apps.accounts.serializers import DoctorLiteSerializer
 from ..models import ConsentDoc, Study, StudyToPatient
 
 
@@ -13,17 +13,19 @@ class ConsentDocSerializer(serializers.ModelSerializer):
 class StudyBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Study
-        fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')
+        fields = ('pk', 'title', 'consent_docs')
 
 
-class StudySerializer(StudyBaseSerializer):
+class StudyCreateUpdateSerializer(StudyBaseSerializer):
     def create(self, validated_data):
-        instance = super(StudySerializer, self).create(validated_data)
+        instance = super(StudyCreateUpdateSerializer, self).create(
+            validated_data)
         self.update_relations(instance)
         return instance
 
     def update(self, instance, validated_data):
-        instance = super(StudySerializer, self).update(instance, validated_data)
+        instance = super(StudyCreateUpdateSerializer, self).update(
+            instance, validated_data)
         self.update_relations(instance)
         return instance
 
@@ -39,8 +41,7 @@ class StudySerializer(StudyBaseSerializer):
 
 
 class StudyListSerializer(serializers.ModelSerializer):
-    patients = PatientSerializer(many=True)
     doctors = DoctorLiteSerializer(many=True)
 
     class Meta(StudyBaseSerializer.Meta):
-        pass
+        fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')

@@ -44,8 +44,8 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(response)
         self.assertEqual(Study.objects.all().count(), initial_studies_count+1)
         data = response.data
-        data.pop('pk')
-        self.assertDictEqual(data, self.get_post_data())
+        self.assertTrue(data['pk'] > 0)
+        self.assertEqual(data['title'], 'sample study')
 
     # Остальные тесты:
     '''
