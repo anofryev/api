@@ -1,6 +1,6 @@
 from rest_framework import generics, response, status
 
-from ..serializers import DoctorSerializer
+from ..serializers import DoctorFullSerializer
 from ..permissions import IsDoctor
 
 
@@ -11,7 +11,7 @@ class CurrentUserView(generics.GenericAPIView):
         user = self.request.user
 
         if hasattr(user, 'doctor_role'):
-            return DoctorSerializer
+            return DoctorFullSerializer
 
         raise NotImplementedError
 
