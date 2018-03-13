@@ -45,11 +45,8 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(response)
         self.assertEqual(Study.objects.all().count(), initial_studies_count+1)
         data = response.data
-        data.pop('pk')
-        self.assertDictEqual(data, self.get_post_data())
-        self.assertEqual(StudyToPatient.objects.all().count(), 1)
-        study_to_patient = StudyToPatient.objects.all().first()
-        self.assertEqual(study_to_patient.patient_consent, None)
+        self.assertTrue(data['pk'] > 0)
+        self.assertEqual(data['title'], 'sample study')
 
     def test_list(self):
         self.authenticate_as_doctor()
@@ -99,11 +96,11 @@ class StudyViewSetTest(APITestCase):
         resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
         self.assertForbidden(resp)
 
-    # def test_delete_doctor(self):
-    #     study = StudyFactory.create()
-    #     self.authenticate_as_doctor(doctor=self.other_doctor)
-    #     resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
-    #     self.assertForbidden(resp)
+    def test_delete_doctor(self):
+        study = StudyFactory.create()
+        self.authenticate_as_doctor(doctor=self.other_doctor)
+        resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        self.assertForbidden(resp)
 
     def test_delete_coordinator(self):
         study = StudyFactory.create()

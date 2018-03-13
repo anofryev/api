@@ -5,4 +5,6 @@ from .mole import (
     MoleUpdateSerializer)
 from .mole_image import (
     MoleImageSerializer, MoleImageCreateSerializer, MoleImageUpdateSerializer)
-from .study import StudySerializer, StudyListSerializer, ConsentDocSerializer
+from .study import (
+    StudyCreateUpdateSerializer, StudyListSerializer, ConsentDocSerializer)
+from .study_invitation import StudyInvitationSerializer
