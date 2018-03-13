@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator, SiteJoinRequest, Site
+from ..models import Doctor, Coordinator, Physician, SiteJoinRequest, Site
 from .user import UserSerializer
 
 
@@ -39,15 +39,19 @@ class RegisterDoctorSerializer(UserSerializer):
 
 class DoctorLiteSerializer(UserSerializer):
     is_coordinator = serializers.SerializerMethodField()
+    is_physician = serializers.SerializerMethodField()
 
     def get_is_coordinator(self, doctor):
         return Coordinator.objects.filter(doctor_ptr=doctor).exists()
+
+    def get_is_physician(self, doctor):
+        return Physician.objects.filter(doctor_ptr=doctor).exists()
 
     class Meta:
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email',
                   'degree', 'department', 'photo', 'units_of_length',
-                  'is_coordinator', 'date_created',)
+                  'is_coordinator', 'is_physician', 'date_created',)
 
 
 class DoctorSerializer(DoctorLiteSerializer):
@@ -62,7 +66,7 @@ class DoctorSerializer(DoctorLiteSerializer):
                   'can_see_prediction',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',
-                  'is_coordinator', 'date_created',)
+                  'is_coordinator', 'is_physician', 'date_created',)
         extra_kwargs = {
             'password': {
                 'write_only': True,

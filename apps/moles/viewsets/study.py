@@ -4,9 +4,9 @@ from rest_framework.decorators import detail_route
 from apps.accounts.permissions import IsCoordinator, IsDoctor, IsDoctorOfPatient
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from apps.moles.permissions import IsMemberOfStudy
-from ..models import ConsentDoc, Study, StudyToPatient
-from ..serializers import ConsentDocSerializer, StudyCreateUpdateSerializer, \
-    StudyListSerializer
+from ..models import ConsentDoc, Study
+from ..serializers import (
+    ConsentDocSerializer, StudyCreateUpdateSerializer, StudyListSerializer)
 
 
 class ConsentDocViewSet(viewsets.GenericViewSet,
