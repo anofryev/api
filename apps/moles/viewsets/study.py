@@ -1,7 +1,10 @@
 from rest_framework import viewsets, mixins
+from rest_framework.decorators import detail_route
 
-from apps.accounts.permissions import IsCoordinator, IsDoctor
-from ..models import ConsentDoc, Study
+from apps.accounts.permissions import IsCoordinator, IsDoctor, IsDoctorOfPatient
+from apps.accounts.viewsets.mixins import PatientInfoMixin
+from apps.moles.permissions import IsMemberOfStudy
+from ..models import ConsentDoc, Study, StudyToPatient
 from ..serializers import ConsentDocSerializer, StudySerializer, \
     StudyListSerializer
 
@@ -13,7 +16,7 @@ class ConsentDocViewSet(viewsets.GenericViewSet,
     permission_classes = (IsCoordinator,)
 
 
-class StudyViewSet(viewsets.GenericViewSet,
+class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                    mixins.CreateModelMixin, mixins.UpdateModelMixin,
                    mixins.ListModelMixin, mixins.RetrieveModelMixin,
                    mixins.DestroyModelMixin):
@@ -30,5 +33,12 @@ class StudyViewSet(viewsets.GenericViewSet,
     def get_permissions(self):
         if self.action in ['create', 'update']:
             return [IsCoordinator()]
+        elif self.action == 'patient_sign':
+            return [IsDoctorOfPatient(), IsMemberOfStudy()]
         else:
             return super(StudyViewSet, self).get_permissions()
+
+    @detail_route(methods=['PUT'])
+    def patient_sign(self):
+        patient = self.get_patient()
+        # TODO
