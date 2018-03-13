@@ -25,6 +25,9 @@ class StudyViewSetTest(APITestCase):
             'consent_docs': [self.consent_doc.pk]
         }
 
+    def target_path(self, pk):
+        return '/api/v1/study/{0}/'.format(pk)
+
     def test_create_unauthorized_forbidden(self):
         response = self.client.post('/api/v1/study/', self.get_post_data(),
                                     format='json')
@@ -64,48 +67,48 @@ class StudyViewSetTest(APITestCase):
 
     def test_retrieve_forbidden(self):
         study = StudyFactory.create()
-        resp = self.client.get('/api/v1/study/' + str(study.pk) + '/', format='json')
+        resp = self.client.get(self.target_path(study.pk), format='json')
         self.assertForbidden(resp)
 
     def test_retrieve_get(self):
         study = StudyFactory.create()
         self.authenticate_as_doctor()
-        resp = self.client.get('/api/v1/study/' + str(study.pk) + '/', format='json')
+        resp = self.client.get(self.target_path(study.pk), format='json')
         self.assertSuccessResponse(resp)
 
     def test_update_and_check_changes(self):
         study = StudyFactory.create()
         initial_title = study.title
         self.authenticate_as_doctor()
-        self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
         study.refresh_from_db()
         self.assertNotEqual(initial_title, study.title)
 
     def test_update_unauthorized(self):
         study = StudyFactory.create()
-        resp = self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        resp = self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
         self.assertForbidden(resp)
 
     def test_update_doctor(self):
         study = StudyFactory.create()
         self.authenticate_as_doctor(doctor=self.other_doctor)
-        resp = self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        resp = self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
         self.assertForbidden(resp)
 
     def test_delete_unauthorized(self):
         study = StudyFactory.create()
-        resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        resp = self.client.delete(self.target_path(study.pk))
         self.assertForbidden(resp)
 
     def test_delete_doctor(self):
         study = StudyFactory.create()
         self.authenticate_as_doctor(doctor=self.other_doctor)
-        resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        resp = self.client.delete(self.target_path(study.pk))
         self.assertForbidden(resp)
 
     def test_delete_coordinator(self):
         study = StudyFactory.create()
         initial_study_count = Study.objects.all().count()
         self.authenticate_as_doctor()
-        self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        self.client.delete(self.target_path(study.pk))
         self.assertNotEqual(initial_study_count, Study.objects.all().count())
