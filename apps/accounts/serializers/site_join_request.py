@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from ..models import SiteJoinRequest, Doctor
-from .doctor import DoctorSerializer
+from .doctor import DoctorFullSerializer
 
 
 class CreateSiteJoinRequestSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class CreateSiteJoinRequestSerializer(serializers.ModelSerializer):
 
 
 class SiteJoinRequestSerializer(serializers.ModelSerializer):
-    doctor = DoctorSerializer()
+    doctor = DoctorFullSerializer()
     site_title = serializers.CharField(source='site.title')
     coordinator_public_key = serializers.SerializerMethodField()
 

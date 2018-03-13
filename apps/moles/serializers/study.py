@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.accounts.serializers import DoctorLiteSerializer
+from apps.accounts.serializers import DoctorSerializer
 from ..models import ConsentDoc, Study, StudyToPatient
 
 
@@ -41,7 +41,7 @@ class StudyCreateUpdateSerializer(StudyBaseSerializer):
 
 
 class StudyListSerializer(serializers.ModelSerializer):
-    doctors = DoctorLiteSerializer(many=True)
+    doctors = DoctorSerializer(many=True)
 
     class Meta(StudyBaseSerializer.Meta):
         fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')

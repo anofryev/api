@@ -37,7 +37,7 @@ class RegisterDoctorSerializer(UserSerializer):
         }
 
 
-class DoctorLiteSerializer(UserSerializer):
+class DoctorSerializer(UserSerializer):
     is_coordinator = serializers.SerializerMethodField()
     is_physician = serializers.SerializerMethodField()
 
@@ -54,7 +54,7 @@ class DoctorLiteSerializer(UserSerializer):
                   'is_coordinator', 'is_physician', 'date_created',)
 
 
-class DoctorSerializer(DoctorLiteSerializer):
+class DoctorFullSerializer(DoctorSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     coordinator_public_key = serializers.SerializerMethodField()
     my_doctors_public_keys = serializers.SerializerMethodField()
@@ -99,4 +99,4 @@ class DoctorSerializer(DoctorLiteSerializer):
         if password:
             instance.set_password(password)
 
-        return super(DoctorSerializer, self).update(instance, validated_data)
+        return super(DoctorFullSerializer, self).update(instance, validated_data)
