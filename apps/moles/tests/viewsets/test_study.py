@@ -46,3 +46,31 @@ class StudyViewSetTest(APITestCase):
         data = response.data
         data.pop('id')
         self.assertDictEqual(data, self.get_post_data())
+
+    # Остальные тесты:
+    '''
+    I. List
+    1. Создать 2 Study, сделать GET, посмотреть что они там есть
+    2. Создать Study, сделать GET от не авторизованного, убедиться, что forbidden
+    
+    II. Retrieve
+    1. forbidden от не авторизованного
+    2. GET от авторизованного
+    
+    III. Create
+    Все есть, добавить в тесте где success проверку, что создастся моделька StudyToPatient,
+    и что в ней будет patient_consent = None
+    
+    IV. Update
+    Обновлять может только координатор
+    1. Создать study, сделать PUT, посмотреть, что данные изменятся
+    2. Создать study, задать в StudyToPatient patient_consent, сделать PUT, проверить, что останется подписанной
+    3. Forbidden тест на неавторизованного
+    4. Forbidden тест на доктора
+    
+    V. Delete
+    Удалять может только координатор
+    1. Forbidden unauthorized
+    2. Forbidden doctor
+    3. Создать study, сделать запрос на удаление, проверить, что удалится, проверить, что связка StudyToPatient тоже
+    '''

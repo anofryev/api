@@ -7,13 +7,13 @@ from ..models import ConsentDoc, Study, StudyToPatient
 class ConsentDocSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConsentDoc
-        fields = '__all__'
+        fields = ('pk', 'file')
 
 
 class StudyBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Study
-        fields = '__all__'
+        fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')
 
 
 class StudySerializer(StudyBaseSerializer):

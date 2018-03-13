@@ -29,3 +29,5 @@ class ConsentDocViewSetTest(APITestCase):
         self.authenticate_as_doctor()
         response = self.post_doc()
         self.assertSuccessResponse(response)
+        self.assertTrue(response.data['pk'] > 0)
+        self.assertTrue(len(response.data['file']) > 0)
