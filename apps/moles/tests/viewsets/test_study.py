@@ -78,7 +78,8 @@ class StudyViewSetTest(APITestCase):
         initial_title = study.title
         self.authenticate_as_doctor()
         self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
-        self.assertNotEqual(initial_title, Study.objects.all().first().title)
+        study.refresh_from_db()
+        self.assertNotEqual(initial_title, study.title)
 
     def test_update_unauthorized(self):
         study = StudyFactory.create()
@@ -105,8 +106,6 @@ class StudyViewSetTest(APITestCase):
     def test_delete_coordinator(self):
         study = StudyFactory.create()
         initial_study_count = Study.objects.all().count()
-        initial_study_to_patient_count = StudyToPatient.objects.all().count()
         self.authenticate_as_doctor()
         self.client.delete('/api/v1/study/' + str(study.pk) + '/')
         self.assertNotEqual(initial_study_count, Study.objects.all().count())
-        self.assertNotEqual(initial_study_to_patient_count, StudyToPatient.objects.all().count())

@@ -15,13 +15,3 @@ class StudyFactory(DjangoModelFactory):
         model = Study
 
     title = fuzzy.FuzzyText()
-
-    @classmethod
-    def create(cls, **kwargs):
-        patient = PatientFactory.create()
-        study = super(StudyFactory, cls).create(**kwargs)
-        StudyToPatient.objects.create(
-            study=study,
-            patient=patient
-        )
-        return study
