@@ -1,7 +1,8 @@
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
     PatientFactory
-from apps.moles.factories.study import ConsentDocFactory
+from apps.moles.factories.study import ConsentDocFactory, StudyFactory, \
+    StudyToPatient
 from apps.moles.models import Study
 
 
@@ -46,31 +47,69 @@ class StudyViewSetTest(APITestCase):
         data = response.data
         data.pop('pk')
         self.assertDictEqual(data, self.get_post_data())
+        self.assertEqual(StudyToPatient.objects.all().count(), 1)
+        study_to_patient = StudyToPatient.objects.all().first()
+        self.assertEqual(study_to_patient.patient_consent, None)
 
-    # Остальные тесты:
-    '''
-    I. List
-    1. Создать 2 Study, сделать GET, посмотреть что они там есть
-    2. Создать Study, сделать GET от не авторизованного, убедиться, что forbidden
-    
-    II. Retrieve
-    1. forbidden от не авторизованного
-    2. GET от авторизованного
-    
-    III. Create
-    Все есть, добавить в тесте где success проверку, что создастся моделька StudyToPatient,
-    и что в ней будет patient_consent = None
-    
-    IV. Update
-    Обновлять может только координатор
-    1. Создать study, сделать PUT, посмотреть, что данные изменятся
-    2. Создать study, задать в StudyToPatient patient_consent, сделать PUT, проверить, что останется подписанной
-    3. Forbidden тест на неавторизованного
-    4. Forbidden тест на доктора
-    
-    V. Delete
-    Удалять может только координатор
-    1. Forbidden unauthorized
-    2. Forbidden doctor
-    3. Создать study, сделать запрос на удаление, проверить, что удалится, проверить, что связка StudyToPatient тоже
-    '''
+    def test_list(self):
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertEqual(len(resp.data), 0)
+        StudyFactory.create()
+        StudyFactory.create()
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertEqual(len(resp.data), 2)
+
+    def test_list_forbidden(self):
+        StudyFactory.create()
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertForbidden(resp)
+
+    def test_retrieve_forbidden(self):
+        study = StudyFactory.create()
+        resp = self.client.get('/api/v1/study/' + str(study.pk) + '/', format='json')
+        self.assertForbidden(resp)
+
+    def test_retrieve_get(self):
+        study = StudyFactory.create()
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/' + str(study.pk) + '/', format='json')
+        self.assertSuccessResponse(resp)
+
+    def test_update_and_check_changes(self):
+        study = StudyFactory.create()
+        initial_title = study.title
+        self.authenticate_as_doctor()
+        self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        self.assertNotEqual(initial_title, Study.objects.all().first().title)
+
+    def test_update_unauthorized(self):
+        study = StudyFactory.create()
+        resp = self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        self.assertForbidden(resp)
+
+    def test_update_doctor(self):
+        study = StudyFactory.create()
+        self.authenticate_as_doctor(doctor=self.other_doctor)
+        resp = self.client.put('/api/v1/study/' + str(study.pk) + '/', {'title': 'test'}, format='json')
+        self.assertForbidden(resp)
+
+    def test_delete_unauthorized(self):
+        study = StudyFactory.create()
+        resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        self.assertForbidden(resp)
+
+    # def test_delete_doctor(self):
+    #     study = StudyFactory.create()
+    #     self.authenticate_as_doctor(doctor=self.other_doctor)
+    #     resp = self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+    #     self.assertForbidden(resp)
+
+    def test_delete_coordinator(self):
+        study = StudyFactory.create()
+        initial_study_count = Study.objects.all().count()
+        initial_study_to_patient_count = StudyToPatient.objects.all().count()
+        self.authenticate_as_doctor()
+        self.client.delete('/api/v1/study/' + str(study.pk) + '/')
+        self.assertNotEqual(initial_study_count, Study.objects.all().count())
+        self.assertNotEqual(initial_study_to_patient_count, StudyToPatient.objects.all().count())
