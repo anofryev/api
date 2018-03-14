@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route
 
 from apps.accounts.permissions import IsDoctor
-from ..models import Study, StudyInvitation
+from ..models import Study, StudyInvitation, StudyInvitationStatus
 from ..serializers import StudyInvitationSerializer
 
 
@@ -27,6 +27,8 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
     @detail_route(methods=['POST'])
     def approve(self):
         invitation = self.get_object()
+        invitation.status = StudyInvitationStatus.ACCEPTED
+
         pass
 
     @detail_route(methods=['POST'])
