@@ -18,3 +18,7 @@ class Participant(models.Model):
     class Meta:
         verbose_name = 'Participant'
         verbose_name_plural = 'Participants'
+
+
+def is_participant(user):
+    return Participant.objects.filter(doctor_ptr=user).exists()

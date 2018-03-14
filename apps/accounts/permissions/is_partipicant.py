@@ -1,5 +1,5 @@
 from .is_doctor import IsDoctor
-from ..models import Participant
+from ..models.participant import is_participant
 
 
 class IsParticipant(IsDoctor):
@@ -7,4 +7,4 @@ class IsParticipant(IsDoctor):
         if not super(IsParticipant, self).has_permission(request, view):
             return False
 
-        return Participant.objects.filter(doctor_ptr=request.user).exists()
+        return is_participant(request.user)
