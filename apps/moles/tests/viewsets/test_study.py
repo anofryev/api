@@ -80,19 +80,22 @@ class StudyViewSetTest(APITestCase):
         study = StudyFactory.create()
         initial_title = study.title
         self.authenticate_as_doctor()
-        self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
+        self.client.put(self.target_path(study.pk),
+                        {'title': 'test'}, format='json')
         study.refresh_from_db()
         self.assertNotEqual(initial_title, study.title)
 
     def test_update_unauthorized(self):
         study = StudyFactory.create()
-        resp = self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
+        resp = self.client.put(self.target_path(study.pk),
+                               {'title': 'test'}, format='json')
         self.assertForbidden(resp)
 
     def test_update_doctor(self):
         study = StudyFactory.create()
         self.authenticate_as_doctor(doctor=self.other_doctor)
-        resp = self.client.put(self.target_path(study.pk), {'title': 'test'}, format='json')
+        resp = self.client.put(self.target_path(study.pk),
+                               {'title': 'test'}, format='json')
         self.assertForbidden(resp)
 
     def test_delete_unauthorized(self):
