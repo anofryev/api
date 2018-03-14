@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.models import DoctorToPatient
 from apps.accounts.permissions.is_partipicant import IsParticipant
-from ..models import Study, StudyInvitation, StudyInvitationStatus
+from ..models import StudyInvitation, StudyInvitationStatus
 from ..serializers import StudyInvitationSerializer
 
 
