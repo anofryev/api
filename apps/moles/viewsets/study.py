@@ -51,7 +51,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
 
         for email in email_list:
             check_doctor = Doctor.objects.filter(email=email).first()
-            if check_doctor and not check_doctor.physician_role:
+            if check_doctor and not check_doctor.participant_role:
                 fail_emails.append(email)
             else:
                 StudyInvitation.objects.create(
