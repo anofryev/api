@@ -10,5 +10,5 @@ class IsCoordinatorOfDoctor(IsCoordinator):
             return False
 
         coordinator = request.user.doctor_role
-        doctor = get_object_or_404(Doctor, pk=view.kwargs['doctor_pk'])
+        doctor = get_object_or_404(Doctor, pk=view.request.data['doctor_pk'])
         return doctor.my_coordinator == coordinator.coordinator_role
