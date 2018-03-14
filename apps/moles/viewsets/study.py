@@ -4,6 +4,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from apps.accounts.models import Doctor
+from apps.accounts.models.participant import is_participant
 from apps.accounts.permissions import IsCoordinator, IsDoctor
 from apps.accounts.permissions.is_coordinator_of_doctor import \
     IsCoordinatorOfDoctor
@@ -43,21 +44,24 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             return super(StudyViewSet, self).get_permissions()
 
     @detail_route(methods=['POST'])
-    def add_doctor(self):
+    def add_doctor(self, request, pk):
         study = self.get_object()
-        doctor = get_object_or_404(Doctor, pk=self.kwargs['doctor_pk'])
+        doctor = get_object_or_404(Doctor, pk=self.request.data['doctor_pk'])
         email_list = self.request.data['emails']
-        fail_emails = []
+        fail_emails = {}
 
         for email in email_list:
             check_doctor = Doctor.objects.filter(email=email).first()
-            if check_doctor and not check_doctor.participant_role:
-                fail_emails.append(email)
+            if check_doctor and not is_participant(check_doctor):
+                fail_emails.update({email: 'user is already doctor or coordinator'})
             else:
-                StudyInvitation.objects.create(
-                    email=email,
-                    study=study,
-                    doctor=doctor)
+                if StudyInvitation.objects.filter(email=email, study=study).exists():
+                    fail_emails.update({email: 'user is already participating'})
+                else:
+                    StudyInvitation.objects.create(
+                        email=email,
+                        study=study,
+                        doctor=doctor)
 
         return Response({
             'all_success': len(fail_emails) == 0,
