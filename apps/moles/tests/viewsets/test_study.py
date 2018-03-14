@@ -1,16 +1,16 @@
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
-    PatientFactory
+    PatientFactory, ParticipantFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory, \
     StudyToPatient
-from apps.moles.models import Study
+from apps.moles.models import Study, StudyInvitation
 
 
 class StudyViewSetTest(APITestCase):
     def setUp(self):
         super(StudyViewSetTest, self).setUp()
 
-        CoordinatorFactory.create(
+        self.coordinator = CoordinatorFactory.create(
             doctor_ptr=self.doctor
         )
         self.other_doctor = DoctorFactory(password='password')
@@ -25,8 +25,17 @@ class StudyViewSetTest(APITestCase):
             'consent_docs': [self.consent_doc.pk]
         }
 
+    def get_post_for_create_doctor(self, doctor_pk, emails):
+        return {
+            'doctor_pk': doctor_pk,
+            'emails': emails
+        }
+
     def target_path(self, pk):
         return '/api/v1/study/{0}/'.format(pk)
+
+    def add_doctor_path(self, pk):
+        return '/api/v1/study/{0}/add_doctor/'.format(pk)
 
     def test_create_unauthorized_forbidden(self):
         response = self.client.post('/api/v1/study/', self.get_post_data(),
@@ -115,3 +124,21 @@ class StudyViewSetTest(APITestCase):
         self.authenticate_as_doctor()
         self.client.delete(self.target_path(study.pk))
         self.assertNotEqual(initial_study_count, Study.objects.all().count())
+
+    def test_add_doctor(self):
+        study = StudyFactory.create()
+        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
+        patient = DoctorFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=patient
+        )
+        self.authenticate_as_doctor()
+        emails = [doctor.email, self.doctor.email, patient.email, 'test@test.com']
+        resp = self.client.post(self.add_doctor_path(study.pk),
+                                self.get_post_for_create_doctor(doctor_pk=doctor.pk,
+                                                                emails=emails),
+                                format='json')
+        invitations = StudyInvitation.objects.all()
+        self.assertEqual(len(invitations), 2)
+        self.assertSetEqual(set(invitations.values_list('email', flat=True)),
+                            {'test@test.com', patient.email})
