@@ -1,6 +1,7 @@
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from apps.accounts.models import DoctorToPatient
 from apps.accounts.permissions.is_partipicant import IsParticipant
@@ -21,7 +22,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             status=StudyInvitationStatus.NEW)
 
     @detail_route(methods=['POST'])
-    def approve(self):
+    def approve(self, request, pk):
         invitation = self.get_object()
         invitation.status = StudyInvitationStatus.ACCEPTED
         invitation.save(update_fields=['status'])
@@ -41,12 +42,12 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             patient=patient,
             defaults={'encrypted_key': encryption_keys[doctor.pk]})
 
-        return StudyInvitationSerializer(instance=invitation).data
+        return Response(StudyInvitationSerializer(instance=invitation).data)
 
     @detail_route(methods=['POST'])
-    def decline(self):
+    def decline(self, request, pk):
         invitation = self.get_object()
         invitation.status = StudyInvitationStatus.DECLINED
         invitation.save(update_fields=['status'])
 
-        return StudyInvitationSerializer(instance=invitation).data
+        return Response(StudyInvitationSerializer(instance=invitation).data)
