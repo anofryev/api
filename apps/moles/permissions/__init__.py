@@ -1,1 +1,0 @@
-from .is_member_of_study import IsMemberOfStudy
