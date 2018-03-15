@@ -29,7 +29,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
 
         encryption_keys = self.request.data['encryption_keys']
         doctor = invitation.doctor
-        if doctor.pk not in encryption_keys:
+        if str(doctor.pk) not in encryption_keys:
             raise ValidationError(
                 'You doesn\'t not pass encryption key of doctor')
 
@@ -40,7 +40,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
         DoctorToPatient.objects.update_or_create(
             doctor=doctor,
             patient=patient,
-            defaults={'encrypted_key': encryption_keys[doctor.pk]})
+            defaults={'encrypted_key': encryption_keys[str(doctor.pk)]})
 
         return Response(StudyInvitationSerializer(instance=invitation).data)
 
