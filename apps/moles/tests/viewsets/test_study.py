@@ -133,12 +133,35 @@ class StudyViewSetTest(APITestCase):
             doctor_ptr=patient
         )
         self.authenticate_as_doctor()
-        emails = [doctor.email, self.doctor.email, patient.email, 'test@test.com']
+        emails = [doctor.email, self.doctor.email,
+                  patient.email, 'test@test.com']
+        self.client.post(self.add_doctor_path(study.pk),
+                         self.get_post_for_create_doctor(doctor_pk=doctor.pk,
+                                                                emails=emails),
+                        format='json')
+        invitations = StudyInvitation.objects.all()
+        self.assertEqual(len(invitations), 2)
+        self.assertSetEqual(set(invitations.values_list('email', flat=True)),
+                            {'test@test.com', patient.email})
+
         resp = self.client.post(self.add_doctor_path(study.pk),
                                 self.get_post_for_create_doctor(doctor_pk=doctor.pk,
                                                                 emails=emails),
                                 format='json')
         invitations = StudyInvitation.objects.all()
         self.assertEqual(len(invitations), 2)
-        self.assertSetEqual(set(invitations.values_list('email', flat=True)),
-                            {'test@test.com', patient.email})
+
+    def test_add_doctor_forbidden(self):
+        study = StudyFactory.create()
+        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
+        patient = DoctorFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=patient
+        )
+        emails = [doctor.email, self.doctor.email,
+                  patient.email, 'test@test.com']
+        resp = self.client.post(self.add_doctor_path(study.pk),
+                                self.get_post_for_create_doctor(doctor_pk=doctor.pk,
+                                                                emails=emails),
+                                format='json')
+        self.assertForbidden(resp)
