@@ -20,8 +20,6 @@ class StudyViewSetTest(APITestCase):
     def get_post_data(self):
         return {
             'title': 'sample study',
-            'doctors': [self.doctor.pk],
-            'patients': [self.patient.pk],
             'consent_docs': [self.consent_doc.pk]
         }
 

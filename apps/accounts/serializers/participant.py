@@ -7,6 +7,7 @@ class RegisterParticipantSerializer(UserSerializer):
         password = validated_data.pop('password')
         doctor = super(RegisterParticipantSerializer,
                        self).create(validated_data)
+        doctor.is_active = False
         doctor.set_password(password)
         doctor.save()
 

@@ -1,10 +1,10 @@
-from rest_framework import generics
+from djoser.views import UserCreateView
 from rest_framework.permissions import AllowAny
 
 from ..serializers import RegisterParticipantSerializer
 
 
-class RegisterAsParticipantView(generics.CreateAPIView):
+class RegisterAsParticipantView(UserCreateView):
     permission_classes = (AllowAny, )
     serializer_class = RegisterParticipantSerializer
 
