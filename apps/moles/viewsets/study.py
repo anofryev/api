@@ -2,9 +2,11 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import detail_route
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from skin.settings import SITE_NAME
 
 from apps.accounts.models import Doctor
 from apps.accounts.models.participant import is_participant
+from apps.moles.models.moles_mailer import AddParticipantNotification
 from apps.accounts.permissions import IsCoordinator, IsDoctor
 from apps.accounts.permissions.is_coordinator_of_doctor import \
     IsCoordinatorOfDoctor
@@ -62,6 +64,8 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                         email=email,
                         study=study,
                         doctor=doctor)
+                    AddParticipantNotification(
+                        context={'site_title': SITE_NAME}).send([email])
 
         return Response({
             'all_success': len(fail_emails) == 0,
