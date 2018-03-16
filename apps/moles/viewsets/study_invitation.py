@@ -3,9 +3,9 @@ from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from apps.accounts.models import DoctorToPatient
+from apps.accounts.models import DoctorToPatient, PatientConsent
 from apps.accounts.permissions.is_partipicant import IsParticipant
-from ..models import StudyInvitation, StudyInvitationStatus
+from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
 from ..serializers import StudyInvitationSerializer
 
 
@@ -33,14 +33,24 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             raise ValidationError(
                 'You doesn\'t not pass encryption key of doctor')
 
+        patient_consent = PatientConsent.objects.get(
+            pk=self.request.data['consent_pk'])
         patient = DoctorToPatient.objects.get(
             doctor=self.request.user.doctor_role
         ).patient
+        if patient_consent.patient != patient:
+            raise ValidationError(
+                'Patient in consent does not match request patient')
 
         DoctorToPatient.objects.update_or_create(
             doctor=doctor,
             patient=patient,
             defaults={'encrypted_key': encryption_keys[str(doctor.pk)]})
+
+        StudyToPatient.objects.create(
+            study=invitation.study,
+            patient=patient,
+            patient_consent=patient_consent)
 
         return Response(StudyInvitationSerializer(instance=invitation).data)
 

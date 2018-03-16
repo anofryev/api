@@ -22,6 +22,9 @@ class StudyAdminForm(forms.ModelForm):
         self.instance._meta.many_to_many[0].save_form_data(
             self.instance, cleaned_data['doctors'])
 
+        self.instance._meta.many_to_many[2].save_form_data(
+            self.instance, cleaned_data['consent_docs'])
+
     class Meta:
         model = Study
         fields = '__all__'

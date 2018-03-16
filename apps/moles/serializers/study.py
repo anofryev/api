@@ -17,6 +17,7 @@ class StudyBaseSerializer(serializers.ModelSerializer):
 
 
 class StudyListSerializer(serializers.ModelSerializer):
+    consent_docs = ConsentDocSerializer(many=True)
     doctors = DoctorSerializer(many=True)
 
     class Meta(StudyBaseSerializer.Meta):
