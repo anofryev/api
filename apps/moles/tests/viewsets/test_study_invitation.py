@@ -79,8 +79,27 @@ class StudyInvitationViewSetTest(APITestCase):
                 'encryption_keys': {20: 'qwertyuiop'}
             },
             format='json')
-        self.assertEqual(["You doesn't not pass encryption key of doctor"],
-                         resp.data)
+        self.assertBadRequest(resp)
+
+    def test_approve_invalid_consent(self):
+        doctor = DoctorFactory.create()
+        participant = DoctorFactory.create()
+        ParticipantFactory.create(doctor_ptr=participant)
+        patient = PatientFactory.create(doctor=participant)
+        study = StudyFactory.create()
+        study_invitation = StudyInvitationFactory.create(
+            study=study,
+            email=participant.email,
+            doctor=doctor)
+        self.authenticate_as_doctor(doctor=participant)
+        consent = PatientConsentFactory.create()
+        resp = self.client.post(
+            '/api/v1/study/invites/{0}/approve/'.format(study_invitation.pk), {
+                'encryption_keys': {doctor.pk: 'qwertyuiop'},
+                'consent_pk': consent.pk
+            },
+            format='json')
+        self.assertBadRequest(resp)
 
     def test_decline(self):
         doctor = DoctorFactory.create()
