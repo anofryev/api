@@ -65,7 +65,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                         study=study,
                         doctor=doctor)
                     AddParticipantNotification(
-                        context={'site_title': SITE_NAME}).send([email])
+                        context={'site_name': SITE_NAME}).send([email])
 
         return Response({
             'all_success': len(fail_emails) == 0,
