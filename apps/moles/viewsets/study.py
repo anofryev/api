@@ -25,7 +25,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                    mixins.CreateModelMixin, mixins.UpdateModelMixin,
                    mixins.ListModelMixin, mixins.RetrieveModelMixin,
                    mixins.DestroyModelMixin):
-    queryset = Study.objects.all()
+    queryset = Study.objects.all().order_by('-pk')
     serializer_class = StudyListSerializer
     permission_classes = (IsDoctor,)
 
