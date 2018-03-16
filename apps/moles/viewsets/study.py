@@ -11,7 +11,7 @@ from apps.accounts.permissions.is_coordinator_of_doctor import \
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from ..models import ConsentDoc, Study, StudyInvitation
 from ..serializers import (
-    ConsentDocSerializer, StudyCreateUpdateSerializer, StudyListSerializer)
+    ConsentDocSerializer, StudyBaseSerializer, StudyListSerializer)
 
 
 class ConsentDocViewSet(viewsets.GenericViewSet,
@@ -31,7 +31,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
-            return StudyCreateUpdateSerializer
+            return StudyBaseSerializer
         else:
             return self.serializer_class
 
