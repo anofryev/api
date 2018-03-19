@@ -2,6 +2,8 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+
+from apps.moles.serializers.study import AddDoctorSerializer
 from skin.settings import SITE_NAME
 
 from apps.accounts.models import Doctor
@@ -59,8 +61,10 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     @detail_route(methods=['POST'])
     def add_doctor(self, request, pk):
         study = self.get_object()
-        doctor = get_object_or_404(Doctor, pk=self.request.data['doctor_pk'])
-        email_list = self.request.data['emails']
+        serializer = AddDoctorSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        doctor_pk = serializer.data['doctor_pk']
+        email_list = serializer.data['emails']
         fail_emails = {}
 
         for email in email_list:
@@ -74,7 +78,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                     StudyInvitation.objects.create(
                         email=email,
                         study=study,
-                        doctor=doctor)
+                        doctor_id=doctor_pk)
                     AddParticipantNotification(
                         context={'site_name': SITE_NAME}).send([email])
 

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.accounts.models import Doctor
 from apps.accounts.serializers import DoctorSerializer
 from ..models import ConsentDoc, Study
 
@@ -27,4 +28,14 @@ class StudyListSerializer(serializers.ModelSerializer):
 
 
 class AddDoctorSerializer(serializers.Serializer):
-    pass
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass
+
+    doctor = DoctorSerializer(read_only=True)
+    doctor_pk = serializers.PrimaryKeyRelatedField(
+        queryset=Doctor.objects.all(), source='doctor')
+    emails = serializers.ListField(
+        child=serializers.EmailField())
