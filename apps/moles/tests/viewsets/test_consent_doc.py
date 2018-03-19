@@ -31,3 +31,9 @@ class ConsentDocViewSetTest(APITestCase):
         self.assertSuccessResponse(response)
         self.assertTrue(response.data['pk'] > 0)
         self.assertTrue(len(response.data['file']) > 0)
+
+    def test_thumbnail(self):
+        pass  # TODO
+
+    def test_filename(self):
+        pass  # TODO

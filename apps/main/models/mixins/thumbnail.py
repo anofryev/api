@@ -14,7 +14,7 @@ class ThumbnailMixin(object):
     @property
     def attachment(self):
         if not hasattr(self, self.ATTACHMENT_FIELD_NAME):
-            raise NotImplementedError('you need to define attachment field')
+            raise NotImplementedError('You need to define attachment field')
 
         return getattr(self, self.ATTACHMENT_FIELD_NAME)
 
