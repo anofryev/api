@@ -24,3 +24,7 @@ class StudyListSerializer(serializers.ModelSerializer):
 
     class Meta(StudyBaseSerializer.Meta):
         fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')
+
+
+class AddDoctorSerializer(serializers.Serializer):
+    pass
