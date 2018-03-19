@@ -29,6 +29,7 @@ requests==2.17.3
 whitenoise==3.3.0
 git+git://github.com/Brogency/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
 funcy==1.9.1
+sorl-thumbnail==12.4.1
 
 ipdb
 ipdbplugin

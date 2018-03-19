@@ -5,9 +5,14 @@ from ..models import ConsentDoc, Study
 
 
 class ConsentDocSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.ImageField(read_only=True)
+
+    def get_thumbnail(self, obj):
+        return obj.thumbnail
+
     class Meta:
         model = ConsentDoc
-        fields = ('pk', 'file')
+        fields = ('pk', 'file', 'thumbnail')
 
 
 class StudyBaseSerializer(serializers.ModelSerializer):

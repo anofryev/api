@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.main.models.mixins.thumbnail import ThumbnailMixin
 from apps.main.storages import private_storage
 from apps.moles.models.upload_paths import study_consent_docs_path
 
@@ -33,7 +34,9 @@ class Study(models.Model):
         verbose_name_plural = 'Studies'
 
 
-class ConsentDoc(models.Model):
+class ConsentDoc(models.Model, ThumbnailMixin):
+    ATTACHMENT_FIELD_NAME = 'file'
+
     file = models.FileField(
         verbose_name='Document file',
         upload_to=study_consent_docs_path,

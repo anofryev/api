@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -44,6 +44,17 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             return [IsCoordinatorOfDoctor()]
         else:
             return super(StudyViewSet, self).get_permissions()
+
+    # We redefine create, because need to use BaseSerializer on input and
+    # ListSerializer on output
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            StudyListSerializer(instance, context={'request': request}).data,
+            status=status.HTTP_201_CREATED, headers=headers)
 
     @detail_route(methods=['POST'])
     def add_doctor(self, request, pk):
