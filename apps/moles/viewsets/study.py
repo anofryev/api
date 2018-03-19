@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
@@ -67,13 +68,22 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         email_list = serializer.data['emails']
         fail_emails = {}
 
+        if study.doctors.filter(pk=doctor_pk).exists():
+            raise ValidationError(
+                'Selected doctor is already taking part in this study')
+
         for email in email_list:
             check_doctor = Doctor.objects.filter(email=email).first()
             if check_doctor and not is_participant(check_doctor):
-                fail_emails.update({email: 'user is already doctor or coordinator'})
+                fail_emails.update({
+                    email: 'user is already doctor or coordinator'
+                })
             else:
-                if StudyInvitation.objects.filter(email=email, study=study).exists():
-                    fail_emails.update({email: 'user is already participating'})
+                if StudyInvitation.objects.filter(
+                        email=email, study=study).exists():
+                    fail_emails.update({
+                        email: 'user is already participating'
+                    })
                 else:
                     StudyInvitation.objects.create(
                         email=email,

@@ -1,8 +1,7 @@
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
     PatientFactory, ParticipantFactory
-from apps.moles.factories.study import ConsentDocFactory, StudyFactory, \
-    StudyToPatient
+from apps.moles.factories.study import ConsentDocFactory, StudyFactory
 from apps.moles.models import Study, StudyInvitation
 
 
@@ -191,7 +190,7 @@ class StudyViewSetTest(APITestCase):
         )
         self.authenticate_as_doctor()
         emails = [doctor.email, self.doctor.email,
-                  patient.email, 'test@test.com', 'bad_email']
+                  patient.email, 'test@test.com']
         resp = self.client.post(
             '/api/v1/study/{0}/add_doctor/'.format(study.pk),
             {
@@ -200,3 +199,25 @@ class StudyViewSetTest(APITestCase):
             },
             format='json')
         self.assertNotFound(resp)
+
+    def test_add_doctor_already_in_study(self):
+        study = StudyFactory.create()
+        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
+        patient = DoctorFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=patient
+        )
+        study.doctors.add(doctor)
+        study.save()
+
+        self.authenticate_as_doctor()
+        emails = [doctor.email, self.doctor.email,
+                  patient.email, 'test@test.com']
+        resp = self.client.post(
+            '/api/v1/study/{0}/add_doctor/'.format(study.pk),
+            {
+                'doctor_pk': doctor.pk,
+                'emails': emails
+            },
+            format='json')
+        self.assertBadRequest(resp)
