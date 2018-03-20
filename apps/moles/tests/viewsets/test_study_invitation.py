@@ -15,9 +15,6 @@ class StudyInvitationViewSetTest(APITestCase):
     def setUp(self):
         super(StudyInvitationViewSetTest, self).setUp()
 
-    def get_post_data(self, ek):
-        return
-
     def test_permission(self):
         resp = self.client.get('/api/v1/study/invites/')
         self.assertForbidden(resp)

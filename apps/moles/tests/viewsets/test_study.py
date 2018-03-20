@@ -2,6 +2,7 @@ from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
     PatientFactory, ParticipantFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory
+from apps.moles.factories.study_invitation import StudyInvitationFactory
 from apps.moles.models import Study, StudyInvitation
 
 
@@ -221,3 +222,28 @@ class StudyViewSetTest(APITestCase):
             },
             format='json')
         self.assertBadRequest(resp)
+
+    def test_add_doctor_invited_email(self):
+        study = StudyFactory.create()
+        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
+        patient = DoctorFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=patient
+        )
+        self.authenticate_as_doctor()
+
+        StudyInvitationFactory.create(
+            email='test@test.com',
+            study=study
+        )
+        emails = ['test@test.com']
+        resp = self.client.post(
+            '/api/v1/study/{0}/add_doctor/'.format(study.pk),
+            {
+                'doctor_pk': doctor.pk,
+                'emails': emails
+            },
+            format='json')
+        self.assertSuccessResponse(resp)
+        self.assertSetEqual(set(resp.data['fail_emails']),
+                            {'test@test.com'})
