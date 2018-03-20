@@ -10,5 +10,9 @@ class IsCoordinatorOfDoctor(IsCoordinator):
             return False
 
         coordinator = request.user.doctor_role
+        if 'doctor_pk' not in view.request.data:
+            # lets pass to view, because error will be processed by serializer
+            return True
+
         doctor = get_object_or_404(Doctor, pk=view.request.data['doctor_pk'])
         return doctor.my_coordinator == coordinator.coordinator_role

@@ -28,14 +28,10 @@ class StudyListSerializer(serializers.ModelSerializer):
 
 
 class AddDoctorSerializer(serializers.Serializer):
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
     doctor = DoctorSerializer(read_only=True)
     doctor_pk = serializers.PrimaryKeyRelatedField(
-        queryset=Doctor.objects.all(), source='doctor')
+        queryset=Doctor.objects.all(),
+        source='doctor',
+        required=True)
     emails = serializers.ListField(
         child=serializers.EmailField())
