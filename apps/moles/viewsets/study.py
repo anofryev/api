@@ -71,6 +71,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             raise ValidationError(
                 'Selected doctor is already taking part in this study')
 
+        study.doctors.add(doctor_pk)
         for email in email_list:
             check_doctor = Doctor.objects.filter(email=email).first()
             if check_doctor and not is_participant(check_doctor):
