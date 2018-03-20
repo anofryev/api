@@ -1,7 +1,21 @@
 {% load i18n %}
 
 {% block subject %}
-{% blocktrans %}You has been invited to research on {{ site_name }}{% endblocktrans %}
+{% blocktrans %}
+    You're invited to handeylab.com study {{ study_id }}: {{ study_title }}.
+{% endblocktrans %}
 {% endblock subject %}
 
-{#TODO: Need message text#}
+{% block text_body %}
+{% blocktrans %}Hello!{% endblocktrans %}
+
+{% blocktrans %}
+You are invited to take part in the new handeylab.com study.
+{% endblocktrans %}
+
+{% blocktrans %}
+Best regards,
+handeylab.com team
+{% endblocktrans %}
+
+{% endblock text_body %}
