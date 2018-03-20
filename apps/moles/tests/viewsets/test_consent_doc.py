@@ -41,6 +41,4 @@ class ConsentDocViewSetTest(APITestCase):
         self.authenticate_as_doctor()
         response = self.post_image_doc()
         self.assertIsNotNone(response.data['thumbnail'])
-
-    def test_filename(self):
-        pass  # TODO
+        self.assertEqual(response.data['original_filename'], 'image_doc.png')

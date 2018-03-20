@@ -10,7 +10,7 @@ class ConsentDocSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConsentDoc
-        fields = ('pk', 'file', 'thumbnail', 'attachment_name')
+        fields = ('pk', 'file', 'thumbnail', 'original_filename')
 
 
 class StudyBaseSerializer(serializers.ModelSerializer):

@@ -33,6 +33,8 @@ def mole_image_photo_path(instance, filename):
 
 
 def study_consent_docs_path(instance, filename):
+    instance.original_filename = filename
+
     new_filename = generate_filename(
         filename,
         prefix='doc')

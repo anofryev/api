@@ -42,6 +42,9 @@ class ConsentDoc(models.Model, ThumbnailMixin):
         upload_to=study_consent_docs_path,
         storage=private_storage,
     )
+    original_filename = models.CharField(
+        max_length=250,
+        blank=True, null=True)
 
     class Meta:
         verbose_name = 'Consent doc'
