@@ -16,6 +16,11 @@ class ConsentDocViewSetTest(APITestCase):
             'file': self.get_sample_file('pdf_doc.pdf')
         })
 
+    def post_image_doc(self):
+        return self.client.post('/api/v1/study/consent_doc/', {
+            'file': self.get_sample_image_file('image_doc.png')
+        })
+
     def test_forbidden_unauthorized(self):
         response = self.post_doc()
         self.assertForbidden(response)
@@ -32,8 +37,10 @@ class ConsentDocViewSetTest(APITestCase):
         self.assertTrue(response.data['pk'] > 0)
         self.assertTrue(len(response.data['file']) > 0)
 
-    def test_thumbnail(self):
-        pass  # TODO
+    def test_thumbnail_success(self):
+        self.authenticate_as_doctor()
+        response = self.post_image_doc()
+        self.assertIsNotNone(response.data['thumbnail'])
 
     def test_filename(self):
         pass  # TODO

@@ -31,8 +31,5 @@ class ThumbnailMixin(object):
         if self.attachment is None or self.extension not in IMAGE_EXTENSIONS:
             return None
 
-        try:
-            return get_thumbnail(self.attachment, '100x100', crop='center',
-                                 quality=99, format='PNG')
-        except Exception:
-            raise
+        return get_thumbnail(self.attachment, '100x100', crop='center',
+                             quality=99, format='PNG')
