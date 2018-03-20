@@ -5,7 +5,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from apps.moles.serializers.study import AddDoctorSerializer
-from skin.settings import SITE_NAME
 
 from apps.accounts.models import Doctor
 from apps.accounts.models.participant import is_participant
@@ -90,7 +89,8 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                         study=study,
                         doctor_id=doctor_pk)
                     AddParticipantNotification(
-                        context={'site_name': SITE_NAME}).send([email])
+                        context={'study_id': study.pk,
+                                 'study_title:': study.title}).send([email])
 
         return Response({
             'all_success': len(fail_emails) == 0,
