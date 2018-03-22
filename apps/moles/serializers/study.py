@@ -34,4 +34,5 @@ class AddDoctorSerializer(serializers.Serializer):
         source='doctor',
         required=True)
     emails = serializers.ListField(
-        child=serializers.EmailField())
+        child=serializers.EmailField(),
+        required=False)

@@ -10,7 +10,8 @@ class IsCoordinatorOfDoctor(IsCoordinator):
             return False
 
         coordinator = request.user.doctor_role
-        if 'doctor_pk' not in view.request.data:
+        if 'doctor_pk' not in view.request.data or \
+                not view.request.data['doctor_pk']:
             # lets pass to view, because error will be processed by serializer
             return True
 
