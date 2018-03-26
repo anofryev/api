@@ -221,7 +221,7 @@ class StudyViewSetTest(APITestCase):
                 'emails': emails
             },
             format='json')
-        self.assertBadRequest(resp)
+        self.assertSuccessResponse(resp)
 
     def test_add_doctor_invited_email(self):
         study = StudyFactory.create()

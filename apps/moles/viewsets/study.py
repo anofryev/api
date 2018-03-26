@@ -67,10 +67,6 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         email_list = serializer.data['emails']
         fail_emails = {}
 
-        if study.doctors.filter(pk=doctor_pk).exists():
-            raise ValidationError(
-                'Selected doctor is already taking part in this study')
-
         study.doctors.add(doctor_pk)
         for email in email_list:
             check_doctor = Doctor.objects.filter(email=email).first()
