@@ -15,7 +15,8 @@ from apps.accounts.permissions.is_coordinator_of_doctor import \
 from apps.accounts.viewsets.mixins import PatientInfoMixin
 from ..models import ConsentDoc, Study, StudyInvitation, StudyInvitationStatus
 from ..serializers import (
-    ConsentDocSerializer, StudyBaseSerializer, StudyListSerializer, StudyInvitationSerializer)
+    ConsentDocSerializer, StudyBaseSerializer, StudyListSerializer,
+    StudyInvitationSerializer)
 
 
 class ConsentDocViewSet(viewsets.GenericViewSet,
@@ -61,9 +62,11 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     @detail_route(methods=['GET'])
     def invites(self, request, pk):
         study = self.get_object()
-        instance = study.studyinvitation_set.all().filter(status=StudyInvitationStatus.NEW)
+        instance = study.studyinvitation_set.all()\
+            .filter(status=StudyInvitationStatus.NEW)
         return Response(
-            StudyInvitationSerializer(instance, context={'request': request}, many=True).data
+            StudyInvitationSerializer(instance, context={'request': request},
+                                      many=True).data
         )
 
     @detail_route(methods=['POST'])
