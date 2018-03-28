@@ -4,7 +4,8 @@ from rest_framework.response import Response
 
 from apps.accounts.models.coordinator import is_coordinator
 from apps.accounts.models import Doctor
-from apps.accounts.models.participant import is_participant
+from apps.accounts.models.participant import is_participant, \
+    get_participant_patient
 from apps.moles.models.moles_mailer import AddParticipantNotification
 from apps.moles.serializers.study import AddDoctorSerializer
 from apps.accounts.permissions import IsCoordinator, IsDoctor
@@ -35,6 +36,12 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         user = self.request.user.doctor_role
         if is_coordinator(user):
             return self.queryset
+        elif is_participant(user):
+            patient = get_participant_patient(user)
+            if patient:
+                return self.queryset.filter(patients__pk=patient.pk)
+            else:
+                return self.queryset.none()
         else:
             return self.queryset.filter(doctors__pk=user.pk)
 

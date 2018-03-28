@@ -1,6 +1,7 @@
 from django.db import models
 
 from .doctor import Doctor
+from .patient import DoctorToPatient
 
 
 # Participant is a patient, who can log in into system (so, can be a doctor)
@@ -22,3 +23,10 @@ class Participant(models.Model):
 
 def is_participant(user):
     return Participant.objects.filter(doctor_ptr=user).exists()
+
+
+def get_participant_patient(user):
+    doctor_to_patient = DoctorToPatient.objects.filter(
+        doctor=user
+    ).first()
+    return doctor_to_patient.patient if doctor_to_patient else None
