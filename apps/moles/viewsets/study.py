@@ -1,14 +1,13 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from apps.moles.serializers.study import AddDoctorSerializer
-
+from apps.accounts.models.coordinator import is_coordinator
 from apps.accounts.models import Doctor
-from apps.accounts.models.participant import is_participant
+from apps.accounts.models.participant import is_participant, \
+    get_participant_patient
 from apps.moles.models.moles_mailer import AddParticipantNotification
+from apps.moles.serializers.study import AddDoctorSerializer
 from apps.accounts.permissions import IsCoordinator, IsDoctor
 from apps.accounts.permissions.is_coordinator_of_doctor import \
     IsCoordinatorOfDoctor
@@ -33,6 +32,19 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     queryset = Study.objects.all().order_by('-pk')
     serializer_class = StudyListSerializer
     permission_classes = (IsDoctor,)
+
+    def get_queryset(self):
+        user = self.request.user.doctor_role
+        if is_coordinator(user):
+            return self.queryset
+        elif is_participant(user):
+            patient = get_participant_patient(user)
+            if patient:
+                return self.queryset.filter(patients__pk=patient.pk)
+            else:
+                return self.queryset.none()
+        else:
+            return self.queryset.filter(doctors__pk=user.pk)
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
