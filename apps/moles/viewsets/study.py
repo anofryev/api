@@ -69,6 +69,16 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                                       many=True).data
         )
 
+    @detail_route(methods=['GET'])
+    def patients(self, request, pk):
+        study = self.get_object()
+        instance = study.studyinvitation_set.all()\
+            .filter(status=StudyInvitationStatus.ACCEPTED)
+        return Response(
+            StudyInvitationSerializer(instance, context={'request': request},
+                                      many=True).data
+        )
+
     @detail_route(methods=['POST'])
     def add_doctor(self, request, pk):
         study = self.get_object()
