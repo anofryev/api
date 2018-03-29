@@ -55,14 +55,17 @@ class StudyViewSetTest(APITestCase):
         self.assertTrue(data['pk'] > 0)
         self.assertEqual(data['title'], 'sample study')
 
-    def test_list(self):
-        self.authenticate_as_doctor()
+    def test_list_as_doctor(self):
+        doctor = DoctorFactory.create()
+        self.authenticate_as_doctor(doctor)
+        study = StudyFactory.create()
         resp = self.client.get('/api/v1/study/', format='json')
         self.assertEqual(len(resp.data), 0)
-        StudyFactory.create()
-        StudyFactory.create()
+        study.doctors.add(doctor)
+        study.save()
+        self.authenticate_as_doctor(doctor)
         resp = self.client.get('/api/v1/study/', format='json')
-        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(len(resp.data), 1)
 
     def test_list_forbidden(self):
         StudyFactory.create()
@@ -170,6 +173,7 @@ class StudyViewSetTest(APITestCase):
         ParticipantFactory.create(
             doctor_ptr=patient
         )
+        old_invites_count = study.studyinvitation_set.count()
         self.authenticate_as_doctor()
         emails = [doctor.email, self.doctor.email,
                   patient.email, 'test@test.com', 'bad_email']
@@ -181,6 +185,8 @@ class StudyViewSetTest(APITestCase):
             },
             format='json')
         self.assertBadRequest(resp)
+        study.refresh_from_db()
+        self.assertEqual(old_invites_count, study.studyinvitation_set.count())
 
     def test_add_doctor_bad_doctor_pk(self):
         study = StudyFactory.create()
@@ -189,6 +195,7 @@ class StudyViewSetTest(APITestCase):
         ParticipantFactory.create(
             doctor_ptr=patient
         )
+        old_doc_count = study.doctors.count()
         self.authenticate_as_doctor()
         emails = [doctor.email, self.doctor.email,
                   patient.email, 'test@test.com']
@@ -200,6 +207,9 @@ class StudyViewSetTest(APITestCase):
             },
             format='json')
         self.assertNotFound(resp)
+        study.refresh_from_db()
+        self.assertEqual(old_doc_count, study.doctors.count())
+
 
     def test_add_doctor_already_in_study(self):
         study = StudyFactory.create()
@@ -222,6 +232,8 @@ class StudyViewSetTest(APITestCase):
             },
             format='json')
         self.assertSuccessResponse(resp)
+        study.refresh_from_db()
+        self.assertEqual(study.doctors.count(), 1)
 
     def test_add_doctor_invited_email(self):
         study = StudyFactory.create()
