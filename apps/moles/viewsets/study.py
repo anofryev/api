@@ -74,18 +74,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     @detail_route(methods=['GET'])
     def invites(self, request, pk):
         study = self.get_object()
-        instance = study.studyinvitation_set.all()\
-            .filter(status=StudyInvitationStatus.NEW)
-        return Response(
-            StudyInvitationSerializer(instance, context={'request': request},
-                                      many=True).data
-        )
-
-    @detail_route(methods=['GET'])
-    def patients(self, request, pk):
-        study = self.get_object()
-        instance = study.studyinvitation_set.all()\
-            .filter(status=StudyInvitationStatus.ACCEPTED)
+        instance = study.studyinvitation_set.all()
         return Response(
             StudyInvitationSerializer(instance, context={'request': request},
                                       many=True).data
