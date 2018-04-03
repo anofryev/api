@@ -26,12 +26,10 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
     def approve(self, request, pk):
         invitation = self.get_object()
 
-        encryption_keys = self.request.data['encryption_keys']
-        doctor = invitation.doctor
-        if str(doctor.pk) not in encryption_keys:
-            raise ValidationError(
-                'You doesn\'t not pass encryption key of doctor')
 
+
+        doctor = invitation.doctor
+        doctor_encryption_key = self.request.data['doctor_encryption_key']
         patient_consent = PatientConsent.objects.get(
             pk=self.request.data['consent_pk'])
         patient = get_participant_patient(self.request.user.doctor_role)
@@ -42,7 +40,17 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
         DoctorToPatient.objects.update_or_create(
             doctor=doctor,
             patient=patient,
-            defaults={'encrypted_key': encryption_keys[str(doctor.pk)]})
+            defaults={'encrypted_key': doctor_encryption_key})
+
+        if doctor.my_coordinator and \
+                'coordinator_encryption_key' in self.request.data:
+            DoctorToPatient.objects.update_or_create(
+                doctor=doctor.my_coordinator.doctor_ptr,
+                patient=patient,
+                defaults={
+                    'encrypted_key':
+                        self.request.data['coordinator_encryption_key']
+                })
 
         StudyToPatient.objects.create(
             study=invitation.study,

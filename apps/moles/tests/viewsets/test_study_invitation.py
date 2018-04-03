@@ -1,4 +1,4 @@
-from apps.accounts.factories import PatientConsentFactory
+from apps.accounts.factories import PatientConsentFactory, CoordinatorFactory
 from apps.main.tests import APITestCase
 from apps.moles.factories.study import StudyFactory
 from apps.moles.models import StudyToPatient
@@ -28,7 +28,9 @@ class StudyInvitationViewSetTest(APITestCase):
         self.assertEqual(len(StudyInvitation.objects.all()), 2)
 
     def test_approve(self):
-        doctor = DoctorFactory.create()
+        coordinator = DoctorFactory.create()
+        coordinator_ptr = CoordinatorFactory.create(doctor_ptr=coordinator)
+        doctor = DoctorFactory.create(my_coordinator=coordinator_ptr)
         participant = DoctorFactory.create()
         ParticipantFactory.create(doctor_ptr=participant)
         patient = PatientFactory.create(doctor=participant)
@@ -41,7 +43,8 @@ class StudyInvitationViewSetTest(APITestCase):
         consent = PatientConsentFactory.create(patient=patient)
         resp = self.client.post(
             '/api/v1/study/invites/{0}/approve/'.format(study_invitation.pk), {
-                'encryption_keys': {doctor.pk: 'qwertyuiop'},
+                'doctor_encryption_key': 'qwertyuiop',
+                'coordinator_encryption_key': 'iqwjgipwqjeg',
                 'consent_pk': consent.pk
             },
             format='json')
@@ -51,9 +54,15 @@ class StudyInvitationViewSetTest(APITestCase):
         self.assertEqual(study_invitation.status,
                          StudyInvitationStatus.ACCEPTED)
 
-        doc_to_patient = DoctorToPatient.objects.get(doctor=doctor,
-                                                     patient=patient)
+        doc_to_patient = DoctorToPatient.objects.get(
+            doctor=doctor,
+            patient=patient)
         self.assertEqual(doc_to_patient.encrypted_key, 'qwertyuiop')
+
+        coordinator_to_patient = DoctorToPatient.objects.get(
+            doctor=coordinator,
+            patient=patient)
+        self.assertEqual(coordinator_to_patient.encrypted_key, 'iqwjgipwqjeg')
 
         study_to_patient = StudyToPatient.objects.get(
             study=study,
@@ -70,10 +79,12 @@ class StudyInvitationViewSetTest(APITestCase):
         study_invitation = StudyInvitationFactory.create(
             email=participant.email,
             doctor=doctor)
+        consent = PatientConsentFactory.create()
         self.authenticate_as_doctor(doctor=participant)
         resp = self.client.post(
             '/api/v1/study/invites/{0}/approve/'.format(study_invitation.pk), {
-                'encryption_keys': {20: 'qwertyuiop'}
+                'doctor_encryption_key': 'qwertyuiop',
+                'consent_pk': consent.pk
             },
             format='json')
         self.assertBadRequest(resp)
@@ -92,7 +103,7 @@ class StudyInvitationViewSetTest(APITestCase):
         consent = PatientConsentFactory.create()
         resp = self.client.post(
             '/api/v1/study/invites/{0}/approve/'.format(study_invitation.pk), {
-                'encryption_keys': {doctor.pk: 'qwertyuiop'},
+                'doctor_encryption_key': 'qwertyuiop',
                 'consent_pk': consent.pk
             },
             format='json')
