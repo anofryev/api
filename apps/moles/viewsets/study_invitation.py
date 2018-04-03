@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from apps.accounts.models import DoctorToPatient, PatientConsent
+from apps.accounts.models.participant import get_participant_patient
 from apps.accounts.permissions.is_partipicant import IsParticipant
 from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
 from ..serializers import StudyInvitationSerializer
@@ -24,8 +25,6 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
     @detail_route(methods=['POST'])
     def approve(self, request, pk):
         invitation = self.get_object()
-        invitation.status = StudyInvitationStatus.ACCEPTED
-        invitation.save(update_fields=['status'])
 
         encryption_keys = self.request.data['encryption_keys']
         doctor = invitation.doctor
@@ -35,9 +34,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
 
         patient_consent = PatientConsent.objects.get(
             pk=self.request.data['consent_pk'])
-        patient = DoctorToPatient.objects.get(
-            doctor=self.request.user.doctor_role
-        ).patient
+        patient = get_participant_patient(self.request.user.doctor_role)
         if patient_consent.patient != patient:
             raise ValidationError(
                 'Patient in consent does not match request patient')
@@ -52,6 +49,8 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             patient=patient,
             patient_consent=patient_consent)
 
+        invitation.status = StudyInvitationStatus.ACCEPTED
+        invitation.save(update_fields=['status'])
         return Response(StudyInvitationSerializer(instance=invitation).data)
 
     @detail_route(methods=['POST'])
