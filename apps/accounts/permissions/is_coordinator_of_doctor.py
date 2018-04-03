@@ -13,6 +13,7 @@ class IsCoordinatorOfDoctor(IsCoordinator):
         if 'doctor_pk' not in view.request.data or \
                 not view.request.data['doctor_pk']:
             # lets pass to view, because error will be processed by serializer
+            # it's because permissions works earlier, than required=True
             return True
 
         doctor = get_object_or_404(Doctor, pk=view.request.data['doctor_pk'])
