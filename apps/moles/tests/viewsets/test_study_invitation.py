@@ -93,7 +93,7 @@ class StudyInvitationViewSetTest(APITestCase):
         doctor = DoctorFactory.create()
         participant = DoctorFactory.create()
         ParticipantFactory.create(doctor_ptr=participant)
-        patient = PatientFactory.create(doctor=participant)
+        PatientFactory.create(doctor=participant)
         study = StudyFactory.create()
         study_invitation = StudyInvitationFactory.create(
             study=study,

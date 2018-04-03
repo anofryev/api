@@ -26,8 +26,6 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
     def approve(self, request, pk):
         invitation = self.get_object()
 
-
-
         doctor = invitation.doctor
         doctor_encryption_key = self.request.data['doctor_encryption_key']
         patient_consent = PatientConsent.objects.get(
