@@ -1,9 +1,10 @@
+from apps.accounts.models import DoctorToPatient
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
     PatientFactory, ParticipantFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory
 from apps.moles.factories.study_invitation import StudyInvitationFactory
-from apps.moles.models import Study, StudyInvitation
+from apps.moles.models import Study, StudyInvitation, StudyToPatient
 
 
 class StudyViewSetTest(APITestCase):
@@ -71,6 +72,34 @@ class StudyViewSetTest(APITestCase):
         StudyFactory.create()
         resp = self.client.get('/api/v1/study/', format='json')
         self.assertForbidden(resp)
+
+    def test_list_by_participant(self):
+        study = StudyFactory.create()
+        study2 = StudyFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=self.other_doctor)
+        DoctorToPatient.objects.create(
+            patient=self.patient,
+            doctor=self.other_doctor,
+            encrypted_key='123')
+        StudyToPatient.objects.create(
+            study=study,
+            patient=self.patient)
+        self.authenticate_as_doctor(self.other_doctor)
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['pk'], study.pk)
+
+    def test_list_by_participant_empty(self):
+        StudyFactory.create()
+        StudyFactory.create()
+        ParticipantFactory.create(
+            doctor_ptr=self.other_doctor)
+        self.authenticate_as_doctor(self.other_doctor)
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 0)
 
     def test_retrieve_forbidden(self):
         study = StudyFactory.create()
@@ -259,3 +288,15 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertSetEqual(set(resp.data['fail_emails']),
                             {'test@test.com'})
+
+    def test_invitations(self):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+        invitation = StudyInvitationFactory.create(study=study)
+        StudyInvitationFactory.create()
+        resp = self.client.get(
+            '/api/v1/study/{0}/invites/'.format(study.pk), format='json')
+
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['pk'], invitation.pk)
