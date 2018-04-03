@@ -239,30 +239,16 @@ class StudyViewSetTest(APITestCase):
         study.refresh_from_db()
         self.assertEqual(old_doc_count, study.doctors.count())
 
-
-    def test_add_doctor_already_in_study(self):
+    def test_add_doctor_doctor_pk_in_permissions(self):
         study = StudyFactory.create()
-        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
-        patient = DoctorFactory.create()
-        ParticipantFactory.create(
-            doctor_ptr=patient
-        )
-        study.doctors.add(doctor)
-        study.save()
-
-        self.authenticate_as_doctor()
-        emails = [doctor.email, self.doctor.email,
-                  patient.email, 'test@test.com']
         resp = self.client.post(
             '/api/v1/study/{0}/add_doctor/'.format(study.pk),
             {
-                'doctor_pk': doctor.pk,
-                'emails': emails
+                'doctor_pk': 0,
+                'emails': ['mail@mail.mail']
             },
             format='json')
-        self.assertSuccessResponse(resp)
-        study.refresh_from_db()
-        self.assertEqual(study.doctors.count(), 1)
+        self.assertNotFound(resp)
 
     def test_add_doctor_invited_email(self):
         study = StudyFactory.create()
