@@ -71,6 +71,32 @@ class StudyInvitationViewSetTest(APITestCase):
         self.assertEqual(study_to_patient.patient_consent.pk, consent.pk)
         self.assertListEqual(list(study.patients.all()), [patient])
 
+    def test_approve_without_coordinator(self):
+        coordinator = DoctorFactory.create()
+        coordinator_ptr = CoordinatorFactory.create(doctor_ptr=coordinator)
+        doctor = DoctorFactory.create(my_coordinator=coordinator_ptr)
+        participant = DoctorFactory.create()
+        ParticipantFactory.create(doctor_ptr=participant)
+        patient = PatientFactory.create(doctor=participant)
+        study = StudyFactory.create()
+        study_invitation = StudyInvitationFactory.create(
+            study=study,
+            email=participant.email,
+            doctor=doctor)
+        self.authenticate_as_doctor(doctor=participant)
+        consent = PatientConsentFactory.create(patient=patient)
+        resp = self.client.post(
+            '/api/v1/study/invites/{0}/approve/'.format(study_invitation.pk), {
+                'doctor_encryption_key': 'qwertyuiop',
+                'consent_pk': consent.pk
+            },
+            format='json')
+        self.assertSuccessResponse(resp)
+        study.refresh_from_db()
+        study_invitation.refresh_from_db()
+        self.assertEqual(study_invitation.status,
+                         StudyInvitationStatus.ACCEPTED)
+
     def test_approve_with_invalid_id(self):
         doctor = DoctorFactory.create()
         participant = DoctorFactory.create()
