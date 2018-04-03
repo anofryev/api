@@ -54,9 +54,26 @@ class DoctorSerializer(UserSerializer):
                   'is_coordinator', 'is_participant', 'date_created',)
 
 
-class DoctorFullSerializer(DoctorSerializer):
-    photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
+class DoctorWithKeysSerializer(DoctorSerializer):
     coordinator_public_key = serializers.SerializerMethodField()
+
+    def get_coordinator_public_key(self, doctor):
+        if doctor.my_coordinator_id:
+            return Doctor.objects.filter(
+                id=doctor.my_coordinator_id).values_list(
+                    'public_key', flat=True).first()
+        return None
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'is_participant', 'date_created',
+                  'public_key', 'coordinator_public_key')
+
+
+class DoctorFullSerializer(DoctorWithKeysSerializer):
+    photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     my_doctors_public_keys = serializers.SerializerMethodField()
 
     class Meta:
@@ -85,13 +102,6 @@ class DoctorFullSerializer(DoctorSerializer):
         if coordinator:
             return {d['id']: d['public_key'] for d in
                     coordinator.doctors.values('id', 'public_key')}
-        return None
-
-    def get_coordinator_public_key(self, doctor):
-        if doctor.my_coordinator_id:
-            return Doctor.objects.filter(
-                id=doctor.my_coordinator_id).values_list(
-                    'public_key', flat=True).first()
         return None
 
     def update(self, instance, validated_data):
