@@ -34,6 +34,13 @@ class StudyInvitation(models.Model):
         verbose_name='Status'
     )
 
+    def __str__(self):
+        return '{0} invites {1} to {2} : {3}'.format(
+            self.doctor,
+            self.email,
+            self.study,
+            self.get_status_display())
+
     class Meta:
         verbose_name = 'Study invitation'
         verbose_name_plural = 'Study invitations'
