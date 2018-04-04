@@ -2,6 +2,9 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from apps.accounts.models import DoctorToPatient
+from apps.accounts.models.participant import get_participant_patient, \
+    is_participant
 from ..models import Doctor, Coordinator, Participant, SiteJoinRequest, Site
 from .user import UserSerializer
 
@@ -102,6 +105,17 @@ class DoctorFullSerializer(DoctorWithKeysSerializer):
         if coordinator:
             return {d['id']: d['public_key'] for d in
                     coordinator.doctors.values('id', 'public_key')}
+
+        if is_participant(doctor):
+            patient = get_participant_patient(doctor)
+            if patient:
+                return {d['id']: d['public_key'] for d in
+                        Doctor.objects.filter(
+                            pk__in=DoctorToPatient.objects.filter(
+                                patient=patient
+                            ).values_list('doctor_id', flat=True)
+                        ).values('id', 'public_key')}
+
         return None
 
     def update(self, instance, validated_data):
