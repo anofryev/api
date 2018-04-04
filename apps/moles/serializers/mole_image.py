@@ -13,7 +13,7 @@ class MoleImageSerializer(serializers.ModelSerializer):
         model = MoleImage
         fields = ('pk', 'date_created', 'date_modified', 'path_diagnosis',
                   'clinical_diagnosis', 'prediction', 'prediction_accuracy',
-                  'photo', 'biopsy', 'biopsy_data', 'approved', 'age', )
+                  'photo', 'biopsy', 'biopsy_data', 'approved', 'age', 'study')
         extra_kwargs = {
             'age': {
                 'read_only': True,
