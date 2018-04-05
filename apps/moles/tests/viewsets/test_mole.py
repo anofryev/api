@@ -1,5 +1,6 @@
 import json
 from apps.main.tests import patch
+from apps.moles.factories.study import StudyFactory
 from ...factories import AnatomicalSiteFactory, PatientAnatomicalSiteFactory
 from ...models import Mole
 from ..moles_test_case import MolesTestCase
@@ -115,6 +116,34 @@ class MoleViewSetTest(MolesTestCase):
         self.assertTrue(mole_image.photo.name.startswith(
             'patients/{0}/skin_images/{1}/{1}_photo'.format(
                 mole.patient.pk, mole.pk)))
+
+    @patch('apps.moles.tasks.requests')
+    def test_create_success_with_study(self, mock_requests):
+        study = StudyFactory.create()
+        self.authenticate_as_doctor()
+
+        position_info = {'x': 10, 'y': 10}
+
+        mole_data = {
+            'anatomical_site': self.anatomical_site.pk,
+            'position_info': json.dumps(position_info),
+            'photo': self.get_sample_image_file(),
+            'study': study.pk
+        }
+
+        with self.fake_media():
+            resp = self.client.post(
+                self.get_url(self.first_patient.pk),
+                mole_data)
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertIsNotNone(data['pk'])
+        mole = Mole.objects.get(pk=data['pk'])
+
+        mole_image = mole.images.first()
+        self.assertIsNotNone(mole_image.study)
+        self.assertEqual(mole_image.study.pk, study.pk)
 
     def test_create_forbidden_for_wrong_patient_anatomical_site(self):
         self.authenticate_as_doctor()

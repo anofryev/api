@@ -2,6 +2,7 @@ import json
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from apps.moles.models import Study
 from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
@@ -70,10 +71,14 @@ class MoleCreateSerializer(MoleSerializer):
     age = serializers.IntegerField(
         required=False,
         allow_null=True)
+    study = serializers.PrimaryKeyRelatedField(
+        queryset=Study.objects.all(),
+        write_only=True,
+        required=False)
 
     class Meta(MoleSerializer.Meta):
         fields = ('anatomical_site', 'patient_anatomical_site',
-                  'position_info', 'photo', 'age', )
+                  'position_info', 'photo', 'age', 'study')
 
     validate_position_info = validate_position_info
     validate = validate
@@ -81,10 +86,11 @@ class MoleCreateSerializer(MoleSerializer):
     def create(self, validated_data):
         photo = validated_data.pop('photo')
         age = validated_data.pop('age', None)
+        study = validated_data.pop('study', None)
 
         mole = super(MoleCreateSerializer, self).create(validated_data)
 
-        MoleImage.objects.create(mole=mole, photo=photo, age=age)
+        MoleImage.objects.create(mole=mole, photo=photo, age=age, study=study)
 
         return mole
 
