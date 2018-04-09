@@ -12,6 +12,10 @@ from .mole_image import MoleImageSerializer
 class MoleSerializer(serializers.ModelSerializer):
     anatomical_sites = AnatomicalSiteSerializer(many=True, read_only=True)
     position_info = serializers.JSONField()
+    studies = serializers.SerializerMethodField()
+
+    def get_studies(self, obj):
+        return list(filter(None, obj.studies))
 
     class Meta:
         model = Mole
@@ -36,7 +40,7 @@ class MoleListSerializer(MoleSerializer):
                   'images_with_clinical_diagnosis_required',
                   'images_with_pathological_diagnosis_required',
                   'images_biopsy_count',
-                  'images_approve_required', )
+                  'images_approve_required', 'studies')
 
 
 class MoleDetailSerializer(MoleSerializer):
@@ -45,7 +49,7 @@ class MoleDetailSerializer(MoleSerializer):
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'patient_anatomical_site',
-                  'position_info', 'images', )
+                  'position_info', 'images', 'studies')
 
 
 def validate_position_info(self, value):

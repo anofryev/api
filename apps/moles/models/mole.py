@@ -3,6 +3,7 @@ from django.db.models import Max, Count, Case, When, Q, F
 from django.contrib.postgres.fields import JSONField
 
 from apps.accounts.models import Patient
+from apps.moles.models.aggregates import ArrayAgg
 from .anatomical_site import AnatomicalSite
 from .patient_anatomical_site import PatientAnatomicalSite
 
@@ -62,6 +63,14 @@ class MoleQuerySet(models.QuerySet):
                          then=F('images__pk')),
                     default=None
                 ),
+                distinct=True
+            )
+        )
+
+    def annotate_studies(self):
+        return self.annotate(
+            studies=ArrayAgg(
+                'images__study_id',
                 distinct=True
             )
         )

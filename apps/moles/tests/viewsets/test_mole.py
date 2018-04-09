@@ -1,5 +1,6 @@
 import json
 from apps.main.tests import patch
+from apps.moles.factories import MoleImageFactory
 from apps.moles.factories.study import StudyFactory
 from ...factories import AnatomicalSiteFactory, PatientAnatomicalSiteFactory
 from ...models import Mole
@@ -49,6 +50,38 @@ class MoleViewSetTest(MolesTestCase):
         resp = self.client.get(self.get_url(
                 self.another_patient.pk, self.another_patient_mole.pk))
         self.assertForbidden(resp)
+
+    def test_mole_studies(self):
+        study = StudyFactory.create()
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+
+        self.authenticate_as_doctor()
+
+        resp = self.client.get(self.get_url(self.first_patient.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        self.assertListEqual(resp.data[0]['studies'], [study.pk])
+
+    def test_mole_studies_detail(self):
+        study = StudyFactory.create()
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+
+        self.authenticate_as_doctor()
+
+        resp = self.client.get(self.get_url(
+            self.first_patient.pk, self.first_patient_mole.pk))
+        self.assertSuccessResponse(resp)
+        self.assertListEqual(resp.data['studies'], [study.pk])
 
     @patch('apps.moles.tasks.requests')
     def test_create_success(self, mock_requests):
