@@ -1,3 +1,4 @@
+from django.db.models import Func
 from django.contrib.postgres.aggregates import ArrayAgg as ArrayAggBase
 
 
@@ -8,3 +9,7 @@ class ArrayAgg(ArrayAggBase):
     def __init__(self, expression, distinct=False, **extra):
         super().__init__(expression, distinct='DISTINCT ' if distinct else '',
                          **extra)
+
+
+class ArrayRemove(Func):
+    function = 'ARRAY_REMOVE'

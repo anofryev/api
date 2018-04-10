@@ -1,13 +1,33 @@
 from django.db import models
+from django.db.models import Case, When
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from versatileimagefield.fields import VersatileImageField
 
 from apps.main.storages import public_storage
 from apps.main.models.mixins import DelayedSaveFilesMixin
+from apps.main.models.aggregates import ArrayRemove, ArrayAgg
 from .user import User
 from .upload_paths import doctor_photo_path
 from .enums import UnitsOfLengthEnum
+
+
+class DoctorQuerySet(models.QuerySet):
+    def annotate_sites(self):
+        from .site_join_request import JoinStateEnum
+
+        return self.annotate(
+            sites=ArrayRemove(
+                ArrayAgg(
+                    Case(When(
+                        sitejoinrequest__state=JoinStateEnum.CONFIRMED,
+                        then='sitejoinrequest__site__pk'
+                    ), default=None),
+                    distinct=True
+                ),
+                None
+            )
+        )
 
 
 class Doctor(DelayedSaveFilesMixin, User):
@@ -61,6 +81,8 @@ class Doctor(DelayedSaveFilesMixin, User):
         blank=True, null=True,
         related_name='doctors'
     )
+
+    objects = DoctorQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Doctor'

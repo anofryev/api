@@ -13,3 +13,8 @@ class DoctorViewSet(viewsets.GenericViewSet,
         participant_role__isnull=True
     )
     permission_classes = (IsCoordinator, )
+
+    def get_queryset(self):
+        return super(DoctorViewSet, self)\
+            .get_queryset()\
+            .annotate_sites()
