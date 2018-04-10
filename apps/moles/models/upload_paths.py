@@ -30,3 +30,15 @@ def mole_image_photo_path(instance, filename):
         'patients', str(patient.pk),
         'skin_images', str(mole.pk), new_filename,
     ])
+
+
+def study_consent_docs_path(instance, filename):
+    instance.original_filename = filename
+
+    new_filename = generate_filename(
+        filename,
+        prefix='doc')
+
+    return '/'.join([
+        'study_consent_docs', new_filename
+    ])

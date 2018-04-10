@@ -2,13 +2,13 @@ from datetime import datetime
 
 from rest_framework_jwt.settings import api_settings
 
-from .serializers import DoctorSerializer
+from .serializers import DoctorFullSerializer
 
 
 def jwt_response_payload_handler(token, user=None, request=None):
     data = {
         'token': token,
-        'doctor': DoctorSerializer(
+        'doctor': DoctorFullSerializer(
             user.doctor_role,
             context={'request': request}
         ).data,

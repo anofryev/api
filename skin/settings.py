@@ -89,6 +89,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'fsm_admin',
     'django_fsm_log',
+    'sorl.thumbnail',
 ]
 
 if DEBUG_EMAIL:  # pragma: no cover

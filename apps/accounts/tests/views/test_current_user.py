@@ -1,3 +1,4 @@
+from apps.accounts.factories import CoordinatorFactory, SiteFactory
 from apps.main.tests import APITestCase
 from ...factories import DoctorFactory
 from ...models import UnitsOfLengthEnum
@@ -56,6 +57,23 @@ class CurrentUserViewTest(APITestCase):
 
         data = resp.data
         self.assertEqual(data['pk'], self.doctor.pk)
+
+    def test_get_coordinator_of_site_null(self):
+        CoordinatorFactory.create(doctor_ptr=self.doctor)
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/auth/current_user/')
+        self.assertSuccessResponse(resp)
+
+        self.assertIsNone(resp.data['coordinator_of_site'])
+
+    def test_get_coordinator_of_site(self):
+        coordinator = CoordinatorFactory.create(doctor_ptr=self.doctor)
+        site = SiteFactory.create(site_coordinator=coordinator)
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/auth/current_user/')
+        self.assertSuccessResponse(resp)
+
+        self.assertEqual(resp.data['coordinator_of_site'], site.pk)
 
     def test_update_current_user_for_unauthorized_failed(self):
         resp = self.client.patch('/api/v1/auth/current_user/')

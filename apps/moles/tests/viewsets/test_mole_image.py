@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from apps.main.tests import patch
 from apps.accounts.factories import CoordinatorFactory
+from apps.moles.factories.study import StudyFactory
 from ...factories import MoleImageFactory
 from ...models import MoleImage
 from ..moles_test_case import MolesTestCase
@@ -75,6 +76,26 @@ class MoleImageViewSetTest(MolesTestCase):
         resp = self.client.post(
             self.get_url(self.first_patient.pk, self.first_patient_mole.pk))
         self.assertForbidden(resp)
+
+    @patch('apps.moles.tasks.requests')
+    def test_create_with_study(self, mock_requests):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+
+        mole_image_data = {
+            'photo': self.get_sample_image_file(),
+            'study': study.pk,
+        }
+
+        with self.fake_media():
+            resp = self.client.post(
+                self.get_url(self.first_patient.pk, self.first_patient_mole.pk),
+                mole_image_data)
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        mole_image = MoleImage.objects.get(pk=data['pk'])
+        self.assertEqual(mole_image.study.pk, study.pk)
 
     @patch('apps.moles.tasks.requests')
     def test_update_success(self, mock_requests):

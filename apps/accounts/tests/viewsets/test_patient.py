@@ -1,5 +1,7 @@
 import json
 from apps.main.tests import APITestCase, patch
+from apps.moles.factories.study import StudyFactory
+from apps.moles.models import StudyToPatient
 
 from ...factories import PatientFactory, DoctorFactory
 from ...models import Patient, RaceEnum, SexEnum, DoctorToPatient
@@ -67,6 +69,22 @@ class PatientViewSetTest(APITestCase):
         resp = self.client.get('/api/v1/patient/', {'path_pending': True})
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 0)
+
+    def test_list_with_study(self):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+        StudyToPatient.objects.create(
+            study=study,
+            patient=self.first_patient
+        )
+
+        resp = self.client.get('/api/v1/patient/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 2)
+        patient_studies = resp.data[0]['studies'] if \
+            resp.data[0]['studies'] else resp.data[1]['studies']
+        self.assertEqual(len(patient_studies), 1)
+        self.assertEqual(patient_studies[0]['pk'], study.pk)
 
     def test_get_own_patient_success(self):
         self.authenticate_as_doctor()

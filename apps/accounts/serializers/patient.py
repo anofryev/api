@@ -3,6 +3,7 @@ from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
+from apps.moles.serializers import StudyLiteSerializer
 from ..models import Patient, DoctorToPatient
 from .patient_consent import PatientConsentSerializer
 
@@ -31,12 +32,13 @@ class PatientSerializer(serializers.ModelSerializer):
     moles_images_biopsy_count = serializers.IntegerField(read_only=True)
     moles_images_approve_required = serializers.IntegerField(
         read_only=True)
+    studies = StudyLiteSerializer(many=True, read_only=True)
 
     class Meta:
         model = Patient
         fields = ('pk', 'first_name', 'last_name', 'mrn',
                   'date_of_birth', 'mrn_hash', 'valid_consent',
-                  'sex', 'race', 'photo',
+                  'sex', 'race', 'photo', 'studies',
                   'encrypted_key', 'encryption_keys', 'doctors',
                   'moles_count',
                   'moles_images_count', 'last_upload',

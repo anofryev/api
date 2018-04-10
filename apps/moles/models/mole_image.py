@@ -8,6 +8,7 @@ from versatileimagefield.fields import VersatileImageField
 
 from apps.main.storages import private_storage
 from .mole import Mole
+from .study import Study
 from .upload_paths import mole_image_photo_path
 
 
@@ -69,6 +70,10 @@ class MoleImage(models.Model):
         verbose_name="Age when photo was taken",
         blank=True, null=True
     )
+    study = models.ForeignKey(
+        Study,
+        verbose_name="Study",
+        blank=True, null=True)
 
     class Meta:
         verbose_name = 'Mole image'

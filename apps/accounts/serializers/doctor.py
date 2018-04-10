@@ -2,7 +2,10 @@ from rest_framework import serializers
 
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from ..models import Doctor, Coordinator, SiteJoinRequest, Site
+from apps.accounts.models import DoctorToPatient
+from apps.accounts.models.participant import get_participant_patient, \
+    is_participant
+from ..models import Doctor, Coordinator, Participant, SiteJoinRequest, Site
 from .user import UserSerializer
 
 
@@ -38,19 +41,63 @@ class RegisterDoctorSerializer(UserSerializer):
 
 
 class DoctorSerializer(UserSerializer):
-    photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
-    coordinator_public_key = serializers.SerializerMethodField()
-    my_doctors_public_keys = serializers.SerializerMethodField()
     is_coordinator = serializers.SerializerMethodField()
+    is_participant = serializers.SerializerMethodField()
+
+    def get_is_coordinator(self, doctor):
+        return Coordinator.objects.filter(doctor_ptr=doctor).exists()
+
+    def get_is_participant(self, doctor):
+        return Participant.objects.filter(doctor_ptr=doctor).exists()
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'is_participant', 'date_created',)
+
+
+class DoctorWithSitesSerializer(DoctorSerializer):
+    sites = serializers.ListField()
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email', 'sites',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'is_participant', 'date_created',)
+
+
+class DoctorWithKeysSerializer(DoctorSerializer):
+    coordinator_public_key = serializers.SerializerMethodField()
+
+    def get_coordinator_public_key(self, doctor):
+        if doctor.my_coordinator_id:
+            return Doctor.objects.filter(
+                id=doctor.my_coordinator_id).values_list(
+                    'public_key', flat=True).first()
+        return None
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'is_participant', 'date_created',
+                  'public_key', 'coordinator_public_key')
+
+
+class DoctorFullSerializer(DoctorWithKeysSerializer):
+    photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
+    my_doctors_public_keys = serializers.SerializerMethodField()
+    coordinator_of_site = serializers.SerializerMethodField()
 
     class Meta:
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email', 'password',
                   'degree', 'department', 'photo', 'units_of_length',
-                  'can_see_prediction',
+                  'can_see_prediction', 'coordinator_of_site',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',
-                  'is_coordinator', 'date_created',)
+                  'is_coordinator', 'is_participant', 'date_created',)
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -69,21 +116,27 @@ class DoctorSerializer(UserSerializer):
         if coordinator:
             return {d['id']: d['public_key'] for d in
                     coordinator.doctors.values('id', 'public_key')}
+
+        if is_participant(doctor):
+            patient = get_participant_patient(doctor)
+            if patient:
+                return {d['id']: d['public_key'] for d in
+                        Doctor.objects.filter(
+                            pk__in=DoctorToPatient.objects.filter(
+                                patient=patient
+                            ).values_list('doctor_id', flat=True)
+                        ).values('id', 'public_key')}
+
         return None
 
-    def get_is_coordinator(self, doctor):
-        return Coordinator.objects.filter(doctor_ptr=doctor).exists()
-
-    def get_coordinator_public_key(self, doctor):
-        if doctor.my_coordinator_id:
-            return Doctor.objects.filter(
-                id=doctor.my_coordinator_id).values_list(
-                    'public_key', flat=True).first()
-        return None
+    def get_coordinator_of_site(self, doctor):
+        result = Site.objects.filter(
+            site_coordinator__doctor_ptr=doctor).first()
+        return result.pk if result else None
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
         if password:
             instance.set_password(password)
 
-        return super(DoctorSerializer, self).update(instance, validated_data)
+        return super(DoctorFullSerializer, self).update(instance, validated_data)

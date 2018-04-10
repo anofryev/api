@@ -14,7 +14,14 @@ mole_router = routers.NestedSimpleRouter(
     patient_router, r'mole', lookup='mole')
 mole_router.register('image', MoleImageViewSet)
 
+
+study_router = routers.SimpleRouter()
+study_router.register('study/consent_doc', ConsentDocViewSet)
+study_router.register('study/invites', StudyInvitationViewSet)
+study_router.register('study', StudyViewSet)
+
 urlpatterns = [
     url(r'^', include(patient_router.urls)),
     url(r'^', include(mole_router.urls)),
+    url(r'^', include(study_router.urls)),
 ]
