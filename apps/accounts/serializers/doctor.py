@@ -79,12 +79,13 @@ class DoctorWithKeysSerializer(DoctorSerializer):
 class DoctorFullSerializer(DoctorWithKeysSerializer):
     photo = VersatileImageFieldSerializer(sizes='main_set', required=False)
     my_doctors_public_keys = serializers.SerializerMethodField()
+    coordinator_of_site = serializers.SerializerMethodField()
 
     class Meta:
         model = Doctor
         fields = ('pk', 'first_name', 'last_name', 'email', 'password',
                   'degree', 'department', 'photo', 'units_of_length',
-                  'can_see_prediction',
+                  'can_see_prediction', 'coordinator_of_site',
                   'public_key', 'private_key', 'coordinator_public_key',
                   'my_coordinator_id', 'my_doctors_public_keys',
                   'is_coordinator', 'is_participant', 'date_created',)
@@ -118,6 +119,11 @@ class DoctorFullSerializer(DoctorWithKeysSerializer):
                         ).values('id', 'public_key')}
 
         return None
+
+    def get_coordinator_of_site(self, doctor):
+        result = Site.objects.filter(
+            site_coordinator__doctor_ptr=doctor).first()
+        return result.pk if result else None
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
