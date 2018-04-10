@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.db.models import Count, Case, When, F, Q
 from rest_framework import viewsets, mixins, response, status
 
 from apps.accounts.permissions import (
@@ -31,6 +30,7 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             .annotate_pathological_diagnosis_required()\
             .annotate_biopsy_count()\
             .annotate_approve_required()\
+            .annotate_studies()\
             .filter(patient=self.get_patient_pk())\
             .order_by('-last_upload')
 
@@ -49,6 +49,9 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         serializer.is_valid(raise_exception=True)
         instance = serializer.save(patient=self.get_patient())
         headers = self.get_success_headers(serializer.data)
+        # Set studies manually, because no queryset here
+        setattr(instance, 'studies',
+                instance.images.all().values_list('study_id', flat=True))
 
         return response.Response(
             MoleDetailSerializer(instance=instance).data,

@@ -20,5 +20,4 @@ class Coordinator(models.Model):
 
 
 def is_coordinator(user):
-    return Coordinator.objects.filter(
-        doctor_ptr_id=user).first()
+    return Coordinator.objects.filter(doctor_ptr_id=user).first()

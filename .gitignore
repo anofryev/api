@@ -13,6 +13,7 @@ logs/
 skin_root/htmlcov/
 skin_root/fabfile/
 backup/
+media/
 # Specific files #
 ##################
 skin_root/skin/settings/environment.py
