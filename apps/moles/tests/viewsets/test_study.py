@@ -101,6 +101,16 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 0)
 
+    def test_list_by_coordinator(self):
+        study = StudyFactory.create(author=self.coordinator)
+        StudyFactory.create()
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertSetEqual(
+            set(item['pk'] for item in resp.data),
+            {study.pk})
+
     def test_retrieve_forbidden(self):
         study = StudyFactory.create()
         resp = self.client.get(self.target_path(study.pk), format='json')
@@ -272,6 +282,20 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertSetEqual(set(resp.data['fail_emails']),
                             {'test@test.com'})
+
+    def test_add_doctor_not_from_my_site_study(self):
+        study = StudyFactory.create()
+        doctor = DoctorFactory.create(my_coordinator=self.coordinator)
+        self.authenticate_as_doctor()
+
+        resp = self.client.post(
+            '/api/v1/study/{0}/add_doctor/'.format(study.pk),
+            {
+                'doctor_pk': doctor.pk,
+                'emails': ['test@test.com']
+            },
+            format='json')
+        self.assertNotFound(resp)
 
     def test_invitations(self):
         self.authenticate_as_doctor()
