@@ -1,13 +1,13 @@
 from rest_framework import viewsets, mixins
 
-from ..serializers import DoctorSerializer
+from ..serializers import DoctorWithSitesSerializer
 from ..models import Doctor
 from ..permissions import IsCoordinator
 
 
 class DoctorViewSet(viewsets.GenericViewSet,
                     mixins.ListModelMixin):
-    serializer_class = DoctorSerializer
+    serializer_class = DoctorWithSitesSerializer
     queryset = Doctor.objects.filter(
         coordinator_role__isnull=True,
         participant_role__isnull=True

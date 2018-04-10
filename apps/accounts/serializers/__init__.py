@@ -1,6 +1,6 @@
 from .user import UserSerializer
 from .doctor import DoctorSerializer, DoctorFullSerializer, \
-    DoctorWithKeysSerializer
+    DoctorWithSitesSerializer, DoctorWithKeysSerializer
 from .site_join_request import SiteJoinRequestSerializer, \
     CreateSiteJoinRequestSerializer
 from .patient import PatientSerializer, CreatePatientSerializer

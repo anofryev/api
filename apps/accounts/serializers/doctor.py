@@ -43,13 +43,22 @@ class RegisterDoctorSerializer(UserSerializer):
 class DoctorSerializer(UserSerializer):
     is_coordinator = serializers.SerializerMethodField()
     is_participant = serializers.SerializerMethodField()
-    sites = serializers.ListField()
 
     def get_is_coordinator(self, doctor):
         return Coordinator.objects.filter(doctor_ptr=doctor).exists()
 
     def get_is_participant(self, doctor):
         return Participant.objects.filter(doctor_ptr=doctor).exists()
+
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'first_name', 'last_name', 'email',
+                  'degree', 'department', 'photo', 'units_of_length',
+                  'is_coordinator', 'is_participant', 'date_created',)
+
+
+class DoctorWithSitesSerializer(DoctorSerializer):
+    sites = serializers.ListField()
 
     class Meta:
         model = Doctor
