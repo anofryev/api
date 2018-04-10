@@ -19,6 +19,12 @@ class StudyBaseSerializer(serializers.ModelSerializer):
         fields = ('pk', 'title', 'consent_docs')
 
 
+class StudyLiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Study
+        fields = ('pk', 'title', 'consent_docs', 'author')
+
+
 class StudyListSerializer(serializers.ModelSerializer):
     consent_docs = ConsentDocSerializer(many=True)
     doctors = DoctorSerializer(many=True)
