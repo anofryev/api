@@ -45,16 +45,16 @@ class StudyViewSetTest(APITestCase):
         self.assertForbidden(response)
 
     def test_create_doctor_success(self):
-        initial_studies_count = Study.objects.all().count()
-
         self.authenticate_as_doctor()
         response = self.client.post('/api/v1/study/', self.get_post_data(),
                                     format='json')
         self.assertSuccessResponse(response)
-        self.assertEqual(Study.objects.all().count(), initial_studies_count+1)
+        self.assertEqual(Study.objects.all().count(), 1)
         data = response.data
         self.assertTrue(data['pk'] > 0)
         self.assertEqual(data['title'], 'sample study')
+        study = Study.objects.get(pk=data['pk'])
+        self.assertEqual(study.author.pk, self.coordinator.pk)
 
     def test_list_as_doctor(self):
         doctor = DoctorFactory.create()
@@ -107,13 +107,13 @@ class StudyViewSetTest(APITestCase):
         self.assertForbidden(resp)
 
     def test_retrieve_get(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         self.authenticate_as_doctor()
         resp = self.client.get(self.target_path(study.pk), format='json')
         self.assertSuccessResponse(resp)
 
     def test_update_and_check_changes(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         initial_title = study.title
         self.authenticate_as_doctor()
         self.client.put(self.target_path(study.pk),
@@ -135,25 +135,25 @@ class StudyViewSetTest(APITestCase):
         self.assertForbidden(resp)
 
     def test_delete_unauthorized(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         resp = self.client.delete(self.target_path(study.pk))
         self.assertForbidden(resp)
 
     def test_delete_doctor(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         self.authenticate_as_doctor(doctor=self.other_doctor)
         resp = self.client.delete(self.target_path(study.pk))
         self.assertForbidden(resp)
 
     def test_delete_coordinator(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         initial_study_count = Study.objects.all().count()
         self.authenticate_as_doctor()
         self.client.delete(self.target_path(study.pk))
         self.assertNotEqual(initial_study_count, Study.objects.all().count())
 
     def test_add_doctor(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
         patient = DoctorFactory.create()
         ParticipantFactory.create(
@@ -178,7 +178,7 @@ class StudyViewSetTest(APITestCase):
                             {doctor.email, self.doctor.email})
 
     def test_add_doctor_forbidden(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
         patient = DoctorFactory.create()
         ParticipantFactory.create(
@@ -196,7 +196,7 @@ class StudyViewSetTest(APITestCase):
         self.assertForbidden(resp)
 
     def test_add_doctor_bad_emails(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
         patient = DoctorFactory.create()
         ParticipantFactory.create(
@@ -218,7 +218,7 @@ class StudyViewSetTest(APITestCase):
         self.assertEqual(old_invites_count, study.studyinvitation_set.count())
 
     def test_add_doctor_bad_doctor_pk(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
         patient = DoctorFactory.create()
         ParticipantFactory.create(
@@ -240,7 +240,7 @@ class StudyViewSetTest(APITestCase):
         self.assertEqual(old_doc_count, study.doctors.count())
 
     def test_add_doctor_bad_request(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         self.authenticate_as_doctor()
         resp = self.client.post(
             '/api/v1/study/{0}/add_doctor/'.format(study.pk),
@@ -249,7 +249,7 @@ class StudyViewSetTest(APITestCase):
         self.assertBadRequest(resp)
 
     def test_add_doctor_invited_email(self):
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
         patient = DoctorFactory.create()
         ParticipantFactory.create(
@@ -275,7 +275,7 @@ class StudyViewSetTest(APITestCase):
 
     def test_invitations(self):
         self.authenticate_as_doctor()
-        study = StudyFactory.create()
+        study = StudyFactory.create(author=self.coordinator)
         invitation = StudyInvitationFactory.create(study=study)
         StudyInvitationFactory.create()
         resp = self.client.get(

@@ -36,7 +36,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     def get_queryset(self):
         user = self.request.user.doctor_role
         if is_coordinator(user):
-            return self.queryset
+            return self.queryset.filter(author__doctor_ptr=user)
         elif is_participant(user):
             patient = get_participant_patient(user)
             if patient:
@@ -66,6 +66,9 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
+        instance.author = request.user.doctor_role.coordinator_role
+        instance.save(update_fields=['author'])
+
         headers = self.get_success_headers(serializer.data)
         return Response(
             StudyListSerializer(instance, context={'request': request}).data,

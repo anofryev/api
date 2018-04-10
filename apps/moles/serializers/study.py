@@ -24,7 +24,8 @@ class StudyListSerializer(serializers.ModelSerializer):
     doctors = DoctorSerializer(many=True)
 
     class Meta(StudyBaseSerializer.Meta):
-        fields = ('pk', 'title', 'doctors', 'patients', 'consent_docs')
+        fields = ('pk', 'title', 'doctors',
+                  'patients', 'consent_docs')
 
 
 class AddDoctorSerializer(serializers.Serializer):

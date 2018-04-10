@@ -1,11 +1,16 @@
 from django.db import models
 
+from apps.accounts.models import Coordinator
 from apps.main.models.mixins.thumbnail import ThumbnailMixin
 from apps.main.storages import private_storage
 from apps.moles.models.upload_paths import study_consent_docs_path
 
 
 class Study(models.Model):
+    author = models.ForeignKey(
+        Coordinator,
+        related_name='studies',
+        blank=True, null=True)
     title = models.CharField(
         max_length=120
     )
