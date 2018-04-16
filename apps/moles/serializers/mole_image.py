@@ -2,6 +2,7 @@ import json
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 from apps.accounts.models import Coordinator
+from apps.moles.serializers.study import StudyBaseSerializer
 
 from ..models import MoleImage
 
