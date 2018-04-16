@@ -3,15 +3,15 @@ from rest_framework import viewsets, mixins
 from apps.accounts.permissions import (
     C, IsDoctorOfPatient, HasPatientValidConsent, AllowAllExceptCreation)
 from ..models import Mole, MoleImage
-from ..serializers import (
-    MoleImageSerializer, MoleImageCreateSerializer, MoleImageUpdateSerializer)
+from ..serializers import MoleImageListSerializer, MoleImageCreateSerializer, \
+    MoleImageUpdateSerializer
 
 
 class MoleImageViewSet(viewsets.GenericViewSet,
                        mixins.ListModelMixin, mixins.RetrieveModelMixin,
                        mixins.CreateModelMixin, mixins.UpdateModelMixin):
     queryset = MoleImage.objects.all()
-    serializer_class = MoleImageSerializer
+    serializer_class = MoleImageListSerializer
     permission_classes = (
         IsDoctorOfPatient,
         C(HasPatientValidConsent) | C(AllowAllExceptCreation)
