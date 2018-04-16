@@ -6,7 +6,7 @@ from apps.moles.models import Study
 from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
-from .mole_image import MoleImageSerializer, MoleImageListSerializer
+from .mole_image import MoleImageListSerializer
 
 
 class MoleSerializer(serializers.ModelSerializer):
@@ -42,7 +42,7 @@ class MoleListSerializer(MoleSerializer):
 
 class MoleDetailSerializer(MoleSerializer):
     patient_anatomical_site = PatientAnatomicalSiteSerializer(read_only=True)
-    images = MoleImageSerializer(many=True, read_only=True)
+    images = MoleImageListSerializer(many=True, read_only=True)
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'patient_anatomical_site',
