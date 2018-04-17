@@ -10,63 +10,109 @@ from .enums import SexEnum, RaceEnum
 
 
 class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
-    def annotate_moles_images_count(self):
-        return self.annotate(
-            moles_images_count=Count('moles__images'))
+    def annotate_moles_count(self, study_pk):
+        if study_pk:
+            return self.annotate(
+                moles_count=Count(
+                    Case(
+                        When(moles__images__study_id=study_pk,
+                             then=F('moles__pk')),
+                        default=None
+                    ),
+                    distinct=True
+                )
+            )
+        else:
+            return self.annotate(
+                moles_count=Count('moles', distinct=True))
+
+    def annotate_moles_images_count(self, study_pk):
+        if study_pk:
+            return self.annotate(
+                moles_images_count=Count(
+                    Case(
+                        When(moles__images__study_id=study_pk,
+                             then=F('moles__images__pk')),
+                        default=None
+                    ),
+                    distinct=True
+                )
+            )
+        else:
+            return self.annotate(
+                moles_images_count=Count('moles__images', distinct=True))
 
     def annotate_last_upload(self):
         return self.annotate(
             last_upload=Max('moles__images__date_created'))
 
-    def annotate_clinical_diagnosis_required(self):
+    def annotate_clinical_diagnosis_required(self, study_pk):
+        when = {
+            'moles__images__clinical_diagnosis__exact': '',
+            'then': F('moles__images__pk')
+        }
+        if study_pk:
+            when['moles__images__study_id'] = study_pk
+
         return self.annotate(
             moles_images_with_clinical_diagnosis_required=Count(
                 Case(
-                    When(
-                        Q(moles__images__clinical_diagnosis__exact=''),
-                        then=F('moles__images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_pathological_diagnosis_required(self):
+    def annotate_pathological_diagnosis_required(self, study_pk):
+        when = {
+            'moles__images__biopsy': True,
+            'moles__images__path_diagnosis__exact': '',
+            'then': F('moles__images__pk')
+        }
+        if study_pk:
+            when['moles__images__study_id'] = study_pk
+
         return self.annotate(
             moles_images_with_pathological_diagnosis_required=Count(
                 Case(
-                    When(
-                        moles__images__biopsy=True,
-                        moles__images__path_diagnosis__exact='',
-                        then=F('moles__images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_biopsy_count(self):
+    def annotate_biopsy_count(self, study_pk):
+        when = {
+            'moles__images__biopsy': True,
+            'then': F('moles__images__pk')
+        }
+        if study_pk:
+            when['moles__images__study_id'] = study_pk
+
         return self.annotate(
             moles_images_biopsy_count=Count(
                 Case(
-                    When(
-                        moles__images__biopsy=True,
-                        then=F('moles__images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_approve_required(self):
+    def annotate_approve_required(self, study_pk):
+        when = {
+            'moles__images__approved__exact': False,
+            'then': F('moles__images__pk')
+        }
+        if study_pk:
+            when['moles__images__study_id'] = study_pk
+
         return self.annotate(
             moles_images_approve_required=Count(
                 Case(
-                    When(moles__images__approved__exact=False,
-                         then=F('moles__images__pk')),
+                    When(**when),
                     default=None
                 ),
                 distinct=True

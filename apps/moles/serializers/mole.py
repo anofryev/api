@@ -33,13 +33,6 @@ class MoleListSerializer(MoleSerializer):
     images_approve_required = serializers.IntegerField(
         read_only=True)
 
-    def get_images_count(self, obj):
-        study = self.context.get('study')
-        if study:
-            return obj.images.filter(study=study).count()
-        else:
-            return obj.images.count()
-
     def get_last_image(self, obj):
         study = self.context.get('study')
         try:

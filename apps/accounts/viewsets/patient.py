@@ -25,15 +25,32 @@ class PatientViewSet(viewsets.GenericViewSet,
         return self.serializer_class
 
     def get_queryset(self):
-        return super(PatientViewSet, self)\
+        study_pk = self.get_study_pk()
+
+        result = super(PatientViewSet, self)\
             .get_queryset()\
             .annotate_last_upload()\
-            .annotate_moles_images_count()\
-            .annotate_clinical_diagnosis_required()\
-            .annotate_pathological_diagnosis_required()\
-            .annotate_biopsy_count()\
-            .annotate_approve_required()\
+            .annotate_moles_count(study_pk)\
+            .annotate_moles_images_count(study_pk)\
+            .annotate_clinical_diagnosis_required(study_pk)\
+            .annotate_pathological_diagnosis_required(study_pk)\
+            .annotate_biopsy_count(study_pk)\
+            .annotate_approve_required(study_pk)\
             .filter(doctors=self.request.user.doctor_role)
+
+        if study_pk:
+            result = result.filter(studies__pk=study_pk)
+
+        return result
+
+    def get_serializer_context(self):
+        result = super(PatientViewSet, self).get_serializer_context()
+        result['study'] = self.get_study_pk()
+        return result
+
+    def get_study_pk(self):
+        return self.request.GET.get('study') \
+            if 'study' in self.request.GET else None
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
