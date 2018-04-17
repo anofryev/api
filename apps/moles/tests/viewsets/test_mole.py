@@ -27,6 +27,25 @@ class MoleViewSetTest(MolesTestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['pk'], self.first_patient_mole.pk)
 
+    def test_get_patient_moles_with_study(self):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+        MoleImageFactory.create(
+            study=study,
+            mole=self.first_patient_mole)
+
+        resp = self.client.get(self.get_url(self.first_patient.pk), {
+            'study': study.pk
+        })
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        data = resp.data[0]
+        self.assertListEqual(data['studies'], [study.pk])
+        self.assertEqual(data['images_count'], 2)
+
     def test_get_patient_moles_forbidden_for_not_own_patient(self):
         self.authenticate_as_doctor()
 
