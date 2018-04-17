@@ -1,4 +1,6 @@
 import json
+
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
@@ -19,9 +21,9 @@ class MoleSerializer(serializers.ModelSerializer):
 
 
 class MoleListSerializer(MoleSerializer):
-    last_image = MoleImageListSerializer(read_only=True)
+    last_image = serializers.SerializerMethodField()
     images_count = serializers.IntegerField(
-        source='images.count', read_only=True)
+        read_only=True)
     images_with_pathological_diagnosis_required = serializers.IntegerField(
         read_only=True)
     images_with_clinical_diagnosis_required = serializers.IntegerField(
@@ -30,6 +32,25 @@ class MoleListSerializer(MoleSerializer):
         read_only=True)
     images_approve_required = serializers.IntegerField(
         read_only=True)
+
+    def get_images_count(self, obj):
+        study = self.context.get('study')
+        if study:
+            return obj.images.filter(study=study).count()
+        else:
+            return obj.images.count()
+
+    def get_last_image(self, obj):
+        study = self.context.get('study')
+        try:
+            if study:
+                image = obj.images.filter(study=study).latest('date_created')
+            else:
+                image = obj.images.latest('date_created')
+
+            return MoleImageListSerializer(image, context=self.context).data
+        except ObjectDoesNotExist:
+            return None
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'last_image', 'images_count',

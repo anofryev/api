@@ -22,17 +22,30 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
     )
 
     def get_queryset(self):
-        return super(MoleViewSet, self)\
+        study_pk = self.get_study_pk()
+
+        result = super(MoleViewSet, self)\
             .get_queryset()\
             .prefetch_related('images')\
             .annotate_last_upload()\
-            .annotate_clinical_diagnosis_required()\
-            .annotate_pathological_diagnosis_required()\
-            .annotate_biopsy_count()\
-            .annotate_approve_required()\
+            .annotate_clinical_diagnosis_required(study_pk)\
+            .annotate_pathological_diagnosis_required(study_pk)\
+            .annotate_biopsy_count(study_pk)\
+            .annotate_approve_required(study_pk) \
+            .annotate_images_count(study_pk) \
             .annotate_studies()\
             .filter(patient=self.get_patient_pk())\
             .order_by('-last_upload')
+
+        if study_pk:
+            result = result.filter(images__study_id=study_pk)
+
+        return result
+
+    def get_serializer_context(self):
+        result = super(MoleViewSet, self).get_serializer_context()
+        result['study'] = self.get_study_pk()
+        return result
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -42,6 +55,10 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
         elif self.action in ['update', 'partial_update']:
             return MoleUpdateSerializer
         return self.serializer_class
+
+    def get_study_pk(self):
+        return self.request.GET.get('study') \
+            if 'study' in self.request.GET else None
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
