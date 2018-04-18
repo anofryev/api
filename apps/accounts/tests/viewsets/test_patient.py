@@ -80,11 +80,8 @@ class PatientViewSetTest(APITestCase):
 
         resp = self.client.get('/api/v1/patient/')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data), 2)
-        patient_studies = resp.data[0]['studies'] if \
-            resp.data[0]['studies'] else resp.data[1]['studies']
-        self.assertEqual(len(patient_studies), 1)
-        self.assertEqual(patient_studies[0]['pk'], study.pk)
+        self.assertEqual(len(resp.data), 1)
+        self.assertListEqual(resp.data[0]['studies'], [])
 
     def test_list_with_study_in_request(self):
         from apps.moles.factories import MoleFactory, MoleImageFactory

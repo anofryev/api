@@ -40,6 +40,8 @@ class PatientViewSet(viewsets.GenericViewSet,
 
         if study_pk:
             result = result.filter(studies__pk=study_pk)
+        else:
+            result = result.filter(studies__isnull=True)
 
         return result
 
