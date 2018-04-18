@@ -11,36 +11,28 @@ from .enums import SexEnum, RaceEnum
 
 class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_moles_count(self, study_pk):
-        if study_pk:
-            return self.annotate(
-                moles_count=Count(
-                    Case(
-                        When(moles__images__study_id=study_pk,
-                             then=F('moles__pk')),
-                        default=None
-                    ),
-                    distinct=True
-                )
+        return self.annotate(
+            moles_count=Count(
+                Case(
+                    When(moles__images__study_id=study_pk,
+                         then=F('moles__pk')),
+                    default=None
+                ),
+                distinct=True
             )
-        else:
-            return self.annotate(
-                moles_count=Count('moles', distinct=True))
+        )
 
     def annotate_moles_images_count(self, study_pk):
-        if study_pk:
-            return self.annotate(
-                moles_images_count=Count(
-                    Case(
-                        When(moles__images__study_id=study_pk,
-                             then=F('moles__images__pk')),
-                        default=None
-                    ),
-                    distinct=True
-                )
+        return self.annotate(
+            moles_images_count=Count(
+                Case(
+                    When(moles__images__study_id=study_pk,
+                         then=F('moles__images__pk')),
+                    default=None
+                ),
+                distinct=True
             )
-        else:
-            return self.annotate(
-                moles_images_count=Count('moles__images', distinct=True))
+        )
 
     def annotate_last_upload(self):
         return self.annotate(
@@ -49,10 +41,9 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_clinical_diagnosis_required(self, study_pk):
         when = {
             'moles__images__clinical_diagnosis__exact': '',
+            'moles__images__study_id': study_pk,
             'then': F('moles__images__pk')
         }
-        if study_pk:
-            when['moles__images__study_id'] = study_pk
 
         return self.annotate(
             moles_images_with_clinical_diagnosis_required=Count(
@@ -68,10 +59,9 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
         when = {
             'moles__images__biopsy': True,
             'moles__images__path_diagnosis__exact': '',
+            'moles__images__study_id': study_pk,
             'then': F('moles__images__pk')
         }
-        if study_pk:
-            when['moles__images__study_id'] = study_pk
 
         return self.annotate(
             moles_images_with_pathological_diagnosis_required=Count(
@@ -86,10 +76,9 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_biopsy_count(self, study_pk):
         when = {
             'moles__images__biopsy': True,
+            'moles__images__study_id': study_pk,
             'then': F('moles__images__pk')
         }
-        if study_pk:
-            when['moles__images__study_id'] = study_pk
 
         return self.annotate(
             moles_images_biopsy_count=Count(
@@ -104,10 +93,9 @@ class PatientQuerySet(DelayedSaveFilesMixin, models.QuerySet):
     def annotate_approve_required(self, study_pk):
         when = {
             'moles__images__approved__exact': False,
+            'moles__images__study_id': study_pk,
             'then': F('moles__images__pk')
         }
-        if study_pk:
-            when['moles__images__study_id'] = study_pk
 
         return self.annotate(
             moles_images_approve_required=Count(

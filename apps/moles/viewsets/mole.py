@@ -39,6 +39,8 @@ class MoleViewSet(viewsets.GenericViewSet, PatientInfoMixin,
 
         if study_pk:
             result = result.filter(images__study_id=study_pk)
+        else:
+            result = result.filter(images__study=None)
 
         return result
 

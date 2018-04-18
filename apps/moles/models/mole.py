@@ -15,10 +15,9 @@ class MoleQuerySet(models.QuerySet):
     def annotate_clinical_diagnosis_required(self, study_pk):
         when = {
             'images__clinical_diagnosis__exact': '',
+            'images__study_id': study_pk,
             'then': F('images__pk')
         }
-        if study_pk:
-            when['images__study_id'] = study_pk
 
         return self.annotate(
             images_with_clinical_diagnosis_required=Count(
@@ -34,10 +33,9 @@ class MoleQuerySet(models.QuerySet):
         when = {
             'images__biopsy': True,
             'images__path_diagnosis__exact': '',
+            'images__study_id': study_pk,
             'then': F('images__pk')
         }
-        if study_pk:
-            when['images__study_id'] = study_pk
 
         return self.annotate(
             images_with_pathological_diagnosis_required=Count(
@@ -52,10 +50,9 @@ class MoleQuerySet(models.QuerySet):
     def annotate_biopsy_count(self, study_pk):
         when = {
             'images__biopsy': True,
+            'images__study_id': study_pk,
             'then': F('images__pk')
         }
-        if study_pk:
-            when['images__study_id'] = study_pk
 
         return self.annotate(
             images_biopsy_count=Count(
@@ -70,10 +67,9 @@ class MoleQuerySet(models.QuerySet):
     def annotate_approve_required(self, study_pk):
         when = {
             'images__approved__exact': False,
+            'images__study_id': study_pk,
             'then': F('images__pk')
         }
-        if study_pk:
-            when['images__study_id'] = study_pk
 
         return self.annotate(
             images_approve_required=Count(
@@ -97,24 +93,16 @@ class MoleQuerySet(models.QuerySet):
         )
 
     def annotate_images_count(self, study_pk):
-        if study_pk:
-            return self.annotate(
-                images_count=Count(
-                    Case(
-                        When(images__study_id=study_pk,
-                             then=F('images__pk')),
-                        default=None
-                    ),
-                    distinct=True
-                )
+        return self.annotate(
+            images_count=Count(
+                Case(
+                    When(images__study_id=study_pk,
+                         then=F('images__pk')),
+                    default=None
+                ),
+                distinct=True
             )
-        else:
-            return self.annotate(
-                images_count=Count(
-                    'images__pk',
-                    distinct=True
-                )
-            )
+        )
 
 
 class Mole(models.Model):

@@ -81,7 +81,9 @@ class MoleViewSetTest(MolesTestCase):
 
         self.authenticate_as_doctor()
 
-        resp = self.client.get(self.get_url(self.first_patient.pk))
+        resp = self.client.get(self.get_url(self.first_patient.pk), {
+            'study': study.pk
+        })
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 1)
         self.assertListEqual(resp.data[0]['studies'], [study.pk])
@@ -98,7 +100,9 @@ class MoleViewSetTest(MolesTestCase):
         self.authenticate_as_doctor()
 
         resp = self.client.get(self.get_url(
-            self.first_patient.pk, self.first_patient_mole.pk))
+            self.first_patient.pk, self.first_patient_mole.pk), {
+            'study': study.pk
+        })
         self.assertSuccessResponse(resp)
         self.assertListEqual(resp.data['studies'], [study.pk])
 

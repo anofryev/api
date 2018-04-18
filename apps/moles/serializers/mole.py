@@ -36,11 +36,7 @@ class MoleListSerializer(MoleSerializer):
     def get_last_image(self, obj):
         study = self.context.get('study')
         try:
-            if study:
-                image = obj.images.filter(study=study).latest('date_created')
-            else:
-                image = obj.images.latest('date_created')
-
+            image = obj.images.filter(study=study).latest('date_created')
             return MoleImageListSerializer(image, context=self.context).data
         except ObjectDoesNotExist:
             return None
