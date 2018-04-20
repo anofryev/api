@@ -2,6 +2,7 @@ from django.db import transaction
 from rest_framework import (viewsets, mixins, pagination,
                             filters, response, status, )
 
+from apps.accounts.models.participant import is_participant
 from ..serializers import PatientSerializer, CreatePatientSerializer
 from ..models import Patient
 from ..permissions import IsDoctor
@@ -40,7 +41,8 @@ class PatientViewSet(viewsets.GenericViewSet,
 
         if study_pk:
             result = result.filter(studies__pk=study_pk)
-        else:
+        elif not is_participant(self.request.user.doctor_role):
+            # for participant return all patients, because it will be single
             result = result.filter(studies__isnull=True)
 
         return result
