@@ -71,3 +71,6 @@ class StudyToPatient(models.Model):
         'accounts.PatientConsent',
         blank=True, null=True
     )
+
+    def __str__(self):
+        return '%s - %s' % (self.study, self.patient)
