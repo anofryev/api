@@ -25,10 +25,10 @@ class DoctorViewSetTest(APITestCase):
         self.authenticate_as_doctor(self.coordinator)
         resp = self.client.get('/api/v1/doctor/')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(len(resp.data), 3)
         self.assertSetEqual(
             set([item['pk'] for item in resp.data]),
-            {self.doctor.pk, self.other_doctor.pk}
+            {self.doctor.pk, self.other_doctor.pk, self.coordinator.pk}
         )
 
     def test_list_with_sites(self):

@@ -9,7 +9,6 @@ class DoctorViewSet(viewsets.GenericViewSet,
                     mixins.ListModelMixin):
     serializer_class = DoctorWithSitesSerializer
     queryset = Doctor.objects.filter(
-        coordinator_role__isnull=True,
         participant_role__isnull=True
     )
     permission_classes = (IsCoordinator, )
