@@ -80,11 +80,29 @@ class PatientViewSetTest(APITestCase):
 
         resp = self.client.get('/api/v1/patient/')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data), 2)
-        patient_studies = resp.data[0]['studies'] if \
-            resp.data[0]['studies'] else resp.data[1]['studies']
-        self.assertEqual(len(patient_studies), 1)
-        self.assertEqual(patient_studies[0]['pk'], study.pk)
+        self.assertEqual(len(resp.data), 1)
+        self.assertListEqual(resp.data[0]['studies'], [])
+
+    def test_list_with_study_in_request(self):
+        from apps.moles.factories import MoleFactory, MoleImageFactory
+
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+        StudyToPatient.objects.create(
+            study=study,
+            patient=self.first_patient
+        )
+        mole = MoleFactory.create(patient=self.first_patient)
+        MoleImageFactory(mole=mole, study=study)
+
+        resp = self.client.get('/api/v1/patient/', {
+            'study': study.pk
+        })
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        data = resp.data[0]
+        self.assertEqual(data['moles_count'], 1)
+        self.assertEqual(data['moles_images_count'], 1)
 
     def test_get_own_patient_success(self):
         self.authenticate_as_doctor()

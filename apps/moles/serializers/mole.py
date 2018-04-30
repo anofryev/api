@@ -1,4 +1,6 @@
 import json
+
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
@@ -6,7 +8,7 @@ from apps.moles.models import Study
 from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
-from .mole_image import MoleImageSerializer
+from .mole_image import MoleImageListSerializer
 
 
 class MoleSerializer(serializers.ModelSerializer):
@@ -19,9 +21,9 @@ class MoleSerializer(serializers.ModelSerializer):
 
 
 class MoleListSerializer(MoleSerializer):
-    last_image = MoleImageSerializer(read_only=True)
+    last_image = serializers.SerializerMethodField()
     images_count = serializers.IntegerField(
-        source='images.count', read_only=True)
+        read_only=True)
     images_with_pathological_diagnosis_required = serializers.IntegerField(
         read_only=True)
     images_with_clinical_diagnosis_required = serializers.IntegerField(
@@ -30,6 +32,14 @@ class MoleListSerializer(MoleSerializer):
         read_only=True)
     images_approve_required = serializers.IntegerField(
         read_only=True)
+
+    def get_last_image(self, obj):
+        study = self.context.get('study')
+        try:
+            image = obj.images.filter(study=study).latest('date_created')
+            return MoleImageListSerializer(image, context=self.context).data
+        except ObjectDoesNotExist:
+            return None
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'last_image', 'images_count',
@@ -42,7 +52,7 @@ class MoleListSerializer(MoleSerializer):
 
 class MoleDetailSerializer(MoleSerializer):
     patient_anatomical_site = PatientAnatomicalSiteSerializer(read_only=True)
-    images = MoleImageSerializer(many=True, read_only=True)
+    images = MoleImageListSerializer(many=True, read_only=True)
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'patient_anatomical_site',

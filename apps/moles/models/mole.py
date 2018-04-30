@@ -12,55 +12,69 @@ class MoleQuerySet(models.QuerySet):
     def annotate_last_upload(self):
         return self.annotate(last_upload=Max('images__date_created'))
 
-    def annotate_clinical_diagnosis_required(self):
+    def annotate_clinical_diagnosis_required(self, study_pk):
+        when = {
+            'images__clinical_diagnosis__exact': '',
+            'images__study_id': study_pk,
+            'then': F('images__pk')
+        }
+
         return self.annotate(
             images_with_clinical_diagnosis_required=Count(
                 Case(
-                    When(
-                        Q(images__clinical_diagnosis__exact=''),
-                        then=F('images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_pathological_diagnosis_required(self):
+    def annotate_pathological_diagnosis_required(self, study_pk):
+        when = {
+            'images__biopsy': True,
+            'images__path_diagnosis__exact': '',
+            'images__study_id': study_pk,
+            'then': F('images__pk')
+        }
+
         return self.annotate(
             images_with_pathological_diagnosis_required=Count(
                 Case(
-                    When(
-                        images__biopsy=True,
-                        images__path_diagnosis__exact='',
-                        then=F('images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_biopsy_count(self):
+    def annotate_biopsy_count(self, study_pk):
+        when = {
+            'images__biopsy': True,
+            'images__study_id': study_pk,
+            'then': F('images__pk')
+        }
+
         return self.annotate(
             images_biopsy_count=Count(
                 Case(
-                    When(
-                        images__biopsy=True,
-                        then=F('images__pk')
-                    ),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
             )
         )
 
-    def annotate_approve_required(self):
+    def annotate_approve_required(self, study_pk):
+        when = {
+            'images__approved__exact': False,
+            'images__study_id': study_pk,
+            'then': F('images__pk')
+        }
+
         return self.annotate(
             images_approve_required=Count(
                 Case(
-                    When(images__approved__exact=False,
-                         then=F('images__pk')),
+                    When(**when),
                     default=None
                 ),
                 distinct=True
@@ -75,6 +89,18 @@ class MoleQuerySet(models.QuerySet):
                     distinct=True
                 ),
                 None
+            )
+        )
+
+    def annotate_images_count(self, study_pk):
+        return self.annotate(
+            images_count=Count(
+                Case(
+                    When(images__study_id=study_pk,
+                         then=F('images__pk')),
+                    default=None
+                ),
+                distinct=True
             )
         )
 
@@ -112,10 +138,3 @@ class Mole(models.Model):
     def anatomical_sites(self):
         return list(
             self.anatomical_site.get_ancestors()) + [self.anatomical_site]
-
-    @property
-    def last_image(self):
-        try:
-            return self.images.latest('date_created')
-        except models.ObjectDoesNotExist:
-            return None
