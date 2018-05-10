@@ -31,15 +31,17 @@ class DoctorViewSetTest(APITestCase):
             {self.doctor.pk, self.other_doctor.pk, self.coordinator.pk}
         )
 
-    def test_public_key(self):
+    def test_public_keys(self):
         self.other_doctor.public_key = 'public_key_value'
         self.other_doctor.save()
 
         self.authenticate_as_doctor(self.coordinator)
         resp = self.client.get(
-            '/api/v1/doctor/{0}/public_key/'.format(self.other_doctor.pk))
+            '/api/v1/doctor/public_keys/?doctors={0}'.format(
+                self.other_doctor.pk))
         self.assertSuccessResponse(resp)
-        self.assertEqual(resp.data['public_key'], 'public_key_value')
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['public_key'], 'public_key_value')
 
     def test_list_with_sites(self):
         site = SiteFactory.create(site_coordinator=self.coordinator_ptr)

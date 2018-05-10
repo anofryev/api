@@ -1,6 +1,6 @@
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import list_route
 
 from ..serializers import DoctorWithSitesSerializer, DoctorKeySerializer
 from ..models import Doctor
@@ -20,6 +20,10 @@ class DoctorViewSet(viewsets.GenericViewSet,
             .get_queryset()\
             .annotate_sites()
 
-    @detail_route(methods=['GET'])
-    def public_key(self, request, *args, **kwargs):
-        return Response(DoctorKeySerializer(self.get_object()).data)
+    @list_route(methods=['GET'])
+    def public_keys(self, request, *args, **kwargs):
+        doctor_pks = request.GET.get('doctors').split(',')
+        return Response(DoctorKeySerializer(
+            Doctor.objects.filter(pk__in=doctor_pks),
+            many=True
+        ).data)
