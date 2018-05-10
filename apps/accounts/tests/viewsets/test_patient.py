@@ -1,4 +1,5 @@
 import json
+
 from apps.main.tests import APITestCase, patch
 from apps.moles.factories.study import StudyFactory
 from apps.moles.models import StudyToPatient
@@ -117,6 +118,20 @@ class PatientViewSetTest(APITestCase):
         resp = self.client.get('/api/v1/patient/{0}/'.format(
             self.another_patient.pk))
         self.assertNotFound(resp)
+
+    def test_get_as_coordinator(self):
+        coordinator = DoctorFactory.create(True)
+        self.authenticate_as_doctor(coordinator)
+
+        resp = self.client.get('/api/v1/patient/')
+        self.assertSuccessResponse(resp)
+        self.assertListEqual([], resp.data)
+
+        self.doctor.my_coordinator = coordinator.coordinator_role
+        self.doctor.save()
+        resp = self.client.get('/api/v1/patient/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 2)
 
     def test_create_patient_success(self):
         self.authenticate_as_doctor()
