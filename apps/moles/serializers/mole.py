@@ -52,7 +52,13 @@ class MoleListSerializer(MoleSerializer):
 
 class MoleDetailSerializer(MoleSerializer):
     patient_anatomical_site = PatientAnatomicalSiteSerializer(read_only=True)
-    images = MoleImageListSerializer(many=True, read_only=True)
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, obj):
+        study = self.context.get('study')
+        images = obj.images.filter(study=study)
+        return MoleImageListSerializer(
+            images, context=self.context, many=True).data
 
     class Meta(MoleSerializer.Meta):
         fields = ('pk', 'anatomical_sites', 'patient_anatomical_site',
