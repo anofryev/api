@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import (viewsets, mixins, pagination,
                             filters, response, status, )
 
@@ -42,9 +43,12 @@ class PatientViewSet(viewsets.GenericViewSet,
 
         user_doctor = self.request.user.doctor_role
         if is_coordinator(user_doctor):
-            result = result.filter(doctors__pk__in=Doctor.objects.filter(
-                my_coordinator=user_doctor.coordinator_role
-            ).values_list('pk', flat=True))
+
+            result = result.filter(
+                Q(doctors__pk__in=Doctor.objects.filter(
+                    my_coordinator=user_doctor.coordinator_role
+                ).values_list('pk', flat=True)) |
+                Q(doctors=user_doctor))
         else:
             result = result.filter(doctors=user_doctor)
 
