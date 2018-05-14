@@ -4,7 +4,7 @@ from rest_framework.decorators import list_route
 
 from ..serializers import DoctorWithSitesSerializer, DoctorKeySerializer
 from ..models import Doctor
-from ..permissions import IsCoordinator
+from ..permissions import IsCoordinator, IsDoctor
 
 
 class DoctorViewSet(viewsets.GenericViewSet,
@@ -20,7 +20,7 @@ class DoctorViewSet(viewsets.GenericViewSet,
             .get_queryset()\
             .annotate_sites()
 
-    @list_route(methods=['GET'])
+    @list_route(methods=['GET'], permission_classes=(IsDoctor,))
     def public_keys(self, request, *args, **kwargs):
         doctor_pks = request.GET.get('doctors').split(',')
         return Response(DoctorKeySerializer(
