@@ -1,7 +1,10 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import (viewsets, mixins, pagination,
                             filters, response, status, )
 
+from apps.accounts.models import Doctor
+from apps.accounts.models.coordinator import is_coordinator
 from apps.accounts.models.participant import is_participant
 from ..serializers import PatientSerializer, CreatePatientSerializer
 from ..models import Patient
@@ -36,12 +39,22 @@ class PatientViewSet(viewsets.GenericViewSet,
             .annotate_clinical_diagnosis_required(study_pk)\
             .annotate_pathological_diagnosis_required(study_pk)\
             .annotate_biopsy_count(study_pk)\
-            .annotate_approve_required(study_pk)\
-            .filter(doctors=self.request.user.doctor_role)
+            .annotate_approve_required(study_pk)
+
+        user_doctor = self.request.user.doctor_role
+        if is_coordinator(user_doctor):
+
+            result = result.filter(
+                Q(doctors__pk__in=Doctor.objects.filter(
+                    my_coordinator=user_doctor.coordinator_role
+                ).values_list('pk', flat=True)) |
+                Q(doctors=user_doctor))
+        else:
+            result = result.filter(doctors=user_doctor)
 
         if study_pk:
             result = result.filter(studies__pk=study_pk)
-        elif not is_participant(self.request.user.doctor_role):
+        elif not is_participant(user_doctor):
             # for participant return all patients, because it will be single
             result = result.filter(studies__isnull=True)
 

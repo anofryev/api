@@ -57,6 +57,12 @@ class DoctorSerializer(UserSerializer):
                   'is_coordinator', 'is_participant', 'date_created',)
 
 
+class DoctorKeySerializer(UserSerializer):
+    class Meta:
+        model = Doctor
+        fields = ('pk', 'public_key')
+
+
 class DoctorWithSitesSerializer(DoctorSerializer):
     sites = serializers.ListField()
 
