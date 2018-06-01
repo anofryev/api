@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.accounts.models import Doctor, DoctorToPatient
+from apps.accounts.models.coordinator import is_coordinator
 from apps.accounts.serializers import DoctorSerializer
 from apps.moles.models import StudyToPatient
 from ..models import ConsentDoc, Study
@@ -40,10 +41,13 @@ class StudyListSerializer(serializers.ModelSerializer):
 
         doctor = self.context['request'].user.doctor_role
 
-        study_to_patients = StudyToPatient.objects.filter(
-            study=obj,
-            patient_id__in=DoctorToPatient.objects.filter(
-                doctor=doctor).values_list('patient_id', flat=True))
+        if is_coordinator(doctor):
+            study_to_patients = []
+        else:
+            study_to_patients = StudyToPatient.objects.filter(
+                study=obj,
+                patient_id__in=DoctorToPatient.objects.filter(
+                    doctor=doctor).values_list('patient_id', flat=True))
 
         result = {}
         for study_to_patient in study_to_patients:
