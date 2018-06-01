@@ -1,7 +1,9 @@
+from django.utils import timezone
+
 from apps.accounts.models import DoctorToPatient
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
-    PatientFactory, ParticipantFactory
+    PatientFactory, ParticipantFactory, PatientConsentFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory
 from apps.moles.factories.study_invitation import StudyInvitationFactory
 from apps.moles.models import Study, StudyInvitation, StudyToPatient
@@ -67,6 +69,38 @@ class StudyViewSetTest(APITestCase):
         self.authenticate_as_doctor(doctor)
         resp = self.client.get('/api/v1/study/', format='json')
         self.assertEqual(len(resp.data), 1)
+        print(resp.data)
+
+    def test_list_as_doctor_with_consent(self):
+        doctor = DoctorFactory.create()
+        study = StudyFactory.create()
+        study.doctors.add(doctor)
+        study.save()
+
+        DoctorToPatient.objects.create(
+            doctor=doctor,
+            patient=self.patient)
+
+        now = timezone.now()
+        consent = PatientConsentFactory.create(
+            patient=self.patient,
+            date_expired=now)
+
+        StudyToPatient.objects.create(
+            study=study,
+            patient=self.patient,
+            patient_consent=consent)
+
+        self.authenticate_as_doctor(doctor)
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertEqual(len(resp.data), 1)
+
+        self.assertListEqual(
+            list(resp.data[0]['consents_validity'].keys()),
+            [self.patient.pk])
+        self.assertEqual(
+            resp.data[0]['consents_validity'][self.patient.pk]['pk'],
+            consent.pk)
 
     def test_list_forbidden(self):
         StudyFactory.create()
