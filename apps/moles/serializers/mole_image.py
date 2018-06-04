@@ -2,7 +2,7 @@ import json
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 from apps.accounts.models import Coordinator
-from apps.moles.serializers.study import StudyBaseSerializer
+from apps.moles.serializers.study import StudyLiteSerializer
 
 from ..models import MoleImage
 from .utils import validate_study_consent_for_patient
@@ -42,7 +42,7 @@ class MoleImageSerializer(serializers.ModelSerializer):
 
 
 class MoleImageListSerializer(MoleImageSerializer):
-    study = StudyBaseSerializer()
+    study = StudyLiteSerializer()
 
     class Meta(MoleImageSerializer.Meta):
         fields = ('pk', 'date_created', 'date_modified', 'path_diagnosis',

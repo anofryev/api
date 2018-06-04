@@ -69,7 +69,6 @@ class StudyViewSetTest(APITestCase):
         self.authenticate_as_doctor(doctor)
         resp = self.client.get('/api/v1/study/', format='json')
         self.assertEqual(len(resp.data), 1)
-        print(resp.data)
 
     def test_list_as_doctor_with_consent(self):
         doctor = DoctorFactory.create()
@@ -96,10 +95,10 @@ class StudyViewSetTest(APITestCase):
         self.assertEqual(len(resp.data), 1)
 
         self.assertListEqual(
-            list(resp.data[0]['consents_validity'].keys()),
+            list(resp.data[0]['patients_consents'].keys()),
             [self.patient.pk])
         self.assertEqual(
-            resp.data[0]['consents_validity'][self.patient.pk]['pk'],
+            resp.data[0]['patients_consents'][self.patient.pk]['pk'],
             consent.pk)
 
     def test_list_forbidden(self):

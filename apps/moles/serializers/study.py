@@ -22,21 +22,9 @@ class StudyBaseSerializer(serializers.ModelSerializer):
 
 
 class StudyLiteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Study
-        fields = ('pk', 'title', 'consent_docs', 'author')
+    patients_consents = serializers.SerializerMethodField()
 
-
-class StudyListSerializer(serializers.ModelSerializer):
-    consent_docs = ConsentDocSerializer(many=True)
-    doctors = DoctorSerializer(many=True)
-    consents_validity = serializers.SerializerMethodField()
-
-    class Meta(StudyBaseSerializer.Meta):
-        fields = ('pk', 'title', 'doctors', 'patients',
-                  'consent_docs', 'consents_validity')
-
-    def get_consents_validity(self, obj):
+    def get_patients_consents(self, obj):
         from apps.accounts.serializers import PatientConsentSerializer
 
         doctor = self.context['request'].user.doctor_role
@@ -55,6 +43,20 @@ class StudyListSerializer(serializers.ModelSerializer):
                 study_to_patient.patient_consent).data
 
         return result
+
+    class Meta:
+        model = Study
+        fields = ('pk', 'title', 'consent_docs', 'author',
+                  'patients_consents')
+
+
+class StudyListSerializer(StudyLiteSerializer):
+    consent_docs = ConsentDocSerializer(many=True)
+    doctors = DoctorSerializer(many=True)
+
+    class Meta(StudyBaseSerializer.Meta):
+        fields = ('pk', 'title', 'doctors', 'patients',
+                  'consent_docs', 'patients_consents')
 
 
 class AddDoctorSerializer(serializers.Serializer):
