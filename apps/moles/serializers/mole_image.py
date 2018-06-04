@@ -2,10 +2,10 @@ import json
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 from apps.accounts.models import Coordinator
-from apps.moles.models import Study, StudyToPatient
 from apps.moles.serializers.study import StudyBaseSerializer
 
 from ..models import MoleImage
+from .utils import validate_study_consent_for_patient
 
 
 class MoleImageSerializer(serializers.ModelSerializer):
@@ -36,16 +36,8 @@ class MoleImageSerializer(serializers.ModelSerializer):
         return data
 
     def validate_study(self, study):
-        study_to_patient = StudyToPatient.objects.filter(
-            study=study,
-            patient=self.context['view'].kwargs['patient_pk']
-        ).first()
-        if study_to_patient:
-            consent = study_to_patient.patient_consent
-            if consent and not consent.is_valid():
-                raise serializers.ValidationError(
-                    "Need to update study consent for patient")
-
+        validate_study_consent_for_patient(
+            study, self.context['view'].kwargs['patient_pk'])
         return study
 
 
