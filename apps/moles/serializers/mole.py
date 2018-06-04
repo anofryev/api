@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from apps.moles.models import Study
+from apps.moles.models import Study, StudyToPatient
 from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
@@ -73,7 +73,18 @@ def validate_position_info(self, value):
 
 
 def validate(self, data):
-    if data.get('patient_anatomical_site') is None or\
+    if data.get('study', None):
+        study_to_patient = StudyToPatient.objects.filter(
+            study=data['study'],
+            patient=self.context['view'].kwargs['patient_pk']
+        ).first()
+        if study_to_patient:
+            consent = study_to_patient.patient_consent
+            if consent and not consent.is_valid():
+                raise serializers.ValidationError(
+                    "Need to update study consent for patient")
+
+    if data.get('patient_anatomical_site') is None or \
             data['patient_anatomical_site'].anatomical_site.pk \
             == data['anatomical_site'].pk:
         return data

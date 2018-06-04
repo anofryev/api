@@ -1,4 +1,8 @@
 import json
+from datetime import timedelta
+
+from django.utils import timezone
+
 from apps.main.tests import patch
 from apps.moles.factories import MoleImageFactory
 from apps.moles.factories.study import StudyFactory
@@ -200,6 +204,30 @@ class MoleViewSetTest(MolesTestCase):
         mole_image = mole.images.first()
         self.assertIsNotNone(mole_image.study)
         self.assertEqual(mole_image.study.pk, study.pk)
+
+    @patch('apps.moles.tasks.requests')
+    def test_create_with_study_outdated_consent(self, mock_requests):
+        study = StudyFactory.create()
+        self.authenticate_as_doctor()
+
+        position_info = {'x': 10, 'y': 10}
+
+        mole_data = {
+            'anatomical_site': self.anatomical_site.pk,
+            'position_info': json.dumps(position_info),
+            'photo': self.get_sample_image_file(),
+            'study': study.pk
+        }
+
+        self.first_patient_consent.date_expired = \
+            timezone.now() - timedelta(days=1)
+        self.first_patient_consent.save()
+
+        with self.fake_media():
+            resp = self.client.post(
+                self.get_url(self.first_patient.pk),
+                mole_data)
+        self.assertForbidden(resp)
 
     def test_create_forbidden_for_wrong_patient_anatomical_site(self):
         self.authenticate_as_doctor()

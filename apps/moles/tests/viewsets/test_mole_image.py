@@ -212,7 +212,6 @@ class MoleImageViewSetTest(MolesTestCase):
             first_patient_mole_image.pk))
         self.assertNotAllowed(resp)
 
-
     @patch('apps.moles.tasks.requests')
     def test_that_doctor_cant_change_approved_field(self, mock_requests):
         mole_image = MoleImageFactory.create(
