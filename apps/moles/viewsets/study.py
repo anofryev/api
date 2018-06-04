@@ -118,3 +118,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             'all_success': len(fail_emails) == 0,
             'fail_emails': fail_emails
         })
+
+    # @detail_route(methods=['POST'])
+    # def add_consent(self, request, pk):
+    #     pass
