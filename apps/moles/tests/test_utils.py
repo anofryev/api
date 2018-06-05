@@ -3,6 +3,8 @@ from datetime import timedelta
 from django.test import TestCase
 from django.utils import timezone
 
+from rest_framework import serializers
+
 from apps.accounts.factories import PatientFactory, PatientConsentFactory
 from apps.moles.factories.study import StudyFactory
 from apps.moles.models import StudyToPatient
@@ -18,10 +20,13 @@ class UtilsTest(TestCase):
         consent = PatientConsentFactory.create(
             patient=patient,
             date_expired=expired)
+        consent.date_expired = expired
+        consent.save()
 
         StudyToPatient.objects.create(
             study=study,
             patient=patient,
             patient_consent=consent)
 
-        validate_study_consent_for_patient(study, patient)
+        with self.assertRaises(serializers.ValidationError):
+            validate_study_consent_for_patient(study, patient)
