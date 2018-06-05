@@ -5,7 +5,7 @@ from apps.accounts.models import Coordinator
 from apps.moles.serializers.study import StudyLiteSerializer
 
 from ..models import MoleImage
-from .utils import validate_study_consent_for_patient
+from ..models.utils import validate_study_consent_for_patient
 
 
 class MoleImageSerializer(serializers.ModelSerializer):

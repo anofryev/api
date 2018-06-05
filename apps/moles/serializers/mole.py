@@ -9,7 +9,7 @@ from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
 from .mole_image import MoleImageListSerializer
-from .utils import validate_study_consent_for_patient
+from ..models.utils import validate_study_consent_for_patient
 
 
 class MoleSerializer(serializers.ModelSerializer):

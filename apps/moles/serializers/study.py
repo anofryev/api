@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.accounts.models import Doctor, DoctorToPatient
 from apps.accounts.models.coordinator import is_coordinator
-from apps.accounts.serializers import DoctorSerializer
+from apps.accounts.serializers.doctor import DoctorSerializer
 from apps.moles.models import StudyToPatient
 from ..models import ConsentDoc, Study
 
