@@ -20,6 +20,21 @@ class UtilsTest(TestCase):
         consent = PatientConsentFactory.create(
             patient=patient,
             date_expired=expired)
+
+        StudyToPatient.objects.create(
+            study=study,
+            patient=patient,
+            patient_consent=consent)
+
+        validate_study_consent_for_patient(study, patient)
+
+    def test_validate_study_consent_with_error(self):
+        study = StudyFactory.create()
+        patient = PatientFactory.create()
+        expired = timezone.now() - timedelta(days=1)
+        consent = PatientConsentFactory.create(
+            patient=patient,
+            date_expired=expired)
         consent.date_expired = expired
         consent.save()
 

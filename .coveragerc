@@ -8,6 +8,8 @@ omit =
     *reversion_compare*
     *contrib*
     *test*
+    *moles/admin*
+    *accounts/admin*
 
 [report]
 # Regexes for lines to exclude from consideration
