@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.signals import m2m_changed
 from django.utils import timezone
 
 from apps.accounts.models import Coordinator
@@ -35,23 +36,11 @@ class Study(models.Model):
     def __str__(self):
         return self.title
 
-    def _invalidate_consents(self):
+    def invalidate_consents(self):
         for study_to_patient in StudyToPatient.objects.filter(study=self):
             if study_to_patient.patient_consent:
                 study_to_patient.patient_consent.date_expired = timezone.now()
                 study_to_patient.patient_consent.save()
-
-    def _check_update_consents(self, previous_docs):
-        current_docs = self.consent_docs.all().values_list(
-            'pk', flat=True)
-        if set(previous_docs) != set(current_docs):
-            self._invalidate_consents()
-
-    def save(self, *args, **kwargs):
-        previous_docs = self.consent_docs.all().values_list('pk', flat=True)
-        super(Study, self).save(*args, **kwargs)
-        if previous_docs:
-            self._check_update_consents(previous_docs)
 
     class Meta:
         verbose_name = 'Study'
