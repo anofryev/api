@@ -56,7 +56,7 @@ class StudyTest(TestCase):
         self.assertEqual(self.study.title, 'Changed name')
         self.assertFalse(mock_invalidate_consents.called)
 
-    def test_update_consent(self):
+    def test_update_consent_docs(self):
         self.assertTrue(self.study_to_patient.patient_consent.is_valid())
 
         yesterday_date = timezone.now() - timedelta(days=1)
@@ -67,3 +67,17 @@ class StudyTest(TestCase):
             self.study.save()
             self.study_to_patient.patient_consent.refresh_from_db()
             self.assertFalse(self.study_to_patient.patient_consent.is_valid())
+
+    @patch('apps.moles.models.study.Study.invalidate_consents')
+    def test_update_consent_docs_without_consent(
+            self, mock_invalidate_consents):
+        self.assertTrue(self.study_to_patient.patient_consent.is_valid())
+
+        self.study_to_patient.patient_consent = None
+        self.study_to_patient.save()
+
+        new_doc = ConsentDocFactory.create()
+        self.study.consent_docs.add(new_doc)
+        self.study.save()
+
+        self.assertTrue(mock_invalidate_consents.called)
