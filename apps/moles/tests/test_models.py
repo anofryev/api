@@ -1,7 +1,15 @@
-from django.test import TransactionTestCase, mock
+from datetime import timedelta
 
+from django.test import TestCase, TransactionTestCase, mock
+from django.utils import timezone
+
+from apps.accounts.factories import DoctorFactory, PatientFactory, \
+    PatientConsentFactory
+from apps.accounts.models import DoctorToPatient
 from apps.main.tests import patch
 from apps.main.tests.mixins import FileTestMixin
+from apps.moles.factories.study import StudyFactory, ConsentDocFactory
+from apps.moles.models import StudyToPatient
 from ..factories import MoleImageFactory
 
 
@@ -19,3 +27,43 @@ class MoleImageTest(FileTestMixin, TransactionTestCase):
             MoleImageFactory.create(photo=self.get_sample_image_file())
 
         self.assertTrue(mock_requests.post.called)
+
+
+class StudyTest(TestCase):
+    def setUp(self):
+        self.doctor = DoctorFactory.create()
+        self.patient = PatientFactory.create()
+        self.study = StudyFactory.create()
+        self.study.doctors.add(self.doctor)
+        self.study.save()
+
+        DoctorToPatient.objects.create(
+            doctor=self.doctor,
+            patient=self.patient)
+        consent = PatientConsentFactory.create(
+            patient=self.patient)
+        self.study_to_patient = StudyToPatient.objects.create(
+            study=self.study,
+            patient=self.patient,
+            patient_consent=consent)
+
+    @patch('apps.moles.models.study.Study.invalidate_consents')
+    def test_update_consent_without_changing_docs(
+            self, mock_invalidate_consents):
+        self.study.title = 'Changed name'
+        self.study.save()
+        self.study.refresh_from_db()
+        self.assertEqual(self.study.title, 'Changed name')
+        self.assertFalse(mock_invalidate_consents.called)
+
+    def test_update_consent(self):
+        self.assertTrue(self.study_to_patient.patient_consent.is_valid())
+
+        yesterday_date = timezone.now() - timedelta(days=1)
+        with patch('django.utils.timezone.now') as mock_now:
+            mock_now.return_value = yesterday_date
+            new_doc = ConsentDocFactory.create()
+            self.study.consent_docs.add(new_doc)
+            self.study.save()
+            self.study_to_patient.patient_consent.refresh_from_db()
+            self.assertFalse(self.study_to_patient.patient_consent.is_valid())
