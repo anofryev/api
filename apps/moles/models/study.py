@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from apps.accounts.models import Coordinator
 from apps.main.models.mixins.thumbnail import ThumbnailMixin
@@ -33,6 +34,26 @@ class Study(models.Model):
 
     def __str__(self):
         return self.title
+
+    def _invalidate_consents(self):
+        for study_to_patient in StudyToPatient.objects.filter(study=self):
+            if study_to_patient.patient_consent:
+                study_to_patient.patient_consent.date_expired = timezone.now()
+                study_to_patient.patient_consent.save()
+
+    def _check_update_consents(self, previous):
+        previous_consent_docs = previous.consent_docs.all().values_list(
+            'pk', flat=True)
+        current_consent_docs = self.consent_docs.all().values_list(
+            'pk', flat=True)
+        if set(current_consent_docs) != set(previous_consent_docs):
+            self._invalidate_consents()
+
+    def save(self, *args, **kwargs):
+        previous = Study.objects.get(pk=self.pk) if self.pk else None
+        super(Study, self).save(*args, **kwargs)
+        if previous:
+            self._check_update_consents(previous)
 
     class Meta:
         verbose_name = 'Study'
