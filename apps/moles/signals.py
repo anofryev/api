@@ -26,7 +26,7 @@ def warm_patient_anatomical_site_distant_photo(sender, instance, **kwargs):
 
 
 def consent_docs_changes(sender, instance, action, **kwargs):
-    if action == 'post_add':
+    if action in ['post_add', 'post_remove', 'post_clear']:
         instance.invalidate_consents()
 
 
