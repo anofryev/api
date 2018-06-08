@@ -41,19 +41,17 @@ class Study(models.Model):
                 study_to_patient.patient_consent.date_expired = timezone.now()
                 study_to_patient.patient_consent.save()
 
-    def _check_update_consents(self, previous):
-        previous_consent_docs = previous.consent_docs.all().values_list(
+    def _check_update_consents(self, previous_docs):
+        current_docs = self.consent_docs.all().values_list(
             'pk', flat=True)
-        current_consent_docs = self.consent_docs.all().values_list(
-            'pk', flat=True)
-        if set(current_consent_docs) != set(previous_consent_docs):
+        if set(previous_docs) != set(current_docs):
             self._invalidate_consents()
 
     def save(self, *args, **kwargs):
-        previous = Study.objects.get(pk=self.pk) if self.pk else None
+        previous_docs = self.consent_docs.all().values_list('pk', flat=True)
         super(Study, self).save(*args, **kwargs)
-        if previous:
-            self._check_update_consents(previous)
+        if previous_docs:
+            self._check_update_consents(previous_docs)
 
     class Meta:
         verbose_name = 'Study'
