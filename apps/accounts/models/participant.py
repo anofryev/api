@@ -32,6 +32,7 @@ def get_participant_patient(user):
     return doctor_to_patient.patient if doctor_to_patient else None
 
 
+# TODO add condition on participant
 def get_participant_doctor(patient):
     doctor_to_patient = DoctorToPatient.objects.filter(
         patient=patient

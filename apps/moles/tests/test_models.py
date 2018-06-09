@@ -48,7 +48,6 @@ class StudyTest(TestCase):
             patient_consent=consent)
 
     @patch('apps.moles.models.study.Study.invalidate_consents')
-
     def test_update_consent_without_changing_docs(
             self, mock_invalidate_consents):
         self.study.title = 'Changed name'
