@@ -1,0 +1,31 @@
+{% load i18n %}
+
+{% block subject %}
+{% blocktrans %}
+    Study {{ study_title }} consent documents updated
+{% endblocktrans %}
+{% endblock subject %}
+
+{% block text_body %}
+
+{% blocktrans %}
+Consent documents for the {{ study_title }} study were updated on
+{{ study_date_of_change }}. To upload new images to this particular study,
+you will need to read and resign the consent form on your app.
+{% endblocktrans %}
+
+{% blocktrans %}
+A copy of the consent document has been attached to this email as well.
+{% endblocktrans %}
+
+{% blocktrans %}
+Please contact {{ study_coordinator }} at {{ study_coordinator_email }}
+for additional information or questions.
+{% endblocktrans %}
+
+{% blocktrans %}
+Best regards,
+UCSF HadleyLab Support Team
+{% endblocktrans %}
+
+{% endblock text_body %}
