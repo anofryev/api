@@ -57,7 +57,7 @@ class StudyTest(TestCase):
         self.assertEqual(self.study.title, 'Changed name')
         self.assertFalse(mock_invalidate_consents.called)
 
-    @patch('apps.moles.models.study.DoctorNotificationDocConsentUdate.send')
+    @patch('apps.moles.models.study.DoctorNotificationDocConsentUpdate.send')
     @patch('apps.moles.models.study.ParticipantNotificationDocConsentUpdate.send')
     def test_update_consent_docs(self, mock_participant_notification,
                                  mock_doc_notification):

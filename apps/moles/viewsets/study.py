@@ -49,7 +49,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             return self.queryset.filter(doctors__pk=user.pk)
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update']:
+        if self.action in ['create', 'update', 'partial_update']:
             return StudyBaseSerializer
         else:
             return self.serializer_class
