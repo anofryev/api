@@ -4,7 +4,7 @@ from django.test import TestCase, TransactionTestCase, mock
 from django.utils import timezone
 
 from apps.accounts.factories import DoctorFactory, PatientFactory, \
-    PatientConsentFactory
+    PatientConsentFactory, CoordinatorFactory
 from apps.accounts.models import DoctorToPatient
 from apps.main.tests import patch
 from apps.main.tests.mixins import FileTestMixin
@@ -48,6 +48,7 @@ class StudyTest(TestCase):
             patient_consent=consent)
 
     @patch('apps.moles.models.study.Study.invalidate_consents')
+
     def test_update_consent_without_changing_docs(
             self, mock_invalidate_consents):
         self.study.title = 'Changed name'
@@ -56,7 +57,12 @@ class StudyTest(TestCase):
         self.assertEqual(self.study.title, 'Changed name')
         self.assertFalse(mock_invalidate_consents.called)
 
-    def test_update_consent_docs(self):
+    @patch('apps.moles.models.study.DoctorNotificationDocConsentUdate.send')
+    @patch('apps.moles.models.study.ParticipantNotificationDocConsentUpdate.send')
+    def test_update_consent_docs(self, mock_participant_notification,
+                                 mock_doc_notification):
+        self.study.author = CoordinatorFactory.create()
+        self.study.save()
         self.assertTrue(self.study_to_patient.patient_consent.is_valid())
 
         yesterday_date = timezone.now() - timedelta(days=1)
@@ -67,6 +73,9 @@ class StudyTest(TestCase):
             self.study.save()
             self.study_to_patient.patient_consent.refresh_from_db()
             self.assertFalse(self.study_to_patient.patient_consent.is_valid())
+
+        self.assertTrue(mock_doc_notification.called)
+        self.assertTrue(mock_participant_notification.called)
 
     @patch('apps.moles.models.study.Study.invalidate_consents')
     def test_update_consent_docs_without_consent(
