@@ -11,7 +11,7 @@ from .models.study import ParticipantNotificationDocConsentUpdate, \
     DoctorNotificationDocConsentUpdate
 
 
-class GetPrerdictionError(Exception):
+class GetPredictionError(Exception):
     pass
 
 
@@ -30,7 +30,7 @@ def get_mole_image_prediction(pk):
         mole_image.prediction_accuracy = Decimal(r.json()['probability'])
         mole_image.save()
     else:
-        raise GetPrerdictionError(r)
+        raise GetPredictionError(r)
 
 
 def get_study_context(study):

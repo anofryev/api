@@ -1,9 +1,8 @@
 from django.test import TransactionTestCase, mock
 from apps.main.tests import patch
 from apps.main.tests.mixins import FileTestMixin
-from ..models import MoleImage
 from ..factories import MoleImageFactory
-from ..tasks import GetPrerdictionError
+from ..tasks import GetPredictionError
 
 
 class TasksTest(FileTestMixin, TransactionTestCase):
@@ -37,6 +36,6 @@ class TasksTest(FileTestMixin, TransactionTestCase):
 
         # Task `get_mole_image_prediction` runs automatically on post save
         # signal
-        with self.fake_media(), self.assertRaises(GetPrerdictionError):
+        with self.fake_media(), self.assertRaises(GetPredictionError):
             MoleImageFactory.create(
                 photo=self.get_sample_image_file())
