@@ -29,7 +29,7 @@ class MoleImageTest(FileTestMixin, TransactionTestCase):
         self.assertTrue(mock_requests.post.called)
 
 
-class StudyTest(TestCase):
+class StudyTest(FileTestMixin, TestCase):
     def setUp(self):
         self.doctor = DoctorFactory.create()
         self.patient = PatientFactory.create()
@@ -71,7 +71,11 @@ class StudyTest(TestCase):
         yesterday_date = timezone.now() - timedelta(days=1)
         with patch('django.utils.timezone.now') as mock_now:
             mock_now.return_value = yesterday_date
-            new_doc = ConsentDocFactory.create()
+
+            with self.fake_media():
+                new_doc = ConsentDocFactory.create(
+                    file=self.get_sample_image_file())
+
             self.study.consent_docs.add(new_doc)
             self.study.save()
             self.study_to_patient.patient_consent.refresh_from_db()
@@ -90,7 +94,10 @@ class StudyTest(TestCase):
         self.study_to_patient.patient_consent = None
         self.study_to_patient.save()
 
-        new_doc = ConsentDocFactory.create()
+        with self.fake_media():
+            new_doc = ConsentDocFactory.create(
+                file=self.get_sample_image_file())
+
         self.study.consent_docs.add(new_doc)
         self.study.save()
 
