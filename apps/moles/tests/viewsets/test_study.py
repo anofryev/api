@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from apps.accounts.models import DoctorToPatient, PatientConsent
-from apps.main.tests import APITestCase
+from apps.main.tests import APITestCase, patch
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
     PatientFactory, ParticipantFactory, PatientConsentFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory
@@ -383,3 +383,16 @@ class StudyViewSetTest(APITestCase):
             count_before_post + 1,
             PatientConsent.objects.all().count()
         )
+
+    @patch('apps.moles.models.study.Study.invalidate_consents')
+    def test_update_consent_docs(self, mock_invalidate_consents):
+        study = StudyFactory.create(author=self.coordinator)
+        new_consent_docs = ConsentDocFactory.create()
+
+        self.authenticate_as_doctor()
+        self.client.put(self.target_path(study.pk), {
+            'title': study.title,
+            'consent_docs': [new_consent_docs.pk]
+        }, format='json')
+
+        mock_invalidate_consents.assert_called_once()
