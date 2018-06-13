@@ -4,7 +4,7 @@ from django.test import TestCase, TransactionTestCase, mock
 from django.utils import timezone
 
 from apps.accounts.factories import DoctorFactory, PatientFactory, \
-    PatientConsentFactory, CoordinatorFactory
+    PatientConsentFactory, CoordinatorFactory, ParticipantFactory
 from apps.accounts.models import DoctorToPatient
 from apps.main.tests import patch
 from apps.main.tests.mixins import FileTestMixin
@@ -63,6 +63,9 @@ class StudyTest(TestCase):
         self.study.author = CoordinatorFactory.create()
         self.study.save()
         self.assertTrue(self.study_to_patient.patient_consent.is_valid())
+
+        # Make out doctor participant (self.doctor in doctors and in patients)
+        ParticipantFactory.create(doctor_ptr=self.doctor)
 
         yesterday_date = timezone.now() - timedelta(days=1)
         with patch('django.utils.timezone.now') as mock_now:
