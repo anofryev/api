@@ -7,11 +7,10 @@
 {% endblock subject %}
 
 {% block text_body %}
-{% blocktrans %}Hello, {{ username }}.{% endblocktrans %}
+{% blocktrans %}Hello, {{ user_full_name }}.{% endblocktrans %}
 
 {% blocktrans %}
-Consent documents for the {{ study_title }} study were updated on
-{{ study_date_of_change }}.
+Consent documents for the {{ study_title }} study were updated on {{ study_date_of_change }}.
 As a result, you will be unable to upload new study images for a patient until
 the consent is renewed. You may ask patients to re-sign the consent on your app
 or they can do it via their own account. Previously uploaded images can

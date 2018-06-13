@@ -3,6 +3,7 @@ import requests
 from celery import shared_task
 from decimal import Decimal
 
+from django.conf import settings
 from django.utils import timezone
 
 from apps.accounts.models import Doctor
@@ -44,12 +45,24 @@ def get_study_context(study):
 
 @shared_task
 def send_participant_consent_changed(study_pk, participant_pk):
-    # TODO: Add attachment to email
     study = Study.objects.get(pk=study_pk)
     participant = Doctor.objects.get(pk=participant_pk)
 
+    consent_docs_urls = []
+    for doc in study.consent_docs.all():
+        url = doc.file.url
+        if not url.startswith('http'):
+            url = '{0}://{1}{2}'.format(
+                settings.PROTOCOL,
+                settings.DOMAIN,
+                url)
+        consent_docs_urls.append(url)
+
+    context = get_study_context(study)
+    context['consent_docs_urls'] = consent_docs_urls
+
     ParticipantNotificationDocConsentUpdate(
-        context=get_study_context(study)).send([participant.email])
+        context=context).send([participant.email])
 
 
 @shared_task
@@ -58,5 +71,5 @@ def send_doctor_consent_changed(study_pk, doctor_pk):
     doctor = Doctor.objects.get(pk=doctor_pk)
 
     context = get_study_context(study)
-    context.update({'username': doctor.username})
+    context.update({'user_full_name': doctor.get_full_name()})
     DoctorNotificationDocConsentUpdate(context=context).send([doctor.email])
