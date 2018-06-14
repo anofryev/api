@@ -17,7 +17,8 @@ you will need to read and resign the consent form on your app.
 {% blocktrans %}
 A copy of the consent document has been attached to this email as well:
 {% endblocktrans %}
-{% for doc in consent_docs_urls %}{{ doc }}{% endfor %}
+{% for doc in consent_docs_urls %}{{ doc }}
+{% endfor %}
 
 {% blocktrans %}
 Please contact {{ study_coordinator }} at {{ study_coordinator_email }}

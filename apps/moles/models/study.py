@@ -48,14 +48,14 @@ class Study(models.Model):
 
                 participant = get_participant_doctor(study_to_patient.patient)
                 if participant:
-                    send_participant_consent_changed.delay(
-                        study_pk=self.pk,
-                        participant_pk=participant.pk)
+                    send_participant_consent_changed.apply_async(
+                        countdown=3,
+                        args=[self.pk, participant.pk])
 
         for doctor_pk in self.doctors.all().values_list('pk', flat=True):
-            send_doctor_consent_changed.delay(
-                study_pk=self.pk,
-                doctor_pk=doctor_pk)
+            send_doctor_consent_changed.apply_async(
+                countdown=3,
+                args=[self.pk, doctor_pk])
 
     class Meta:
         verbose_name = 'Study'
