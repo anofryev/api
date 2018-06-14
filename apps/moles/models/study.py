@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.core.validators import FileExtensionValidator
 from templated_mail.mail import BaseEmailMessage
 
 from apps.accounts.models import Coordinator
@@ -69,6 +70,12 @@ class ConsentDoc(models.Model, ThumbnailMixin):
         verbose_name='Document file',
         upload_to=study_consent_docs_path,
         storage=private_storage,
+        validators=[FileExtensionValidator(
+            allowed_extensions=[
+                'jpg', 'jpeg', 'png', 'gif', 'svg',
+                'pdf', 'doc', 'docx', 'odt', 'html', 'htm', 'rtf'
+            ]
+        )]
     )
     original_filename = models.CharField(
         max_length=250,
