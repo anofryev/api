@@ -1,7 +1,7 @@
 Django==1.11.1
 Pillow==4.1.1
 boto==2.47.0
-celery==4.0.2
+celery==4.2.0
 dj-database-url==0.4.2
 django-constance==2.0.0
 django-picklefield==0.3.2
