@@ -9,6 +9,7 @@ from ..models import Mole, MoleImage
 from .anatomical_site import AnatomicalSiteSerializer
 from .patient_anatomical_site import PatientAnatomicalSiteSerializer
 from .mole_image import MoleImageListSerializer
+from ..models.utils import validate_study_consent_for_patient
 
 
 class MoleSerializer(serializers.ModelSerializer):
@@ -73,7 +74,11 @@ def validate_position_info(self, value):
 
 
 def validate(self, data):
-    if data.get('patient_anatomical_site') is None or\
+    validate_study_consent_for_patient(
+        data.get('study', None),
+        self.context['view'].kwargs['patient_pk'])
+
+    if data.get('patient_anatomical_site') is None or \
             data['patient_anatomical_site'].anatomical_site.pk \
             == data['anatomical_site'].pk:
         return data

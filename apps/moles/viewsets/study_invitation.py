@@ -57,7 +57,10 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
 
         invitation.status = StudyInvitationStatus.ACCEPTED
         invitation.save(update_fields=['status'])
-        return Response(StudyInvitationSerializer(instance=invitation).data)
+        return Response(StudyInvitationSerializer(
+            context=self.get_serializer_context(),
+            instance=invitation
+        ).data)
 
     @detail_route(methods=['POST'])
     def decline(self, request, pk):
@@ -65,4 +68,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
         invitation.status = StudyInvitationStatus.DECLINED
         invitation.save(update_fields=['status'])
 
-        return Response(StudyInvitationSerializer(instance=invitation).data)
+        return Response(StudyInvitationSerializer(
+            context=self.get_serializer_context(),
+            instance=invitation
+        ).data)

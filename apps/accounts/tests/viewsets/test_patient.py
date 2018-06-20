@@ -1,5 +1,6 @@
 import json
 
+from apps.accounts.factories import ParticipantFactory
 from apps.main.tests import APITestCase, patch
 from apps.moles.factories.study import StudyFactory
 from apps.moles.models import StudyToPatient
@@ -83,6 +84,17 @@ class PatientViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 1)
         self.assertListEqual(resp.data[0]['studies'], [])
+
+    def test_list_as_participant(self):
+        participant = DoctorFactory.create(password='password')
+        ParticipantFactory.create(doctor_ptr=participant)
+        patient = PatientFactory.create(doctor=participant)
+        self.authenticate_as_doctor(participant)
+
+        resp = self.client.get('/api/v1/patient/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['pk'], patient.pk)
 
     def test_list_with_study_in_request(self):
         from apps.moles.factories import MoleFactory, MoleImageFactory

@@ -98,6 +98,26 @@ class MoleImageViewSetTest(MolesTestCase):
         self.assertEqual(mole_image.study.pk, study.pk)
 
     @patch('apps.moles.tasks.requests')
+    def test_create_with_study_outdated_consent(self, mock_requests):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+
+        mole_image_data = {
+            'photo': self.get_sample_image_file(),
+            'study': study.pk,
+        }
+
+        self.first_patient_consent.date_expired = \
+            timezone.now() - timedelta(days=1)
+        self.first_patient_consent.save()
+
+        with self.fake_media():
+            resp = self.client.post(
+                self.get_url(self.first_patient.pk, self.first_patient_mole.pk),
+                mole_image_data)
+        self.assertForbidden(resp)
+
+    @patch('apps.moles.tasks.requests')
     def test_update_success(self, mock_requests):
         self.authenticate_as_doctor()
 
@@ -191,7 +211,6 @@ class MoleImageViewSetTest(MolesTestCase):
             self.first_patient_mole.pk,
             first_patient_mole_image.pk))
         self.assertNotAllowed(resp)
-
 
     @patch('apps.moles.tasks.requests')
     def test_that_doctor_cant_change_approved_field(self, mock_requests):
