@@ -50,6 +50,9 @@ class PatientConsent(DelayedSaveFilesMixin, models.Model):
     def __str__(self):
         return '{0}: {1}'.format(self.patient, self.date_expired)
 
+    def is_valid(self):
+        return self.date_expired > timezone.now()
+
 
 @receiver(pre_save, sender=PatientConsent)
 def set_up_date_expired(sender, instance, **kwargs):

@@ -30,3 +30,11 @@ def get_participant_patient(user):
         doctor=user
     ).first()
     return doctor_to_patient.patient if doctor_to_patient else None
+
+
+def get_participant_doctor(patient):
+    doctor_to_patient = DoctorToPatient.objects.filter(
+        patient=patient,
+        doctor__participant_role__isnull=False,
+    ).first()
+    return doctor_to_patient.doctor if doctor_to_patient else None

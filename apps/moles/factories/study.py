@@ -1,8 +1,7 @@
-from factory import DjangoModelFactory, SubFactory, fuzzy
+from factory import DjangoModelFactory, fuzzy
 
 from ..models import ConsentDoc
-from apps.moles.models.study import Study, StudyToPatient
-from apps.accounts.factories import PatientFactory, DoctorFactory
+from apps.moles.models.study import Study
 
 
 class ConsentDocFactory(DjangoModelFactory):

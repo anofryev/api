@@ -3,9 +3,11 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from apps.accounts.models.coordinator import is_coordinator
-from apps.accounts.models import Doctor
+from apps.accounts.models import Doctor, Patient
 from apps.accounts.models.participant import is_participant, \
     get_participant_patient
+from apps.accounts.serializers import PatientConsentSerializer
+from apps.moles.models import StudyToPatient
 from apps.moles.models.moles_mailer import AddParticipantNotification
 from apps.moles.serializers.study import AddDoctorSerializer
 from apps.accounts.permissions import IsCoordinator, IsDoctor
@@ -47,7 +49,7 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
             return self.queryset.filter(doctors__pk=user.pk)
 
     def get_serializer_class(self):
-        if self.action in ['create', 'update']:
+        if self.action in ['create', 'update', 'partial_update']:
             return StudyBaseSerializer
         else:
             return self.serializer_class
@@ -112,9 +114,33 @@ class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
                         doctor_id=doctor_pk)
                     AddParticipantNotification(
                         context={'study_id': study.pk,
-                                 'study_title:': study.title}).send([email])
+                                 'study_title': study.title}).send([email])
 
         return Response({
             'all_success': len(fail_emails) == 0,
             'fail_emails': fail_emails
         })
+
+    @detail_route(methods=['POST'])
+    def add_consent(self, request, pk):
+        """
+        :param request: {patient_pk: X, signature: XX}
+        :param pk:
+        :return: Serialized study
+        """
+        study = self.get_object()
+        patient = Patient.objects.get(pk=request.data.get('patient_pk'))
+
+        serializer = PatientConsentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        consent = serializer.save(patient=patient)
+
+        study_to_patient = StudyToPatient.objects.filter(
+            study=study,
+            patient=patient
+        ).first()
+        study_to_patient.patient_consent = consent
+        study_to_patient.save()
+
+        return Response(
+            StudyListSerializer(study, context={'request': request}).data)

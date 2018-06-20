@@ -1,7 +1,11 @@
-from apps.accounts.models import DoctorToPatient
-from apps.main.tests import APITestCase
+from datetime import timedelta
+
+from django.utils import timezone
+
+from apps.accounts.models import DoctorToPatient, PatientConsent
+from apps.main.tests import APITestCase, patch
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory, \
-    PatientFactory, ParticipantFactory
+    PatientFactory, ParticipantFactory, PatientConsentFactory
 from apps.moles.factories.study import ConsentDocFactory, StudyFactory
 from apps.moles.factories.study_invitation import StudyInvitationFactory
 from apps.moles.models import Study, StudyInvitation, StudyToPatient
@@ -67,6 +71,37 @@ class StudyViewSetTest(APITestCase):
         self.authenticate_as_doctor(doctor)
         resp = self.client.get('/api/v1/study/', format='json')
         self.assertEqual(len(resp.data), 1)
+
+    def test_list_as_doctor_with_consent(self):
+        doctor = DoctorFactory.create()
+        study = StudyFactory.create()
+        study.doctors.add(doctor)
+        study.save()
+
+        DoctorToPatient.objects.create(
+            doctor=doctor,
+            patient=self.patient)
+
+        now = timezone.now()
+        consent = PatientConsentFactory.create(
+            patient=self.patient,
+            date_expired=now)
+
+        StudyToPatient.objects.create(
+            study=study,
+            patient=self.patient,
+            patient_consent=consent)
+
+        self.authenticate_as_doctor(doctor)
+        resp = self.client.get('/api/v1/study/', format='json')
+        self.assertEqual(len(resp.data), 1)
+
+        self.assertListEqual(
+            list(resp.data[0]['patients_consents'].keys()),
+            [self.patient.pk])
+        self.assertEqual(
+            resp.data[0]['patients_consents'][self.patient.pk]['pk'],
+            consent.pk)
 
     def test_list_forbidden(self):
         StudyFactory.create()
@@ -308,3 +343,56 @@ class StudyViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]['pk'], invitation.pk)
+
+    def test_add_consent(self):
+        doctor = DoctorFactory.create()
+        study = StudyFactory.create()
+        study.doctors.add(doctor)
+        study.save()
+
+        DoctorToPatient.objects.create(
+            doctor=doctor,
+            patient=self.patient)
+
+        expired = timezone.now() - timedelta(days=1)
+        consent = PatientConsentFactory.create(
+            patient=self.patient,
+            date_expired=expired)
+
+        study_to_patient = StudyToPatient.objects.create(
+            study=study,
+            patient=self.patient,
+            patient_consent=consent)
+
+        self.authenticate_as_doctor(doctor)
+        count_before_post = PatientConsent.objects.all().count()
+        resp = self.client.post(
+            '/api/v1/study/{0}/add_consent/'.format(study.pk),
+            {
+                'patient_pk': self.patient.pk,
+                'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD'
+                             '0lEQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
+            },
+            format='json')
+
+        self.assertNotEqual(
+            study_to_patient.pk,
+            resp.data['patients_consents'][self.patient.pk]['pk']
+        )
+        self.assertEqual(
+            count_before_post + 1,
+            PatientConsent.objects.all().count()
+        )
+
+    @patch('apps.moles.models.study.Study.invalidate_consents')
+    def test_update_consent_docs(self, mock_invalidate_consents):
+        study = StudyFactory.create(author=self.coordinator)
+        new_consent_docs = ConsentDocFactory.create()
+
+        self.authenticate_as_doctor()
+        self.client.put(self.target_path(study.pk), {
+            'title': study.title,
+            'consent_docs': [new_consent_docs.pk]
+        }, format='json')
+
+        mock_invalidate_consents.assert_called_once()
