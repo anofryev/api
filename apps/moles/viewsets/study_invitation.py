@@ -1,13 +1,16 @@
+from django.db.models import Q
 from rest_framework import viewsets, mixins
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from apps.accounts.models import DoctorToPatient, PatientConsent
 from apps.accounts.models.participant import get_participant_patient
+from apps.accounts.permissions import IsDoctor
 from apps.accounts.permissions.is_partipicant import IsParticipant
 from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
-from ..serializers import StudyInvitationSerializer
+from ..serializers import StudyInvitationSerializer, \
+    StudyInvitationForDoctorSerializer
 
 
 class StudyInvitationViewSet(viewsets.GenericViewSet,
@@ -72,3 +75,16 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             context=self.get_serializer_context(),
             instance=invitation
         ).data)
+
+    @list_route(methods=['GET'], permission_classes=(IsDoctor,))
+    def participant_approvals(self, request):
+        doctor = request.user.doctor_role
+        queryset = StudyInvitation.objects.filter(
+            doctor=doctor,
+            patient__isnull=False
+        ).filter(
+            Q(status=StudyInvitationStatus.NEW) |
+            Q(status=StudyInvitationStatus.DECLINED))
+
+        serializer = StudyInvitationForDoctorSerializer(queryset, many=True)
+        return Response(serializer.data)
