@@ -4,6 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from apps.moles.serializers import StudyBaseSerializer
+from apps.moles.models import StudyInvitation
 
 from ..models import Patient, DoctorToPatient
 from .patient_consent import PatientConsentSerializer
@@ -110,14 +111,27 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class CreatePatientSerializer(PatientSerializer):
     signature = Base64ImageField(required=True)
+    email = serializers.EmailField(required=False)
+    study = serializers.IntegerField(required=False)
 
     def create(self, validated_data):
-        signature = validated_data.pop(
-            'signature')
+        signature = validated_data.pop('signature')
+        email = validated_data.pop('email', None)
+        study = validated_data.pop('study', None)
+
         patient = super(CreatePatientSerializer, self).create(validated_data)
         patient.consents.create(signature=signature)
+
+        if email and study:
+            doctor = self.context['request'].user.doctor_role
+            StudyInvitation.objects.create(
+                email=email,
+                study=study,
+                doctor=doctor,
+                patient=patient)
+
         return patient
 
     class Meta:
         model = Patient
-        fields = PatientSerializer.Meta.fields + ('signature', )
+        fields = PatientSerializer.Meta.fields + ('signature', 'email', 'study')
