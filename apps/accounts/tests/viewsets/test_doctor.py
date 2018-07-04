@@ -62,3 +62,22 @@ class DoctorViewSetTest(APITestCase):
 
             if doctor['pk'] == self.doctor.pk:
                 self.assertListEqual(doctor['sites'], [site.pk])
+
+    def test_get_by_email_forbidden(self):
+        resp = self.client.get(
+            '/api/v1/doctor/get_by_email/?email={0}'.format(self.doctor.email))
+        self.assertForbidden(resp)
+
+    def test_get_by_email_success(self):
+        self.authenticate_as_doctor()
+        resp = self.client.get(
+            '/api/v1/doctor/get_by_email/?email={0}'.format(self.doctor.email))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(self.doctor.pk, resp.data['pk'])
+
+    def test_get_by_email_not_exists(self):
+        self.authenticate_as_doctor()
+        resp = self.client.get(
+            '/api/v1/doctor/get_by_email/?email=not-existing-email@mail.ru')
+        self.assertSuccessResponse(resp)
+        self.assertDictEqual(resp.data, {})
