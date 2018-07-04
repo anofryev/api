@@ -8,6 +8,7 @@ from apps.accounts.models import DoctorToPatient, PatientConsent
 from apps.accounts.models.participant import get_participant_patient
 from apps.accounts.permissions import IsDoctor
 from apps.accounts.permissions.is_partipicant import IsParticipant
+from apps.accounts.serializers import PatientSerializer
 from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
 from ..serializers import StudyInvitationSerializer, \
     StudyInvitationForDoctorSerializer
@@ -76,15 +77,43 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
             instance=invitation
         ).data)
 
-    @list_route(methods=['GET'], permission_classes=(IsDoctor,))
-    def participant_approvals(self, request):
-        doctor = request.user.doctor_role
-        queryset = StudyInvitation.objects.filter(
-            doctor=doctor,
+
+class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
+                                      mixins.ListModelMixin):
+    queryset = StudyInvitation.objects.all()
+    serializer_class = StudyInvitationForDoctorSerializer
+    permission_classes = (IsDoctor,)
+
+    def get_queryset(self):
+        qs = super(StudyInvitationForDoctorViewSet, self).get_queryset()
+        return qs.filter(
+            doctor=self.request.user.doctor_role,
             patient__isnull=False
         ).filter(
             Q(status=StudyInvitationStatus.NEW) |
             Q(status=StudyInvitationStatus.DECLINED))
 
-        serializer = StudyInvitationForDoctorSerializer(queryset, many=True)
+    # post all patient data to this view and make update
+    # It will create new link between participant and invite.patient
+    @detail_route(methods=['POST'])
+    def approve(self, request, pk):
+        invitation = self.get_object()
+        patient_serializer = PatientSerializer(
+            invitation.patient, data=request.data)
+        patient_serializer.is_valid(raise_exception=True)
+        patient_serializer.save()
+
+        invitation.status = StudyInvitationStatus.ACCEPTED
+        invitation.save(update_fields=['status'])
+
+        serializer = self.get_serializer(instance=invitation)
+        return Response(serializer.data)
+
+    @detail_route(methods=['POST'])
+    def decline(self, request, pk):
+        invitation = self.get_object()
+        invitation.status = StudyInvitationStatus.ACCEPTED
+        invitation.save(update_fields=['status'])
+
+        serializer = self.get_serializer(instance=invitation)
         return Response(serializer.data)

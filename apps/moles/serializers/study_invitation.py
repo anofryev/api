@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.accounts.models import Doctor
 from apps.accounts.serializers import DoctorWithKeysSerializer, \
-    DoctorKeySerializer
+    DoctorKeySerializer, PatientSerializer
 from .study import StudyListSerializer
 from ..models import StudyInvitation
 
@@ -13,11 +13,12 @@ class StudyInvitationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudyInvitation
-        fields = ('pk', 'email', 'study', 'doctor', 'status')
+        fields = ('pk', 'email', 'study', 'doctor', 'status', 'patient')
 
 
 class StudyInvitationForDoctorSerializer(StudyInvitationSerializer):
     participant = serializers.SerializerMethodField()
+    patient = PatientSerializer()
 
     def get_participant(self, obj):
         participant = Doctor.objects.filter(
