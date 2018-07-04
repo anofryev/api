@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import viewsets, mixins
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
