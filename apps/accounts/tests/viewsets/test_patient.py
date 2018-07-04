@@ -3,7 +3,7 @@ import json
 from apps.accounts.factories import ParticipantFactory
 from apps.main.tests import APITestCase, patch
 from apps.moles.factories.study import StudyFactory
-from apps.moles.models import StudyToPatient
+from apps.moles.models import StudyToPatient, StudyInvitation
 
 from ...factories import PatientFactory, DoctorFactory
 from ...models import Patient, RaceEnum, SexEnum, DoctorToPatient
@@ -328,3 +328,43 @@ class PatientViewSetTest(APITestCase):
         resp = self.client.delete(
             '/api/v1/patient/{0}/'.format(patient.pk))
         self.assertNotAllowed(resp)
+
+    def test_create_patient_with_study_and_email(self):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+
+        patient_data = {
+            'first_name': 'first name',
+            'last_name': 'first name',
+            'sex': SexEnum.MALE,
+            'race': RaceEnum.ASIAN,
+            'date_of_birth': '1990-01-01',
+            'photo': self.get_sample_image_file(),
+            'signature': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0l'
+                         'EQVQIHQEEAPv/AP///wX+Av4DfRnGAAAAAElFTkSuQmCC',
+            'encryption_keys': json.dumps({self.doctor.pk: 'qwertyuiop'}),
+            'email': 'participant@mail.ru',
+            'study': study.pk,
+        }
+
+        with self.fake_media():
+            resp = self.client.post('/api/v1/patient/', patient_data)
+
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertIsNotNone(data['pk'])
+        patient = Patient.objects.get(pk=data['pk'])
+        self.assertEqual(patient.consents.count(), 1)
+
+        self.assertTrue(DoctorToPatient.objects.filter(
+            doctor=self.doctor, patient=patient).exists())
+        self.assertEqual(patient.first_name, patient_data['first_name'])
+        self.assertEqual(patient.last_name, patient_data['last_name'])
+
+        self.assertTrue(StudyInvitation.objects.filter(
+            email='participant@mail.ru',
+            study=study,
+            doctor=self.doctor,
+            patient=patient
+        ).exists())

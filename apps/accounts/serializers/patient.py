@@ -117,16 +117,16 @@ class CreatePatientSerializer(PatientSerializer):
     def create(self, validated_data):
         signature = validated_data.pop('signature')
         email = validated_data.pop('email', None)
-        study = validated_data.pop('study', None)
+        study_pk = validated_data.pop('study', None)
 
         patient = super(CreatePatientSerializer, self).create(validated_data)
         patient.consents.create(signature=signature)
 
-        if email and study:
+        if email and study_pk:
             doctor = self.context['request'].user.doctor_role
             StudyInvitation.objects.create(
                 email=email,
-                study=study,
+                study_id=study_pk,
                 doctor=doctor,
                 patient=patient)
 
