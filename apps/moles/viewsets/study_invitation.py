@@ -93,13 +93,14 @@ class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
             Q(status=StudyInvitationStatus.NEW) |
             Q(status=StudyInvitationStatus.DECLINED))
 
-    # post all patient data to this view and make update
-    # It will create new link between participant and invite.patient
+    # PatientSerializer with partial=True is used for creating
+    # DoctorToPatient links. So need to post with `encryption_keys` param
     @detail_route(methods=['POST'])
     def approve(self, request, pk):
         invitation = self.get_object()
         patient_serializer = PatientSerializer(
-            invitation.patient, data=request.data)
+            invitation.patient,
+            data=request.data, context={'request': request}, partial=True)
         patient_serializer.is_valid(raise_exception=True)
         patient_serializer.save()
 
