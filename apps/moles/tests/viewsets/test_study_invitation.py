@@ -12,9 +12,6 @@ from apps.moles.factories.study_invitation import StudyInvitationFactory
 
 
 class StudyInvitationViewSetTest(APITestCase):
-    def setUp(self):
-        super(StudyInvitationViewSetTest, self).setUp()
-
     def test_permission(self):
         resp = self.client.get('/api/v1/study/invites/')
         self.assertForbidden(resp)
@@ -149,3 +146,61 @@ class StudyInvitationViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertEqual(StudyInvitation.objects.all().first().status,
                          StudyInvitationStatus.DECLINED)
+
+
+class StudyInvitationForDoctorViewSetTest(APITestCase):
+    def setUp(self):
+        super(StudyInvitationForDoctorViewSetTest, self).setUp()
+
+        doctor = DoctorFactory.create()
+        self.study = StudyFactory.create()
+        self.patient = PatientFactory.create(doctor=self.doctor)
+        self.participant = DoctorFactory.create(
+            email='123@mail.ru',
+            public_key='public_key_123')
+        ParticipantFactory.create(doctor_ptr=self.participant)
+        self.invitation = StudyInvitationFactory.create(
+            email='123@mail.ru',
+            doctor=self.doctor,
+            study=self.study,
+            patient=self.patient)
+        StudyInvitationFactory.create(
+            email='456@mail.ru',
+            doctor=self.doctor,
+            study=self.study)
+        StudyInvitationFactory.create(
+            email='789@mail.ru',
+            doctor=doctor,
+            study=self.study)
+
+    def test_permission(self):
+        resp = self.client.get('/api/v1/study/invites_doctor/')
+        self.assertForbidden(resp)
+        participant = DoctorFactory.create()
+        ParticipantFactory.create(doctor_ptr=participant)
+        self.authenticate_as_doctor(doctor=participant)
+        resp = self.client.get('/api/v1/study/invites_doctor/')
+        self.assertForbidden(resp)
+
+    def test_list_success(self):
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/invites_doctor/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 1)
+
+        item = resp.data[0]
+        self.assertEqual(item['pk'], self.invitation.pk)
+        self.assertEqual(item['email'], '123@mail.ru')
+        self.assertEqual(item['study']['pk'], self.study.pk)
+        self.assertEqual(item['participant']['pk'], self.participant.pk)
+        self.assertEqual(item['participant']['public_key'], 'public_key_123')
+
+    def test_decline(self):
+        self.authenticate_as_doctor()
+        resp = self.client.post(
+            '/api/v1/study/invites_doctor/{0}/decline/'.format(
+                self.invitation.pk))
+        self.assertSuccessResponse(resp)
+
+        self.invitation.refresh_from_db()
+        self.assertEqual(self.invitation.status, StudyInvitationStatus.DECLINED)

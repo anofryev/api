@@ -28,11 +28,11 @@ class StudyInvitationForDoctorSerializer(StudyInvitationSerializer):
         if not participant:
             return None
 
-        return DoctorKeySerializer(participant).data
+        return DoctorKeySerializer(participant, context=self.context).data
 
     def get_patient(self, obj):
         from apps.accounts.serializers.patient import PatientSerializer
-        return PatientSerializer(obj.patient).data
+        return PatientSerializer(obj.patient, context=self.context).data
 
     class Meta(StudyInvitationSerializer.Meta):
         fields = StudyInvitationSerializer.Meta.fields + ('participant',)
