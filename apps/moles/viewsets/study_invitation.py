@@ -79,7 +79,8 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
 
 
 class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
-                                      mixins.ListModelMixin):
+                                      mixins.ListModelMixin,
+                                      mixins.CreateModelMixin):
     queryset = StudyInvitation.objects.all()
     serializer_class = StudyInvitationForDoctorSerializer
     permission_classes = (IsOnlyDoctor,)
@@ -92,6 +93,9 @@ class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
         ).filter(
             Q(status=StudyInvitationStatus.NEW) |
             Q(status=StudyInvitationStatus.DECLINED))
+
+    def perform_create(self, serializer):
+        serializer.save(doctor=self.request.user.doctor_role)
 
     # PatientSerializer with partial=True is used for creating
     # DoctorToPatient links. So need to post with `encryption_keys` param
