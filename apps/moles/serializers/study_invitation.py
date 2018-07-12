@@ -7,13 +7,18 @@ from .study import StudyListSerializer
 from ..models import StudyInvitation
 
 
-class StudyInvitationSerializer(serializers.ModelSerializer):
-    doctor = DoctorWithKeysSerializer()
-    study = StudyListSerializer()
-
+class StudyInvitationBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudyInvitation
         fields = ('pk', 'email', 'study', 'doctor', 'status', 'patient')
+
+
+class StudyInvitationSerializer(StudyInvitationBaseSerializer):
+    doctor = DoctorWithKeysSerializer()
+    study = StudyListSerializer()
+
+    class Meta(StudyInvitationBaseSerializer.Meta):
+        pass
 
 
 class StudyInvitationForDoctorSerializer(StudyInvitationSerializer):

@@ -1,5 +1,5 @@
 from django.db.models import Q
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -10,8 +10,8 @@ from apps.accounts.permissions import IsOnlyDoctor
 from apps.accounts.permissions.is_partipicant import IsParticipant
 from apps.accounts.serializers import PatientSerializer
 from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
-from ..serializers import StudyInvitationSerializer, \
-    StudyInvitationForDoctorSerializer
+from ..serializers import StudyInvitationBaseSerializer, \
+    StudyInvitationSerializer, StudyInvitationForDoctorSerializer
 
 
 class StudyInvitationViewSet(viewsets.GenericViewSet,
@@ -79,8 +79,7 @@ class StudyInvitationViewSet(viewsets.GenericViewSet,
 
 
 class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
-                                      mixins.ListModelMixin,
-                                      mixins.CreateModelMixin):
+                                      mixins.ListModelMixin):
     queryset = StudyInvitation.objects.all()
     serializer_class = StudyInvitationForDoctorSerializer
     permission_classes = (IsOnlyDoctor,)
@@ -94,8 +93,19 @@ class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
             Q(status=StudyInvitationStatus.NEW) |
             Q(status=StudyInvitationStatus.DECLINED))
 
-    def perform_create(self, serializer):
-        serializer.save(doctor=self.request.user.doctor_role)
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return StudyInvitationBaseSerializer
+        else:
+            return self.serializer_class
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.doctor = self.request.user.doctor_role
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data,
+                        status=status.HTTP_201_CREATED)
 
     # PatientSerializer with partial=True is used for creating
     # DoctorToPatient links. So need to post with `encryption_keys` param
