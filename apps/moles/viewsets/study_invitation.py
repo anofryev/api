@@ -100,8 +100,9 @@ class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
             return self.serializer_class
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.doctor = self.request.user.doctor_role
+        data = request.data.copy()
+        data.update({'doctor': self.request.user.doctor_role})
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data,

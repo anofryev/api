@@ -233,3 +233,15 @@ class StudyInvitationForDoctorViewSetTest(APITestCase):
         self.assertTrue(DoctorToPatient.objects.filter(
             doctor=self.participant,
             patient=self.patient).exists())
+
+    def test_create(self):
+        self.authenticate_as_doctor()
+        resp = self.client.post(
+            '/api/v1/study/invites_doctor/', {
+                'email': 'pro@pro.com',
+                'study': self.study.pk
+            })
+        self.assertSuccessResponse(resp)
+        invite = StudyInvitation.objects.get(email='pro@pro.com')
+
+        self.assertEqual(invite.status, StudyInvitationStatus.NEW)
