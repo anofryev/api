@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from apps.moles.serializers import StudyBaseSerializer
-from apps.moles.models import StudyInvitation
+from apps.moles.models import StudyInvitation, StudyToPatient
 
 from ..models import Patient, DoctorToPatient
 from .patient_consent import PatientConsentSerializer
@@ -128,6 +128,10 @@ class CreatePatientSerializer(PatientSerializer):
                 email=email,
                 study_id=study_pk,
                 doctor=doctor,
+                patient=patient)
+
+            StudyToPatient.objects.create(
+                study_id=study_pk,
                 patient=patient)
 
         return patient
