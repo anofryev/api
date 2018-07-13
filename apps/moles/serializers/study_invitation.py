@@ -23,6 +23,7 @@ class StudyInvitationSerializer(StudyInvitationBaseSerializer):
 
 class StudyInvitationForDoctorSerializer(StudyInvitationSerializer):
     participant = serializers.SerializerMethodField()
+    patient = serializers.SerializerMethodField()  # To avoid cross import
 
     def get_participant(self, obj):
         participant = Doctor.objects.filter(
@@ -33,6 +34,10 @@ class StudyInvitationForDoctorSerializer(StudyInvitationSerializer):
             return None
 
         return DoctorKeySerializer(participant, context=self.context).data
+
+    def get_patient(self, obj):
+        from apps.accounts.serializers.patient import PatientSerializer
+        return PatientSerializer(obj.patient, context=self.context).data
 
     class Meta(StudyInvitationSerializer.Meta):
         fields = StudyInvitationSerializer.Meta.fields + ('participant',)
