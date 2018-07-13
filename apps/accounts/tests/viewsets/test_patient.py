@@ -368,3 +368,9 @@ class PatientViewSetTest(APITestCase):
             doctor=self.doctor,
             patient=patient
         ).exists())
+
+        study_to_patient = StudyToPatient.objects.get(
+            study=study,
+            patient=patient)
+        self.assertEqual(study_to_patient.patient_consent,
+                         patient.consents.first())
