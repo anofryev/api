@@ -88,7 +88,7 @@ class DoctorWithKeysSerializer(DoctorSerializer):
         fields = ('pk', 'first_name', 'last_name', 'email',
                   'degree', 'department', 'photo', 'units_of_length',
                   'is_coordinator', 'is_participant', 'date_created',
-                  'public_key', 'coordinator_public_key')
+                  'public_key', 'coordinator_public_key', 'my_coordinator_id')
 
 
 class DoctorFullSerializer(DoctorWithKeysSerializer):
