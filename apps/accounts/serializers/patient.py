@@ -120,7 +120,7 @@ class CreatePatientSerializer(PatientSerializer):
         study_pk = validated_data.pop('study', None)
 
         patient = super(CreatePatientSerializer, self).create(validated_data)
-        patient.consents.create(signature=signature)
+        consent = patient.consents.create(signature=signature)
 
         if email and study_pk:
             doctor = self.context['request'].user.doctor_role
@@ -132,7 +132,8 @@ class CreatePatientSerializer(PatientSerializer):
 
             StudyToPatient.objects.create(
                 study_id=study_pk,
-                patient=patient)
+                patient=patient,
+                patient_consent=consent)
 
         return patient
 
