@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from apps.accounts.models import DoctorToPatient, PatientConsent
 from apps.accounts.models.participant import get_participant_patient
-from apps.accounts.permissions import IsOnlyDoctor
+from apps.accounts.permissions import IsDoctorOrCoordinator
 from apps.accounts.permissions.is_partipicant import IsParticipant
 from apps.accounts.serializers import PatientSerializer
 from ..models import StudyInvitation, StudyInvitationStatus, StudyToPatient
@@ -82,7 +82,7 @@ class StudyInvitationForDoctorViewSet(viewsets.GenericViewSet,
                                       mixins.ListModelMixin):
     queryset = StudyInvitation.objects.all()
     serializer_class = StudyInvitationForDoctorSerializer
-    permission_classes = (IsOnlyDoctor,)
+    permission_classes = (IsDoctorOrCoordinator,)
 
     def get_queryset(self):
         qs = super(StudyInvitationForDoctorViewSet, self).get_queryset()
