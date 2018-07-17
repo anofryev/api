@@ -1,7 +1,9 @@
 from apps.accounts.factories import DoctorFactory, CoordinatorFactory, \
-    SiteFactory
+    SiteFactory, PatientFactory
 from apps.accounts.models import SiteJoinRequest, JoinStateEnum
 from apps.main.tests import APITestCase
+from apps.moles.factories.study import StudyFactory
+from apps.moles.factories.study_invitation import StudyInvitationFactory
 
 
 class DoctorViewSetTest(APITestCase):
@@ -81,3 +83,16 @@ class DoctorViewSetTest(APITestCase):
             '/api/v1/doctor/get_by_email/?email=not-existing-email@mail.ru')
         self.assertSuccessResponse(resp)
         self.assertDictEqual(resp.data, {})
+
+    def test_get_by_email_for_exists_patient(self):
+        self.authenticate_as_doctor()
+        study = StudyFactory.create()
+        patient = PatientFactory.create(doctor=self.doctor)
+        StudyInvitationFactory.create(
+            email='123@mail.ru',
+            doctor=self.doctor,
+            study=study,
+            patient=patient)
+        resp = self.client.get(
+            '/api/v1/doctor/get_by_email/?email=123@mail.ru')
+        self.assertBadRequest(resp)
