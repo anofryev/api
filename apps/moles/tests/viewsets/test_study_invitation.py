@@ -245,3 +245,19 @@ class StudyInvitationForDoctorViewSetTest(APITestCase):
         invite = StudyInvitation.objects.get(email='pro@pro.com')
 
         self.assertEqual(invite.status, StudyInvitationStatus.NEW)
+
+    def test_create_duplicate_fail(self):
+        self.authenticate_as_doctor()
+        resp = self.client.post(
+            '/api/v1/study/invites_doctor/', {
+                'email': 'pro@pro.com',
+                'study': self.study.pk
+            })
+        self.assertSuccessResponse(resp)
+
+        resp = self.client.post(
+            '/api/v1/study/invites_doctor/', {
+                'email': 'pro@pro.com',
+                'study': self.study.pk
+            })
+        self.assertBadRequest(resp)

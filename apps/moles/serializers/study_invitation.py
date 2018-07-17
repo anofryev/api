@@ -8,6 +8,21 @@ from ..models import StudyInvitation
 
 
 class StudyInvitationBaseSerializer(serializers.ModelSerializer):
+    def validate(self, validated_data):
+        email = validated_data['email']
+        study = validated_data['study']
+        doctor = validated_data['doctor']
+
+        if StudyInvitation.objects.filter(
+                email=email,
+                study=study,
+                doctor=doctor).exists():
+            raise serializers.ValidationError(
+                '{0} already invited to {1} by {2}'.format(
+                    email, study, doctor))
+
+        return validated_data
+
     class Meta:
         model = StudyInvitation
         fields = ('pk', 'email', 'study', 'doctor', 'status', 'patient')
