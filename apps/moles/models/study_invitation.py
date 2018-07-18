@@ -33,6 +33,12 @@ class StudyInvitation(models.Model):
         default=StudyInvitationStatus.NEW,
         verbose_name='Status'
     )
+    patient = models.ForeignKey(
+        'accounts.Patient',
+        on_delete=models.CASCADE,
+        verbose_name='Patient',
+        blank=True, null=True
+    )
 
     def __str__(self):
         return '{0} invites {1} to {2} : {3}'.format(
