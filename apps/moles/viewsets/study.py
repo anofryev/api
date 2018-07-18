@@ -34,7 +34,8 @@ class ConsentDocViewSet(viewsets.GenericViewSet,
             'page': page.content if page else '',
             'docs': ConsentDocSerializer(
                 ConsentDoc.objects.filter(is_default_consent=True),
-                many=True).data
+                many=True,
+                context={'request': request}).data
         })
 
 
