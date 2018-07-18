@@ -1,6 +1,10 @@
 from factory import Faker
 from django.test import mock
+
+from apps.accounts.factories import PatientFactory
 from apps.main.tests import APITestCase, patch
+from apps.moles.factories.study import StudyFactory
+from apps.moles.factories.study_invitation import StudyInvitationFactory
 
 from ...factories import SiteFactory, UserFactory, DoctorFactory
 from ...models import (User, Coordinator,
@@ -122,3 +126,21 @@ class RegistrationTest(APITestCase):
         self.assertEqual(doctor.private_key, '')
         self.assertCanLogin({'username': doctor.username,
                              'password': new_password})
+
+    def test_register_as_doctor_with_patient_email(self):
+        study = StudyFactory.create()
+        patient = PatientFactory.create(doctor=self.doctor)
+        StudyInvitationFactory.create(
+            email='123@mail.ru',
+            doctor=self.doctor,
+            study=study,
+            patient=patient)
+        data = {
+            'first_name': Faker('first_name').generate({}),
+            'last_name': Faker('last_name').generate({}),
+            'email': '123@mail.ru',
+            'password': Faker('password').generate({}),
+            'site': self.site.id,
+        }
+        resp = self.client.post('/api/v1/auth/register/', data)
+        self.assertBadRequest(resp)

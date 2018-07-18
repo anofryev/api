@@ -18,6 +18,7 @@ mole_router.register('image', MoleImageViewSet)
 study_router = routers.SimpleRouter()
 study_router.register('study/consent_doc', ConsentDocViewSet)
 study_router.register('study/invites', StudyInvitationViewSet)
+study_router.register('study/invites_doctor', StudyInvitationForDoctorViewSet)
 study_router.register('study', StudyViewSet)
 
 urlpatterns = [

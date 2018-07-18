@@ -5,6 +5,7 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 from apps.accounts.models import DoctorToPatient
 from apps.accounts.models.participant import get_participant_patient, \
     is_participant
+from apps.moles.models import StudyInvitation
 from ..models import Doctor, Coordinator, Participant, SiteJoinRequest, Site
 from .user import UserSerializer
 
@@ -15,6 +16,18 @@ class RegisterDoctorSerializer(UserSerializer):
         required=False,
         allow_null=True,
         write_only=True)
+
+    def validate(self, validated_data):
+        email = validated_data['email']
+
+        if StudyInvitation.objects.filter(
+                email=email,
+                patient__isnull=False).exists():
+            raise serializers.ValidationError({
+                'email': '{0} already used by the patient'.format(email)
+            })
+
+        return validated_data
 
     def create(self, validated_data):
         site = validated_data.pop('site', None)
@@ -88,7 +101,7 @@ class DoctorWithKeysSerializer(DoctorSerializer):
         fields = ('pk', 'first_name', 'last_name', 'email',
                   'degree', 'department', 'photo', 'units_of_length',
                   'is_coordinator', 'is_participant', 'date_created',
-                  'public_key', 'coordinator_public_key')
+                  'public_key', 'coordinator_public_key', 'my_coordinator_id')
 
 
 class DoctorFullSerializer(DoctorWithKeysSerializer):
