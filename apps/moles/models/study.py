@@ -79,7 +79,15 @@ class ConsentDoc(models.Model, ThumbnailMixin):
     )
     original_filename = models.CharField(
         max_length=250,
-        blank=True, null=True)
+        blank=True, null=True
+    )
+    is_default_consent = models.BooleanField(
+        verbose_name='Used as part of default consent form',
+        default=False
+    )
+
+    def __str__(self):
+        return '{0} ({1})'.format(self.original_filename, self.pk)
 
     class Meta:
         verbose_name = 'Consent doc'
