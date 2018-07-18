@@ -90,6 +90,7 @@ THIRD_PARTY_APPS = [
     'fsm_admin',
     'django_fsm_log',
     'sorl.thumbnail',
+    'ckeditor',
 ]
 
 if DEBUG_EMAIL:  # pragma: no cover
