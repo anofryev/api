@@ -1,5 +1,5 @@
 from rest_framework import viewsets, mixins, status
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
 
 from apps.accounts.models.coordinator import is_coordinator
@@ -14,7 +14,8 @@ from apps.accounts.permissions import IsCoordinator, IsDoctor
 from apps.accounts.permissions.is_coordinator_of_doctor import \
     IsCoordinatorOfDoctor
 from apps.accounts.viewsets.mixins import PatientInfoMixin
-from ..models import ConsentDoc, Study, StudyInvitation, StudyInvitationStatus
+from apps.main.models import FlatBlock
+from ..models import ConsentDoc, Study, StudyInvitation
 from ..serializers import (
     ConsentDocSerializer, StudyBaseSerializer, StudyListSerializer,
     StudyInvitationSerializer)
@@ -25,6 +26,16 @@ class ConsentDocViewSet(viewsets.GenericViewSet,
     queryset = ConsentDoc.objects.all()
     serializer_class = ConsentDocSerializer
     permission_classes = (IsCoordinator,)
+
+    @list_route(methods=['GET'], permission_classes=(IsDoctor,))
+    def default(self, request):
+        page = FlatBlock.objects.filter(slug='default_consent_form').first()
+        return Response({
+            'page': page.content if page else '',
+            'docs': ConsentDocSerializer(
+                ConsentDoc.objects.filter(is_default_consent=True),
+                many=True).data
+        })
 
 
 class StudyViewSet(viewsets.GenericViewSet, PatientInfoMixin,
