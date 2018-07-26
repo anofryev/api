@@ -16,5 +16,9 @@ class IsCoordinatorOfDoctor(IsCoordinator):
             # it's because permissions works earlier, than required=True
             return True
 
-        doctor = get_object_or_404(Doctor, pk=view.request.data['doctor_pk'])
+        doctor_pk = view.request.data['doctor_pk']
+        if doctor_pk == coordinator.pk:
+            return True
+
+        doctor = get_object_or_404(Doctor, pk=doctor_pk)
         return doctor.my_coordinator == coordinator.coordinator_role
