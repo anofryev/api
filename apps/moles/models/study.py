@@ -6,7 +6,7 @@ from templated_mail.mail import BaseEmailMessage
 from apps.accounts.models import Coordinator
 from apps.accounts.models.participant import get_participant_doctor
 from apps.main.models.mixins.thumbnail import ThumbnailMixin
-from apps.main.storages import private_storage
+from apps.main.storages import public_storage
 from apps.moles.models.upload_paths import study_consent_docs_path
 
 
@@ -69,7 +69,7 @@ class ConsentDoc(models.Model, ThumbnailMixin):
     file = models.FileField(
         verbose_name='Document file',
         upload_to=study_consent_docs_path,
-        storage=private_storage,
+        storage=public_storage,
         validators=[FileExtensionValidator(
             allowed_extensions=[
                 'jpg', 'jpeg', 'png', 'gif', 'svg',
