@@ -33,7 +33,9 @@ class DoctorViewSet(viewsets.GenericViewSet,
 
     @list_route(methods=['GET'], permission_classes=(IsDoctor,))
     def get_by_email(self, request, *args, **kwargs):
-        email = request.GET.get('email')
+        # NOTE: every '+' replaced to ' ' on server, so, to not release new app
+        # version, we fix it here, because no spaces in emails
+        email = request.GET.get('email').replace(' ', '+')
         if StudyInvitation.objects.filter(
                 email=email,
                 patient__isnull=False).exists():
