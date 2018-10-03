@@ -23,7 +23,7 @@ class ConsentDocViewSetTest(APITestCase):
 
     def test_forbidden_unauthorized(self):
         response = self.post_doc()
-        self.assertForbidden(response)
+        self.assertUnauthorized(response)
 
     def test_forbidden_other_doctor(self):
         self.authenticate_as_doctor(self.other_doctor)

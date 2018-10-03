@@ -58,7 +58,7 @@ class MoleViewSetTest(MolesTestCase):
 
     def test_get_patient_moles_forbidden_for_unauthorized(self):
         resp = self.client.get(self.get_url(self.another_patient.pk))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_get_patient_mole_success(self):
         self.authenticate_as_doctor()

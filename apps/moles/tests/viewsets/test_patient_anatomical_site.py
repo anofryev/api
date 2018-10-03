@@ -32,7 +32,7 @@ class PatientAnatomicalSiteViewSetTest(MolesTestCase):
         resp = self.client.get(
             '/api/v1/patient/{0}/anatomical_site/'.format(
                 self.another_patient.pk))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_create_success(self):
         self.authenticate_as_doctor()

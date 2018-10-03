@@ -20,7 +20,7 @@ class PatientConsentViewSetTest(APITestCase):
 
     def test_get_patient_consents_failed_for_unauthorized(self):
         resp = self.client.get(self.get_url(self.first_patient.pk))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_get_patient_consents_success(self):
         self.authenticate_as_doctor()
