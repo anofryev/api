@@ -48,7 +48,7 @@ class CurrentUserViewTest(APITestCase):
 
     def test_get_current_user_for_unauthorized_failed(self):
         resp = self.client.get('/api/v1/auth/current_user/')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_get_current_user_success(self):
         self.authenticate_as_doctor()
@@ -77,7 +77,7 @@ class CurrentUserViewTest(APITestCase):
 
     def test_update_current_user_for_unauthorized_failed(self):
         resp = self.client.patch('/api/v1/auth/current_user/')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_update_current_user_success(self):
         self.authenticate_as_doctor()

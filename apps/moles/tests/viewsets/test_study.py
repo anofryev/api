@@ -40,7 +40,7 @@ class StudyViewSetTest(APITestCase):
     def test_create_unauthorized_forbidden(self):
         response = self.client.post('/api/v1/study/', self.get_post_data(),
                                     format='json')
-        self.assertForbidden(response)
+        self.assertUnauthorized(response)
 
     def test_create_other_doctor_forbidden(self):
         self.authenticate_as_doctor(self.other_doctor)
@@ -106,7 +106,7 @@ class StudyViewSetTest(APITestCase):
     def test_list_forbidden(self):
         StudyFactory.create()
         resp = self.client.get('/api/v1/study/', format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_list_by_participant(self):
         study = StudyFactory.create()
@@ -149,7 +149,7 @@ class StudyViewSetTest(APITestCase):
     def test_retrieve_forbidden(self):
         study = StudyFactory.create()
         resp = self.client.get(self.target_path(study.pk), format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_retrieve_get(self):
         study = StudyFactory.create(author=self.coordinator)
@@ -170,7 +170,7 @@ class StudyViewSetTest(APITestCase):
         study = StudyFactory.create()
         resp = self.client.put(self.target_path(study.pk),
                                {'title': 'test'}, format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_update_doctor(self):
         study = StudyFactory.create()
@@ -182,7 +182,7 @@ class StudyViewSetTest(APITestCase):
     def test_delete_unauthorized(self):
         study = StudyFactory.create(author=self.coordinator)
         resp = self.client.delete(self.target_path(study.pk))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_delete_doctor(self):
         study = StudyFactory.create(author=self.coordinator)
@@ -238,7 +238,7 @@ class StudyViewSetTest(APITestCase):
                 'emails': emails
             },
             format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_add_doctor_bad_emails(self):
         study = StudyFactory.create(author=self.coordinator)

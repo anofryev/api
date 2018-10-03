@@ -43,7 +43,7 @@ class MoleImageViewSetTest(MolesTestCase):
     def test_get_patient_mole_images_forbidden_for_unauthorized(self):
         resp = self.client.get(
             self.get_url(self.another_patient.pk, self.another_patient_mole.pk))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     @patch('apps.moles.tasks.requests')
     def test_create_success(self, mock_requests):

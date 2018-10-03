@@ -16,7 +16,7 @@ from apps.moles.factories.study_invitation import StudyInvitationFactory
 class StudyInvitationViewSetTest(APITestCase):
     def test_permission(self):
         resp = self.client.get('/api/v1/study/invites/')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
         self.authenticate_as_doctor()
         resp = self.client.get('/api/v1/study/invites/')
         self.assertForbidden(resp)
@@ -177,7 +177,7 @@ class StudyInvitationForDoctorViewSetTest(APITestCase):
 
     def test_permission(self):
         resp = self.client.get('/api/v1/study/invites_doctor/')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
         participant = DoctorFactory.create()
         ParticipantFactory.create(doctor_ptr=participant)
         self.authenticate_as_doctor(doctor=participant)

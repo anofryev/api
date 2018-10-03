@@ -16,7 +16,7 @@ class DoctorViewSetTest(APITestCase):
 
     def test_forbidden_unauthorized(self):
         resp = self.client.get('/api/v1/doctor/')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_forbidden_doctor(self):
         self.authenticate_as_doctor()
@@ -68,7 +68,7 @@ class DoctorViewSetTest(APITestCase):
     def test_get_by_email_forbidden(self):
         resp = self.client.get(
             '/api/v1/doctor/get_by_email/?email={0}'.format(self.doctor.email))
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_get_by_email_success(self):
         self.authenticate_as_doctor()
