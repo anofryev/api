@@ -197,6 +197,25 @@ class StudyInvitationForDoctorViewSetTest(APITestCase):
         self.assertEqual(item['participant']['pk'], self.participant.pk)
         self.assertEqual(item['participant']['public_key'], 'public_key_123')
 
+    def test_list_without_participant(self):
+        patient = PatientFactory.create(doctor=self.doctor)
+        new_invitation = StudyInvitationFactory.create(
+            email='777@mail.ru',
+            doctor=self.doctor,
+            study=self.study,
+            patient=patient)
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/invites_doctor/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data), 2)
+        self.assertSetEqual(
+            {self.invitation.pk, new_invitation.pk},
+            set([item['pk'] for item in resp.data]))
+
+        item = next(item for item in resp.data
+                    if item['pk'] == new_invitation.pk)
+        self.assertIsNone(item['participant'])
+
     def test_decline(self):
         self.authenticate_as_doctor()
         resp = self.client.post(
