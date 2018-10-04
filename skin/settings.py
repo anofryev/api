@@ -38,6 +38,9 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 DEBUG_EMAIL = os.environ.get('DEBUG_EMAIL', 'False') == 'True'
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
+# This flag notes what we run django from docker build script
+BUILD = os.environ.get('BUILD', 'False') == 'True'
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # EMAIL settings
@@ -236,7 +239,7 @@ RAVEN_CONFIG = {
 }
 
 AWS_S3_SECURE_URLS = True  # use https
-if not DEBUG:
+if not DEBUG and not BUILD:
     try:
         AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
         AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ[
