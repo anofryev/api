@@ -258,21 +258,17 @@ COLLECT_STATIC = 'collectstatic' in sys.argv
 
 
 AWS_S3_SECURE_URLS = True  # use https
-if DEBUG or COLLECT_STATIC or RUN_TESTS:  # pragma: no cover
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
-    AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
-        'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
-    AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
-    AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
-else:
-    try:  # pragma: no cover
-        AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']  # pragma: no cover
-        AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ[  # pragma: no cover
-            'AWS_STORAGE_PUBLIC_BUCKET_NAME']  # pragma: no cover
-        AWS_S3_ACCESS_KEY_ID = os.environ['AWS_S3_ACCESS_KEY_ID']  # pragma: no cover
-        AWS_S3_SECRET_ACCESS_KEY = os.environ['AWS_S3_SECRET_ACCESS_KEY']  # pragma: no cover
-    except KeyError:  # pragma: no cover
-        raise EnvironmentError('You must specify S3 variables in production')  # pragma: no cover
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
+    'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
+AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
+AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
+
+if not (DEBUG or COLLECT_STATIC or RUN_TESTS):  # pragma: no cover
+    assert AWS_STORAGE_BUCKET_NAME and AWS_STORAGE_PUBLIC_BUCKET_NAME and \
+           AWS_S3_ACCESS_KEY_ID and AWS_S3_SECRET_ACCESS_KEY, \
+           'You must specify S3 variables in production'  # pragma: no cover
+
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     # The amount of time, in seconds, that references to created images
