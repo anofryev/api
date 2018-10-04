@@ -38,9 +38,6 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 DEBUG_EMAIL = os.environ.get('DEBUG_EMAIL', 'False') == 'True'
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
-# This flag notes what we run django from docker build script
-BUILD = os.environ.get('BUILD', 'False') == 'True'
-
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # EMAIL settings
@@ -255,9 +252,13 @@ if RUN_TESTS:
 
     CELERY_ALWAYS_EAGER = True
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+    
+    
+COLLECT_STATIC = 'collectstatic' in sys.argv
+
 
 AWS_S3_SECURE_URLS = True  # use https
-if DEBUG or BUILD or RUN_TESTS:  # pragma: no cover
+if DEBUG or COLLECT_STATIC or RUN_TESTS:  # pragma: no cover
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
     AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
         'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
