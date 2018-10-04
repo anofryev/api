@@ -257,14 +257,14 @@ if RUN_TESTS:
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 AWS_S3_SECURE_URLS = True  # use https
-if DEBUG or BUILD or RUN_TESTS:
+if DEBUG or BUILD or RUN_TESTS:  # pragma: no cover
     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
     AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
         'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
     AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
     AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
 else:
-    try:
+    try:  # pragma: no cover
         AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']  # pragma: no cover
         AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ[  # pragma: no cover
             'AWS_STORAGE_PUBLIC_BUCKET_NAME']  # pragma: no cover

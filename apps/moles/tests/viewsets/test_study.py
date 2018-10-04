@@ -222,6 +222,19 @@ class StudyViewSetTest(APITestCase):
         self.assertSetEqual(set(resp.data['fail_emails']),
                             {doctor.email, self.doctor.email})
 
+    def test_add_doctor_with_myself(self):
+        study = StudyFactory.create(author=self.coordinator)
+        self.authenticate_as_doctor()
+        resp = self.client.post(
+            '/api/v1/study/{0}/add_doctor/'.format(study.pk),
+            {
+                'doctor_pk': self.doctor.pk,
+                'emails': ['123@mail.ru']
+            },
+            format='json')
+        self.assertSuccessResponse(resp)
+        self.assertTrue(resp.data['all_success'])
+
     def test_add_doctor_forbidden(self):
         study = StudyFactory.create(author=self.coordinator)
         doctor = DoctorFactory.create(my_coordinator=self.coordinator)
