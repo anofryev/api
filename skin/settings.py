@@ -235,12 +235,40 @@ RAVEN_CONFIG = {
     'dsn': os.environ.get('SENTRY_DSN', '')
 }
 
+# TESTING SETTINGS
+RUN_TESTS = 'test' in sys.argv
+IS_CI = os.environ.get('IS_CI', 'False') == 'True'
+
+if RUN_TESTS:
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    NOSE_ARGS = ['--with-doctest', '--rednose']
+
+    if not IS_CI:
+        NOSE_ARGS += [
+            '--ipdb',
+            '--ipdb-failures',
+            '--nocapture',
+        ]
+
+    CELERY_ALWAYS_EAGER = True
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+    
+    
+COLLECT_STATIC = 'collectstatic' in sys.argv
+
+
 AWS_S3_SECURE_URLS = True  # use https
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 AWS_STORAGE_PUBLIC_BUCKET_NAME = os.environ.get(
     'AWS_STORAGE_PUBLIC_BUCKET_NAME', '')
 AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
 AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
+
+if not (DEBUG or COLLECT_STATIC or RUN_TESTS):  # pragma: no cover
+    assert AWS_STORAGE_BUCKET_NAME and AWS_STORAGE_PUBLIC_BUCKET_NAME and \
+           AWS_S3_ACCESS_KEY_ID and AWS_S3_SECRET_ACCESS_KEY, \
+           'You must specify S3 variables in production'  # pragma: no cover
+
 
 VERSATILEIMAGEFIELD_SETTINGS = {
     # The amount of time, in seconds, that references to created images
@@ -352,24 +380,6 @@ LOGGING = {
         },
     }
 }
-
-# TESTING SETTINGS
-RUN_TESTS = 'test' in sys.argv
-IS_CI = os.environ.get('IS_CI', 'False') == 'True'
-
-if RUN_TESTS:
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-    NOSE_ARGS = ['--with-doctest', '--rednose']
-
-    if not IS_CI:
-        NOSE_ARGS += [
-            '--ipdb',
-            '--ipdb-failures',
-            '--nocapture',
-        ]
-
-    CELERY_ALWAYS_EAGER = True
-    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

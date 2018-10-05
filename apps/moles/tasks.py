@@ -51,7 +51,8 @@ def send_participant_consent_changed(study_pk, participant_pk):
     consent_docs_urls = []
     for doc in study.consent_docs.all():
         url = doc.file.url
-        if not url.startswith('http'):
+        if not url.startswith('http'):  # pragma: no cover
+            # no cover, because we don't use S3 in tests, and aways true here
             url = '{0}://{1}{2}'.format(
                 settings.PROTOCOL,
                 settings.DOMAIN,

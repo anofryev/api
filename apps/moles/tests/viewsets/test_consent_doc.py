@@ -1,5 +1,7 @@
+from apps.main.models import FlatBlock
 from apps.main.tests import APITestCase
 from apps.accounts.factories import CoordinatorFactory, DoctorFactory
+from apps.moles.factories.study import ConsentDocFactory
 
 
 class ConsentDocViewSetTest(APITestCase):
@@ -42,3 +44,19 @@ class ConsentDocViewSetTest(APITestCase):
         response = self.post_image_doc()
         self.assertIsNotNone(response.data['thumbnail'])
         self.assertEqual(response.data['original_filename'], 'image_doc.png')
+
+    def test_default_consent_docs(self):
+        with self.fake_media():
+            doc1 = ConsentDocFactory.create(
+                is_default_consent=True,
+                file=self.get_sample_image_file())
+            doc2 = ConsentDocFactory.create(
+                is_default_consent=True,
+                file=self.get_sample_image_file())
+
+        self.authenticate_as_doctor()
+        resp = self.client.get('/api/v1/study/consent_doc/default/')
+        self.assertTrue(len(resp.data['page']) > 0)
+        self.assertSetEqual(
+            {doc1.pk, doc2.pk},
+            set([item['pk'] for item in resp.data['docs']]))
